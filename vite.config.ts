@@ -7,8 +7,11 @@ import Components from 'unplugin-vue-components/vite'
 import {ElementPlusResolver} from 'unplugin-vue-components/resolvers'
 import vueSetupExtend from 'vite-plugin-vue-setup-extend'
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
-
+import IconsResolver from "unplugin-icons/resolver";
+import Icons from "unplugin-icons/vite";
 // https://vite.dev/config/
+
+const pathSrc = path.resolve(__dirname, "src");
 export default defineConfig((mode): any =>{
     const env = loadEnv(mode.mode, process.cwd());
     return {
@@ -46,10 +49,34 @@ export default defineConfig((mode): any =>{
             }),
             /** element plus 自动按需导入插件配置 start */
             AutoImport({
-                resolvers: [ElementPlusResolver()],
+                resolvers: [
+                    ElementPlusResolver(),
+                    IconsResolver({}),
+                ],
+                vueTemplate: true, // 是否在 vue 模板中自动导入
+                dts: path.resolve(pathSrc, 'types', 'auto-imports.d.ts') // 自动导入组件类型声明文件位置，默认根目录
             }),
             Components({
-                resolvers: [ElementPlusResolver({importStyle: 'sass'})] // importStyle: "sass" ---  解决覆盖element plus 的sass变量不生效的bug
+                resolvers: [
+                    // importStyle: "sass" ---  解决覆盖element plus 的sass变量不生效的bug
+                    ElementPlusResolver({importStyle: 'sass'}),
+                    // 自动注册图标组件
+                    IconsResolver({
+                        enabledCollections: ["ep"] // element-plus图标库，其他图标库 https://icon-sets.iconify.design/
+                    }),
+                ],
+                dts: path.resolve(pathSrc, "types", "components.d.ts"), //  自动导入组件类型声明文件位置，默认根目录
+
+            }),
+            Icons({
+                // 自动安装图标库
+                autoInstall: true,
+            }),
+            createSvgIconsPlugin({
+                // 指定需要缓存的图标文件夹
+                iconDirs: [path.resolve(process.cwd(), 'src/assets/icons')],
+                // 指定symbolId格式
+                symbolId: 'icon-[dir]-[name]',
             }),
             /** element plus 自动按需导入插件配置 end */
             // 压缩
@@ -64,7 +91,7 @@ export default defineConfig((mode): any =>{
         ],
         resolve: {
             alias: {
-                "@": path.resolve(__dirname, "src"),
+                "@": pathSrc,
             }
         },
         css: {

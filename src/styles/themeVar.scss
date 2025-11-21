@@ -1,0 +1,56 @@
+/* 自定义 element-plus 主题 */
+@forward 'element-plus/theme-chalk/src/common/var.scss' with (
+  $colors: (
+    'white': #ffffff,
+    'black': #000000,
+    'primary': (
+       'base': #f59a23,
+    ),
+    'success': (
+      'base': #3abb5f,
+    ),
+    'warning': (
+      'base': #f59a23,
+    ),
+    'danger': (
+      'base': #f56c6c,
+    ),
+    'error': (
+      'base': #ec4c40,
+    ),
+    'info': (
+      'base': #909399,
+    ),
+  ),
+  $table: (
+    'header-bg-color': #F2F3F5,
+    'header-text-color': #1D2129,
+    'text-color': #303133,
+    'row-hover-bg-color': #fff,
+  )
+);
+
+
+/** 全局SCSS变量 */
+
+:root {
+  --menu-background: linear-gradient(180deg, #1f2935 0%, #425365 100%);
+  --menu-text: #fff;
+  --menu-active-text: #fff;
+  --menu-hover: #161d26;
+  // 修复表格 fixed 列被选中后由于透明色导致叠字的 bug
+  .el-table {
+    --el-table-current-row-bg-color: rgb(235 243 250);
+  };
+}
+
+
+$menu-background: var(--menu-background); // 菜单背景色
+$menu-text: var(--menu-text); // 菜单文字颜色
+$menu-active-text: var(--menu-active-text); // 菜单激活文字颜色
+$menu-hover: var(--menu-hover); // 菜单悬停背景色
+
+$sidebar-width: 256px; // 侧边栏宽度
+$sidebar-width-collapsed: 64px; // 侧边栏收缩宽度
+$navbar-height: 64px; // 导航栏高度
+$bg-color:red

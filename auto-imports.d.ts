@@ -8,3 +8,12 @@ export {}
 declare global {
 
 }
+
+// for vue template auto import
+import { UnwrapRef } from 'vue'
+declare module 'vue' {
+  interface GlobalComponents {}
+  interface ComponentCustomProperties {
+
+  }
+}
