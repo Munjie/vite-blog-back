@@ -9,6 +9,7 @@ import vueSetupExtend from 'vite-plugin-vue-setup-extend'
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 import IconsResolver from "unplugin-icons/resolver";
 import Icons from "unplugin-icons/vite";
+import UnoCSS from 'unocss/vite'
 // https://vite.dev/config/
 
 const pathSrc = path.resolve(__dirname, "src");
@@ -87,6 +88,7 @@ export default defineConfig((mode): any =>{
                 deleteOriginFile: false, // 是否删除原始文件
                 compressionOptions: { level: 9 }, // 压缩级别，1-9，越高压缩率越大
             }),
+            UnoCSS({ /* options */ }),
 
         ],
         resolve: {
@@ -95,13 +97,14 @@ export default defineConfig((mode): any =>{
             }
         },
         css: {
+            // CSS 预处理器
             preprocessorOptions: {
-                // scss全局文件引入
+                //define global scss variable
                 scss: {
-                    // additionalData: '@import "@/styles/global.scss";' 这行代码可能会导致报错
-                    additionalData: '@use "@/styles/global.scss" as *;' //建议使用这行代码
-                },
-            },
+                    javascriptEnabled: true,
+                    additionalData: `@use "@/styles/variables.scss" as *;`
+                }
+            }
         },
         build: {
             minify: 'terser',
