@@ -15,5 +15,5 @@ export interface LoginResData {
 // 用户登录
 export const login = (params: LoginReqForm) => {
     // 返回的数据格式可以和服务端约定
-    return http.post<LoginResData>('/user/login', params);
+    return http.post<LoginResData>('/api/user/login', params);
 }
