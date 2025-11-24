@@ -50,13 +50,15 @@ import {login} from '../../api/login.ts'
 
 const lgStr = localStorage.getItem('login-param');
 const checked = ref(lgStr ? true : false);
-
+import { useUserStore } from '../../stores';
+import {ElMessage} from "element-plus";
+import {getMenu} from "../../api/menu.ts";
+import {permissionAPI} from "../../api/permission.ts";
 const router = useRouter();
 const loading = ref(false);
 const form = reactive({
     username: '',
-    password: '',
-    remember: false
+    password: ''
 });
 const rules: FormRules = {
     username: [
@@ -66,17 +68,20 @@ const rules: FormRules = {
         {required: true, message: '请输入密码', trigger: 'blur'}
     ]
 };
+const store = useUserStore();
 const handleLogin = async () => {
     if (!form.username || !form.password) return;
 
     try {
         loading.value = true;
-        // 模拟API请求
         const res = await login(form);
-        debugger
         if (res.code === 200) {
+            store.setUsername(res.data.username);
+            store.setUserId(res.data.id)
             localStorage.setItem('token', res.data.token);
-            await router.push('/main'); // 登录成功跳转
+            const menu = await getMenu(res.data.id);
+            await router.push('/main');
+
         }
     } catch (error) {
         console.error(error);
@@ -84,6 +89,8 @@ const handleLogin = async () => {
         loading.value = false;
     }
 };
+
+
 </script>
 
 <style scoped>

@@ -41,9 +41,9 @@
 <script lang="ts" setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-
-
-
+import { useUserStore } from '../stores';
+import type { MenuItem } from '../types/user.ts'
+const store = useUserStore();
 
 interface MenuItem {
     index: string;
@@ -55,10 +55,29 @@ interface MenuItem {
 const menuData = ref<MenuItem[]>([]); // 初始化为空数组
 
 // 封装数据获取和处理逻辑
-
+const fetchMenuData = async () => {
+    try {
+         let menu = store.getMenuData;
+        console.info('menuAPI :', menu);
+        if (Array.isArray(menu)) {
+            menuData.value = menu
+        } else {
+            console.error('menuAPI 返回的数据不是数组:', menu);
+        }
+    } catch (error) {
+        console.error('获取菜单数据失败:', error);
+    }
+};
 
 onMounted(() => {
-
+    if (!store.getMenuData.length) {
+        console.warn('菜单数据为空，尝试重新获取');
+        fetchMenuData();
+    } else {
+        console.log('菜单数据已存在，无需重新获取');
+        menuData.value = store.getMenuData;
+        console.log('menuData.value:', menuData.value);
+    }
 });
 
 
@@ -69,24 +88,25 @@ const noChilden = computed(() => menuData.value.filter(item => !item.children ||
 const activeIndex = ref('Home');
 const router = useRouter();
 
-const handlemenu = (_item: MenuItem) => {
-    router.push(_item.index);
-    console.log('item:', _item);
-
+const handlemenu = (item: MenuItem) => {
+    router.push(item.index);
+    console.log('item:', item);
+    store.setTabsData(item)
 };
 
-const handlemenuchild = (_item: MenuItem, subItem: MenuItem) => {
+const handlemenuchild = (item: MenuItem, subItem: MenuItem) => {
     router.push(subItem.index);
-
+    console.log('subItem:', subItem);
+    store.setTabsData(subItem)
 };
 
 
 
 const TitleText = computed(() => {
-    return '测试平台';
+    return store.isCollapse ? '平台' : '测试平台';
 });
 
-const isCollapse = computed(() => false);
+const isCollapse = computed(() => store.isCollapse);
 /*
 // 使用 defineComponent 显式命名组件
 export const MainAsideCont = defineComponent({
