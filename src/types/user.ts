@@ -13,8 +13,6 @@ export interface UserInfo {
 }
 
 export interface MenuItem {
-    pid: number
-    sort: number
     index: string
     label: string
     path: string

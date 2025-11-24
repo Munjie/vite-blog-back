@@ -2,18 +2,17 @@
     <el-menu
         :default-active="activeIndex"
         class="el-menu-vertical-demo"
-        :collapse="isCollapse"
     >
         <h3 :key="TitleText">{{TitleText}}</h3>
         <!-- 渲染没有子菜单的项 -->
         <el-menu-item
-            v-for="item in noChilden"
-            :key="item.index"
-            :index="item.index"
-            @click="handlemenu(item)"
+            v-for="it in noChilden"
+            :key="it.index"
+            :index="it.index"
+            @click="handlemenu(it)"
         >
-            <component class="icon" :is="item.icon"></component>
-            <span>{{ item.label }}</span>
+            <component class="icon" :is="it.icon"></component>
+            <span>{{ it.label }}</span>
         </el-menu-item>
 
         <!-- 渲染有子菜单的项 -->
@@ -39,10 +38,11 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { useUserStore } from '../stores';
-import type { MenuItem } from '../types/user.ts'
+import {computed, onMounted, ref} from 'vue';
+import {useRouter} from 'vue-router';
+import {useUserStore} from '../stores';
+import type {MenuItem} from '../types/user.ts'
+
 const store = useUserStore();
 
 
@@ -91,7 +91,7 @@ const handlemenu = (item: MenuItem) => {
     store.setTabsData(item)
 };
 
-const handlemenuchild = (item: MenuItem, subItem: MenuItem) => {
+const handlemenuchild = (_item: MenuItem, subItem: MenuItem) => {
     router.push(subItem.index);
     console.log('subItem:', subItem);
     store.setTabsData(subItem)
@@ -100,10 +100,11 @@ const handlemenuchild = (item: MenuItem, subItem: MenuItem) => {
 
 
 const TitleText = computed(() => {
-    return store.isCollapse ? '平台' : '测试平台';
+    // return computed(() => store.isCollapse ? '平台' : '测试平台');
+    return  '系统管理平台';
 });
 
-const isCollapse = computed(() => store.isCollapse);
+// const isCollapse = computed(() => store.isCollapse);
 /*
 // 使用 defineComponent 显式命名组件
 export const MainAsideCont = defineComponent({

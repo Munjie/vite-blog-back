@@ -52,7 +52,6 @@ const lgStr = localStorage.getItem('login-param');
 const checked = ref(lgStr ? true : false);
 import { useUserStore } from '../../stores';
 import {getUserMenu} from "../../api/menu.ts";
-import {permissionAPI} from "../../api/permission.ts";
 import type {MenuItem} from "../../types/user.ts";
 const router = useRouter();
 const loading = ref(false);

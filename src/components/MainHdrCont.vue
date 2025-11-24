@@ -2,9 +2,9 @@
   <!-- 顶部导航栏 -->
     <div class="header-layout">
         <div class="header-left">
-            <div class="mb-4">
+<!--            <div class="mb-4">
                 <el-button type="primary" :key="bntMenuText" @click="handleMenu">{{ bntMenuText }}</el-button>
-            </div>
+            </div>-->
         </div>
         <div class="header-right">
             <el-switch
@@ -34,22 +34,13 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue';
-import { useUserStore,useAppStore} from '../stores';
+
+import {useUserStore} from '../stores';
 
 
 const userStore = useUserStore();
-const store = useAppStore();
 
-// 定义按钮文本，根据 store.isCollapse 的值动态设置
-const bntMenuText = computed(() => {
-    return store.isCollapse ? 'expand' : 'collapse';
-});
 
-// 定义单击事件的处理函数
-function handleMenu() {
-    store.isCollapse = !store.isCollapse;
-}
 function handleLogout() {
     userStore.logout();
 }

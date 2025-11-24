@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 import router from '../../router'
 import type { Component } from 'vue'
 
+
 // 类型定义
 interface TabItem {
     path: string
@@ -133,7 +134,8 @@ export const useUserStore = defineStore('useAllData', {
         getPermissions: (state) => state.permissions,
         getLocale: (state) => state.locale,
         getCurrentPagePath: (state) => state.currentPagePath,
-        getTabsData: (state) => state.tabs
+        getTabsData: (state) => state.tabs,
+        isCollapse: (state) => state.isCollapse,
     },
     // 定义 actions
     actions: {
@@ -195,7 +197,7 @@ export const useUserStore = defineStore('useAllData', {
         logout() {
             this.resetStore()
             router.push({ name: 'login' })
-        }
+        },
     },
     // Persist 配置（修正：移除 enabled 和 strategies，使用 pick）
     persist: {
