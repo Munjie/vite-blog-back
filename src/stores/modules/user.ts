@@ -1,7 +1,6 @@
-// src/stores/allData.ts (假设文件路径)
+// src/stores/allData.ts
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-import router from '../../router' // 调整为实际路径
+import router from '../../router'
 import type { Component } from 'vue'
 
 // 类型定义
@@ -37,159 +36,64 @@ interface AllDataState {
 // 动态模块导入类型
 type Modules = Record<string, () => Promise<{ default: Component }>>
 
-// 初始化状态
-const initState = (): AllDataState => ({
-    isCollapse: false,
-    username: '',
-    userid: 0,
-    token: '',
-    menuData: [],
-    tabs: [
-        {
-            path: '/home',
-            index: 'Home',
-            label: 'home',
-            icon: 'home'
-        }
-    ],
-    currentMenu: null,
-    permissions: [],
-    currentPagePath: '/',
-    locale: 'en'
-})
-
-// @ts-ignore
-// @ts-ignore
-export const useUserStore = defineStore('useAllData', () => {
-        // State
-        const state = ref<AllDataState>(initState())
-        // Getters
-        const getUsername = computed(() => state.value.username)
-        const getUserid = computed(() => state.value.userid)
-        const getToken = computed(() => state.value.token)
-        const getMenuData = computed(() => state.value.menuData)
-        const getPermissions = computed(() => state.value.permissions)
-        const getLocale = computed(() => state.value.locale)
-        const getCurrentPagePath = computed(() => state.value.currentPagePath)
-        const getTabsData = computed(() => state.value.tabs)
-
-        // Actions
-        const setUsername = (username: string) => {
-            state.value.username = username
-        }
-
-        const setUserid = (userid: number) => {
-            state.value.userid = userid
-        }
-
-        const setToken = (token: string) => {
-            state.value.token = token
-        }
-
-        const setMenuData = (menuData: MenuItem[]) => {
-            addRouter(menuData)
-            state.value.menuData = menuData
-        }
-
-        const setPermissions = (val: any[]) => {
-            state.value.permissions = val
-        }
-
-        const setLocale = (val: string) => {
-            state.value.locale = val
-        }
-
-        const setCurrentPagePath = (val: string) => {
-            state.value.currentPagePath = val
-        }
-
-        const resetStore = () => {
-            state.value = initState() // 重置为初始状态
-            localStorage.removeItem('user-store')
-        }
-
-        const setTabsData = (val: any) => {
-            console.log('val', val)
-            if (val.name === 'home') {
-                state.value.currentMenu = null
-            } else {
-                const index = state.value.tabs.findIndex((item: any) => item.index === val.index)
-                console.log(index)
-                if (index === -1) {
-                    state.value.tabs.push(val)
-                }
-                console.log('tabs:', state.value.tabs)
+// 初始化状态函数
+function stateIni(): AllDataState {
+    return {
+        isCollapse: false,
+        username: '',
+        userid: 0,
+        token: '',
+        menuData: [],
+        tabs: [
+            {
+                path: "/home",
+                index: "Home",
+                label: "home",
+                icon: "home"
             }
-        }
+        ],
+        currentMenu: null,
+        permissions: [],
+        currentPagePath: '/',
+        locale: 'en'
+    }
+}
 
-        const removeTagsData = (val: any) => {
-            const index = state.value.tabs.findIndex((item: any) => item.index === val.index)
-            if (index > -1) {
-                state.value.tabs.splice(index, 1)
-            }
-        }
-
-        const logout = async () => {
-            resetStore()
-            router.push({ name: 'login' })
-        }
-
-        return {
-            // State (暴露以便直接访问，如果需要)
-            ...state.value,
-
-            // Getters
-            getUsername,
-            getUserid,
-            getToken,
-            getMenuData,
-            getPermissions,
-            getLocale,
-            getCurrentPagePath,
-            getTabsData,
-
-            // Actions
-            setUsername,
-            setUserid,
-            setToken,
-            setMenuData,
-            setPermissions,
-            setLocale,
-            setCurrentPagePath,
-            resetStore,
-            setTabsData,
-            removeTagsData,
-            logout
-        }
-    },
-
-
-)
-
-function addRouter(menuData: any) {
+// addRouter 函数（保持不变）
+function addRouter(menuData: MenuItem[]) {
     const routerList = router.getRoutes()
-    const modules: Modules = import.meta.glob('../views/**/*.vue') as Modules;
-    const routerArr: Array<any> = [];
-    menuData.forEach((item: any) => {
-        if (item.children) {
-            item.children.forEach((child: any) => {
-                const componentPath = `../${child.path}.vue`;
-                const module = modules[componentPath];
-                if (module) {
-                    child.component = module;
-                    routerArr.push(child)
-                }
-            });
-        } else {
-            const componentPath = `../${item.path}.vue`;
-            const module = modules[componentPath];
-            if (module) {
-                item.component = module;
-                routerArr.push(item)
-            }
+    const modules: Modules = import.meta.glob('../views/**/*.vue') as Modules
+    const routerArr: any[] = []
 
+    menuData.forEach((item) => {
+        if (item.children && item.children.length > 0) {
+            item.children.forEach((child) => {
+                const componentPath = `../${child.path}.vue`
+                const module = modules[componentPath as keyof Modules]
+                if (module) {
+                    child.component = module
+                    routerArr.push({
+                        path: child.index,
+                        name: child.label,
+                        component: child.component
+                    })
+                }
+            })
+        } else {
+            const componentPath = `../${item.path}.vue`
+            const module = modules[componentPath as keyof Modules]
+            if (module) {
+                item.component = module
+                routerArr.push({
+                    path: item.index,
+                    name: item.label,
+                    component: item.component
+                })
+            }
         }
-    });
+    })
+
+    // 删除动态路由（保留基础路由）
     // 增加删除路由
     routerList.forEach((item: any) => {
         if (item.name === 'main'
@@ -204,23 +108,105 @@ function addRouter(menuData: any) {
         router.removeRoute(item.name)
     });
 
-    routerArr.forEach((item: any) => {
-        router.addRoute('main',
-            {
-                path: item.index,
-                name: item.label,
-                component: item.component,
-            });
-
+    // 添加新路由
+    routerArr.forEach((item) => {
+        router.addRoute('main', {
+            path: item.path,
+            name: item.name,
+            component: item.component
+        })
     })
+
     const routerListLast = router.getRoutes()
     console.log(routerListLast)
-
 }
 
-// ReloadData 函数（修正 TS 类型）
+export const useUserStore = defineStore('useAllData', {
+    // 定义状态
+    state: stateIni,
+    // 定义 getters
+    getters: {
+        getUsername: (state) => state.username,
+        getUserid: (state) => state.userid,
+        getToken: (state) => state.token,
+        getMenuData: (state) => state.menuData,
+        getPermissions: (state) => state.permissions,
+        getLocale: (state) => state.locale,
+        getCurrentPagePath: (state) => state.currentPagePath,
+        getTabsData: (state) => state.tabs
+    },
+    // 定义 actions
+    actions: {
+        // 设置用户名
+        setUsername(username: string) {
+            this.username = username
+        },
+        // 设置 userid
+        setUserid(userid: number) {
+            this.userid = userid
+        },
+        // 设置 token
+        setToken(token: string) {
+            this.token = token
+        },
+        // 设置菜单数据
+        setMenuData(menuData: MenuItem[]) {
+            addRouter(menuData)
+            this.menuData = menuData
+        },
+        // 权限
+        setPermissions(val: any[]) {
+            this.permissions = val
+        },
+        // 当前语言
+        setLocale(val: string) {
+            this.locale = val
+        },
+        // 当前页面路径
+        setCurrentPagePath(val: string) {
+            this.currentPagePath = val
+        },
+        resetStore() {
+            // 重置为初始状态
+            Object.assign(this.$state, stateIni())
+            localStorage.removeItem('useAllData-store')
+        },
+        // tabs
+        setTabsData(val: any) {
+            console.log('val', val)
+            if (val.name === 'home') {
+                this.currentMenu = null
+            } else {
+                const index = this.tabs.findIndex((item: any) => item.index === val.index)
+                console.log(index)
+                if (index === -1) {
+                    this.tabs.push(val)
+                }
+                console.log('tabs:', this.tabs)
+            }
+        },
+        removeTagsData(val: any) {
+            const index = this.tabs.findIndex((item: any) => item.index === val.index)
+            if (index > -1) {
+                this.tabs.splice(index, 1)
+            }
+        },
+        // 登出方法
+        logout() {
+            this.resetStore()
+            router.push({ name: 'login' })
+        }
+    },
+    // Persist 配置（修正：移除 enabled 和 strategies，使用 pick）
+    persist: {
+        key: 'useAllData-store',
+        storage: localStorage,
+        pick: ['token', 'menuData', 'username', 'userid'] // 使用 pick 指定持久化字段
+    }
+})
+
+// ReloadData 函数
 export function ReloadData() {
     const store = useUserStore()
-    const menuData = store.getMenuData // 使用 getter（computed，无需 .value 在此上下文中）
-    addRouter(menuData)
+    addRouter(store.getMenuData)
 }

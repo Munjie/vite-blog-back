@@ -51,15 +51,16 @@ import {login} from '../../api/login.ts'
 const lgStr = localStorage.getItem('login-param');
 const checked = ref(lgStr ? true : false);
 import { useUserStore } from '../../stores';
-import {ElMessage} from "element-plus";
-import {getMenu} from "../../api/menu.ts";
+import {getUserMenu} from "../../api/menu.ts";
 import {permissionAPI} from "../../api/permission.ts";
+import type {MenuItem} from "../../types/user.ts";
 const router = useRouter();
 const loading = ref(false);
 const form = reactive({
     username: '',
     password: ''
 });
+const menus = ref<MenuItem[]>([]);
 const rules: FormRules = {
     username: [
         {required: true, message: '请输入用户名', trigger: 'blur'}
@@ -77,9 +78,10 @@ const handleLogin = async () => {
         const res = await login(form);
         if (res.code === 200) {
             store.setUsername(res.data.username);
-            store.setUserId(res.data.id)
-            localStorage.setItem('token', res.data.token);
-            const menu = await getMenu(res.data.id);
+            store.setUserid(res.data.id)
+            store.setToken(res.data.token)
+            menus.value  = await getUserMenu(res.data.id);
+            store.setMenuData(menus.value);
             await router.push('/main');
 
         }

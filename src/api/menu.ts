@@ -1,15 +1,16 @@
 // 引入 request、post 和 get 函数
 import http from './http.ts';
+import type {MenuItem} from "../types/user.ts";
 
 
 
-export const getMenu = async (data: any) => {
+// 根据用户 ID 获取菜单
+export const getUserMenu = async (userId: number): Promise<MenuItem[]> => {
     try {
-        debugger
-         // 使用封装的 get 方法
-        return await http.get('/api/user/list-menu/'+data)  ;
+        const response = await http.get(`/api/user/list-menu/${userId}`);
+        return response.data;
     } catch (error) {
-        console.error('获取菜单数据失败:', error);
-        return [];
+        console.error('Failed to fetch user menu:', error);
+        throw error;
     }
 };

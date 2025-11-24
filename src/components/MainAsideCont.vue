@@ -45,12 +45,7 @@ import { useUserStore } from '../stores';
 import type { MenuItem } from '../types/user.ts'
 const store = useUserStore();
 
-interface MenuItem {
-    index: string;
-    label: string;
-    icon?: any;
-    children?: MenuItem[];
-}
+
 // 确保 menuAPI 是一个数组，并赋值给 menuData
 const menuData = ref<MenuItem[]>([]); // 初始化为空数组
 
@@ -70,7 +65,9 @@ const fetchMenuData = async () => {
 };
 
 onMounted(() => {
-    if (!store.getMenuData.length) {
+    menuData.value = store.getMenuData;
+    debugger
+    if (!menuData.value.length) {
         console.warn('菜单数据为空，尝试重新获取');
         fetchMenuData();
     } else {

@@ -23,9 +23,11 @@ export interface MenuItem {
 }
 
 export interface Permission {
-    id: number
-    name: string // 如 'user:view'
-    description?: string
+    index: string
+    label: string
+    path: string
+    permissions: string[]
+
 }
 
 export interface tabs {
