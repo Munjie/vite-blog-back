@@ -3,11 +3,11 @@
         <div class="login-container">
             <div class="login-header">
                 <img class="logo mr10" src="../../assets/logo.svg" alt="" />
-                <div class="login-title">后台管理系统</div>
+                <div class="login-title">AI Cloud System</div>
             </div>
             <el-form :model="form" :rules="rules" ref="loginFormRef" size="large">
                 <el-form-item prop="username">
-                    <el-input v-model="form.username" placeholder="用户名">
+                    <el-input v-model="form.username" placeholder="User">
                         <template #prepend>
                             <el-icon>
                                 <User />
@@ -18,7 +18,7 @@
                 <el-form-item prop="password">
                     <el-input
                         type="password"
-                        placeholder="密码"
+                        placeholder="Password"
                         v-model="form.password"
                         @keyup.enter="handleLogin"
                     >
@@ -30,13 +30,10 @@
                     </el-input>
                 </el-form-item>
                 <div class="pwd-tips">
-                    <el-checkbox class="pwd-checkbox" v-model="checked" label="记住密码" />
-                    <el-link type="primary" @click="router.push('/reset-pwd')">忘记密码</el-link>
+                    <el-checkbox class="pwd-checkbox" v-model="checked" label="Remember" />
+                    <el-link type="primary" @click="router.push('/reset-pwd')">Forgot</el-link>
                 </div>
-                <el-button class="login-btn" type="primary" size="large" @click="handleLogin">登录</el-button>
-                <p class="login-text">
-                    没有账号？<el-link type="primary" @click="router.push('/register')">立即注册</el-link>
-                </p>
+                <el-button class="login-btn" type="primary" size="large" @click="handleLogin">Login</el-button>
             </el-form>
         </div>
     </div>
