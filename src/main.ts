@@ -7,7 +7,8 @@ import {createPinia} from "pinia";
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 import * as http from "./api/http.ts";
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
-
+import 'element-plus/dist/index.css';
+import './assets/css/icon.css';
 
 
 const pina = createPinia();
