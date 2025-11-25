@@ -52,6 +52,9 @@ const lgStr = localStorage.getItem('login-param');
 const checked = ref(lgStr ? true : false);
 import { useUserStore } from '../../stores';
 import {getUserMenu} from "../../api/menu.ts";
+
+import { useTabsStore } from '../../stores/tabs';
+import { usePermissStore } from '../../stores/permiss';
 import type {MenuItem} from "../../types/user.ts";
 const router = useRouter();
 const loading = ref(false);
@@ -69,6 +72,7 @@ const rules: FormRules = {
     ]
 };
 const store = useUserStore();
+const permiss = usePermissStore();
 const handleLogin = async () => {
     if (!form.username || !form.password) return;
 
@@ -76,6 +80,11 @@ const handleLogin = async () => {
         loading.value = true;
         const res = await login(form);
         if (res.code === 200) {
+            //
+            localStorage.setItem('vuems_name', form.username);
+            const keys = permiss.defaultList[form.username == 'admin' ? 'admin' : 'user'];
+            permiss.handleSet(keys || []);
+            //
             store.setUsername(res.data.username);
             store.setUserid(res.data.id)
             store.setToken(res.data.token)
@@ -90,7 +99,8 @@ const handleLogin = async () => {
         loading.value = false;
     }
 };
-
+const tabs = useTabsStore();
+tabs.clearTabs();
 
 </script>
 

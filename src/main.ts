@@ -10,7 +10,7 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import 'element-plus/dist/index.css';
 import './assets/css/icon.css';
 import * as echarts from 'echarts'
-
+import { usePermissStore } from './stores/permiss';
 const pina = createPinia();
 pina.use(piniaPluginPersistedstate);
 
@@ -26,4 +26,13 @@ setupStore(app)
 app.use(pina)
 app.use(router)
 app.use(ElementPlus)
+// 自定义权限指令
+const permiss = usePermissStore();
+app.directive('permiss', {
+    mounted(el, binding) {
+        if (binding.value && !permiss.key.includes(String(binding.value))) {
+            el['hidden'] = true;
+        }
+    },
+});
 app.mount('#app')
