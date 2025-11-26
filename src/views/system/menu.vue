@@ -8,15 +8,15 @@
             :total = "total"
             :pageSizes="[5, 10, 15, 20, 30]"
             :showSelection="true"
-            @update:currentPage="currentPage = $event"
-            @update:pageSize="pageSize = $event"
+            @update:current-page="handlePageChange"
+            @update:page-size="handlePageSizeChange"
             @selection-change="handleSelectionChange"
         />
     </div>
 </template>
 
 <script setup>
-import {onMounted, ref} from 'vue';
+import {onMounted, ref, watch} from 'vue';
 import CustomTable from '@/components/ActionTableCont.vue';
 import {getTaskList} from "@/api/task";
 
@@ -50,7 +50,7 @@ const getList = async () => {
         const res = await getTaskList(taskForm);
         data.value = res.data.records,
             total.value = res.data.total
-        console.log("sadad"+  data.value)
+        console.log('API数据:', data.value);
 
     } catch (error) {
         console.log('登录请求失败，请稍后再试'+error);
@@ -62,6 +62,23 @@ onMounted(() => {
     getList()
 })
 
+// 分页变化处理（替换原 @update 事件，避免直接赋值导致 watch 延迟）
+const handlePageChange = (page) => {
+    currentPage.value = page;
+    getList();  // 立即加载新页
+};
+
+const handlePageSizeChange = (size) => {
+    pageSize.value = size;
+    getList();  // 页大小变化也重新加载
+};
+// 监听页码或页大小变化，重新查询
+/*watch(
+    [currentPage, pageSize],
+    () => {
+        getList();
+    },
+);*/
 
 // 用于存储选中的数据
 const selectedData = ref([]);

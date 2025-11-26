@@ -2,7 +2,9 @@
     <div>
         <!-- 表格 -->
         <el-table class="mgb20" :style="{ width: '100%' }"
-                :data="currentPageData"
+                  ref="tableRef"
+                  :key="currentPage"
+                :data="tableData"
                 style="width: 100%"
                 border
                 @selection-change="handleSelectionChange"
@@ -81,12 +83,8 @@ const props = defineProps({
 const emit = defineEmits(['update:currentPage', 'update:pageSize', 'selection-change']);
 
 const currentPage = ref(1);
+const tableRef = ref<null>null;
 
-const currentPageData = computed(() => {
-    const start = (currentPage.value - 1) * props.pageSize;
-    const end = start + props.pageSize;
-    return props.tableData.slice(start, end);
-});
 
 const visibleColumns = computed(() => {
     return props.tableColumns.filter((column) => !column.hide);
@@ -117,4 +115,5 @@ watch(currentPage, (newVal, oldVal) => {
 watch(() => props.pageSize, (newVal, oldVal) => {
     console.log(`pageSize changed from ${oldVal} to ${newVal}`);
 });
+ // deep: true 处理数组变化
 </script>
