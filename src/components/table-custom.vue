@@ -37,30 +37,16 @@
         </div>
         <el-table class="mgb20" :style="{ width: '100%' }" border :data="tableData" :row-key="rowKey"
             @selection-change="handleSelectionChange" table-layout="auto">
-            <template v-for="item in columns" :key="item.prop">
-                <el-table-column v-if="item.visible" :prop="item.prop" :label="item.label" :width="item.width"
-                    :type="item.type" :align="item.align || 'center'">
-
-                    <template #default="{  $index }" v-if="item.type === 'index'">
-                        {{ getIndex($index) }}
-                    </template>
-                    <template #default="{ row, $index }" v-if="!item.type">
-                        <slot :name="item.prop" :rows="row" :index="$index">
-                            <template v-if="item.prop == 'operator'">
-                                <el-button type="warning" size="small" :icon="View" @click="viewFunc(row)">
-                                    查看
-                                </el-button>
-                                <el-button type="primary" size="small" :icon="Edit" @click="editFunc(row)">
-                                    编辑
-                                </el-button>
-                                <el-button type="danger" size="small" :icon="Delete" @click="handleDelete(row)">
-                                    删除
-                                </el-button>
-                            </template>
-                        </slot>
-                    </template>
-                </el-table-column>
-            </template>
+            <!-- 动态列 -->
+            <el-table-column
+                v-for="column in columns"
+                :key="column.prop"
+                :prop="column.prop"
+                :label="column.label"
+                :type="column.type"
+                :align="column.align || 'center'"
+            >
+            </el-table-column>
         </el-table>
         <el-pagination v-if="hasPagination" :current-page="currentPage" :page-size="pageSize" :background="true"
             :layout="layout" :total="total" @current-change="handleCurrentChange" />
@@ -69,7 +55,7 @@
 
 <script setup lang="ts">
 import { toRefs, ref } from 'vue'
-import { Delete, Edit, View, Refresh } from '@element-plus/icons-vue';
+import { Delete, Refresh } from '@element-plus/icons-vue';
 // 1. 定义 Props 接口（精确 TS 类型）
 interface Props {
     // 表格相关
@@ -98,7 +84,12 @@ interface Props {
 // @ts-ignore
 const props = withDefaults(defineProps<Props>(), {
     // 表格相关
-    tableData: () => [],
+    // tableData: () => [],
+    tableData: {
+        type: Array,
+        required: true,
+        default: () => [],
+    },
     columns: () => [],
     rowKey: 'id',
     hasToolbar: true,
@@ -165,7 +156,6 @@ const viewFunc = (row:any) => {
 const getIndex = (index: number) => {
     return index + 1 + (currentPage.value - 1) * pageSize.value
 }
-
 </script>
 
 <style scoped>
