@@ -14,7 +14,16 @@ export const routes = [
                 component: () => import('@/views/home/index.vue'),
                 meta: {}
 
-            }
+            },
+            {
+                path: '/system-menu',
+                name: 'system-menu',
+                meta: {
+                    title: '菜单管理',
+                    permiss: '13',
+                },
+                component: () => import('@/views/system/menu.vue'),
+            },
         ],
     },
     {

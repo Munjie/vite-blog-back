@@ -1,6 +1,6 @@
 export interface Menus {
-    id: string;
-    pid?: string;
+    id: number;
+    pid?: number;
     icon?: string;
     index: string;
     title: string;

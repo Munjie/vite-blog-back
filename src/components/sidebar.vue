@@ -8,55 +8,49 @@
             :text-color="sidebar.textColor"
             router
         >
-            <template v-for="item in menuData">
-                <template v-if="item.children">
-                    <el-sub-menu :index="item.index" :key="item.index" v-permiss="item.id">
-                        <template #title>
-                            <el-icon>
-                                <component :is="item.icon"></component>
-                            </el-icon>
-                            <span>{{ item.title }}</span>
-                        </template>
-                        <template v-for="subItem in item.children">
-                            <el-sub-menu
-                                v-if="subItem.children"
-                                :index="subItem.index"
-                                :key="subItem.index"
-                                v-permiss="item.id"
-                            >
-                                <template #title>{{ subItem.title }}</template>
-                                <el-menu-item
-                                    v-for="(threeItem, i) in subItem.children"
-                                    :key="i"
-                                    :index="threeItem.index"
-                                >
-                                    {{ threeItem.title }}
-                                </el-menu-item>
-                            </el-sub-menu>
-                            <el-menu-item v-else :index="subItem.index" v-permiss="item.id">
-                                {{ subItem.title }}
-                            </el-menu-item>
-                        </template>
-                    </el-sub-menu>
+            <el-menu-item
+                v-for="it in noChilden"
+                :key="it.index"
+                :index="it.index"
+            >
+                <el-icon>
+                    <component :is="it.icon"></component>
+                </el-icon>
+                    <span>{{ it.title }}</span>
+            </el-menu-item>
+            <!-- 渲染有子菜单的项 -->
+            <el-sub-menu
+                v-for="item in hasChilden"
+                :key="item.index"
+                :index="item.index"
+            >
+                <template #title>
+                    <el-icon>
+                        <component :is="item.icon"></component>
+                    </el-icon>
+                    <span>{{ item.title }}</span>
                 </template>
-                <template v-else>
-                    <el-menu-item :index="item.index" :key="item.index" v-permiss="item.id">
-                        <el-icon>
-                            <component :is="item.icon"></component>
-                        </el-icon>
-                        <template #title>{{ item.title }}</template>
-                    </el-menu-item>
-                </template>
-            </template>
+                <el-menu-item
+                    v-for="subItem in item.children"
+                    :key="subItem.index"
+                    :index="subItem.index"
+                >
+                    <span>{{ subItem.title }}</span>
+                </el-menu-item>
+            </el-sub-menu>
         </el-menu>
     </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import {computed, onMounted, ref} from 'vue';
 import { useSidebarStore } from '../stores/sidebar';
 import { useRoute } from 'vue-router';
-import { menuData } from './menu.ts';
+import {useUserStore} from '../stores';
+import type {Menus} from "../types/menu.ts";
+
+
+const store = useUserStore();
 
 const route = useRoute();
 const onRoutes = computed(() => {
@@ -64,6 +58,16 @@ const onRoutes = computed(() => {
 });
 
 const sidebar = useSidebarStore();
+const menuData = ref<Menus[]>([]);
+onMounted(() => {
+    menuData.value = store.getMenus;
+});
+const noChilden = computed(() => {
+    return menuData.value.filter(item => !item.children || item.children.length === 0);
+});
+const hasChilden = computed(() => {
+    return menuData.value.filter(item => item.children && item.children.length > 0);
+});
 </script>
 
 <style scoped>

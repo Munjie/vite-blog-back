@@ -16,6 +16,7 @@ export interface MenuItem {
     index: string
     label: string
     path: string
+    pid?: string;
     icon?: string // Element Plus 图标名称，如 'House'
     children?: MenuItem[]
 }
@@ -34,3 +35,21 @@ export interface tabs {
     label: string;
     icon: string
 }[];
+
+
+
+export interface User {
+    id: number;
+    name: string;
+    password: string;
+    email: string;
+    phone: string;
+    role: string;
+    date: string;
+}
+
+export interface Register {
+    username: string;
+    password: string;
+    email: string;
+}

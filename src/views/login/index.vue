@@ -52,14 +52,14 @@ import {getUserMenu} from "../../api/menu.ts";
 
 import { useTabsStore } from '../../stores/tabs';
 import { usePermissStore } from '../../stores/permiss';
-import type {MenuItem} from "../../types/user.ts";
+import type {Menus} from "../../types/menu.ts";
 const router = useRouter();
 const loading = ref(false);
 const form = reactive({
     username: '',
     password: ''
 });
-const menus = ref<MenuItem[]>([]);
+const menus = ref<Menus[]>([]);
 const rules: FormRules = {
     username: [
         {required: true, message: '请输入用户名', trigger: 'blur'}
@@ -86,7 +86,7 @@ const handleLogin = async () => {
             store.setUserid(res.data.id)
             store.setToken(res.data.token)
             menus.value  = await getUserMenu(res.data.id);
-            store.setMenuData(menus.value);
+            store.setMenus(menus.value);
             await router.push('/main');
 
         }

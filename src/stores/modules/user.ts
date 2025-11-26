@@ -2,7 +2,7 @@
 import { defineStore } from 'pinia'
 import router from '../../router'
 import type { Component } from 'vue'
-
+import type { Menus } from '../../types/menu.ts';
 
 // 类型定义
 interface TabItem {
@@ -27,6 +27,7 @@ interface AllDataState {
     userid: number
     token: string
     menuData: MenuItem[]
+    menus: Menus[]
     tabs: TabItem[]
     currentMenu: any // 可优化为 MenuItem | null
     permissions: any[] // 可定义具体 Permission 类型
@@ -45,6 +46,7 @@ function stateIni(): AllDataState {
         userid: 0,
         token: '',
         menuData: [],
+        menus: [],
         tabs: [
             {
                 path: "/home",
@@ -131,6 +133,7 @@ export const useUserStore = defineStore('useAllData', {
         getUserid: (state) => state.userid,
         getToken: (state) => state.token,
         getMenuData: (state) => state.menuData,
+        getMenus: (state) => state.menus,
         getPermissions: (state) => state.permissions,
         getLocale: (state) => state.locale,
         getCurrentPagePath: (state) => state.currentPagePath,
@@ -155,6 +158,9 @@ export const useUserStore = defineStore('useAllData', {
         setMenuData(menuData: MenuItem[]) {
             addRouter(menuData)
             this.menuData = menuData
+        },
+        setMenus(menus: Menus[]) {
+            this.menus = menus
         },
         // 权限
         setPermissions(val: any[]) {
@@ -203,7 +209,7 @@ export const useUserStore = defineStore('useAllData', {
     persist: {
         key: 'useAllData-store',
         storage: localStorage,
-        pick: ['token', 'menuData', 'username', 'userid'] // 使用 pick 指定持久化字段
+        pick: ['token', 'menuData','menus', 'username', 'userid'] // 使用 pick 指定持久化字段
     }
 })
 
