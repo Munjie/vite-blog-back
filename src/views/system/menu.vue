@@ -1,74 +1,87 @@
-
 <template>
-    <el-table :data="tableData" border style="width: 100%">
-        <el-table-column fixed prop="date" label="日期" width="150">
-        </el-table-column>
-        <el-table-column prop="name" label="姓名" width="120"> </el-table-column>
-        <el-table-column prop="province" label="省份" width="120">
-        </el-table-column>
-        <el-table-column prop="city" label="市区" width="120"> </el-table-column>
-        <el-table-column prop="address" label="地址" width="600"> </el-table-column>
-        <el-table-column prop="zip" label="邮编" width="120"> </el-table-column>
-        <el-table-column fixed="right" label="操作" width="100">
-            <template #default="scope">
-                <el-button @click="handleClick(scope.row)" type="text" size="small"
-                >查看</el-button
-                >
-                <el-button type="text" size="small">编辑</el-button>
-            </template>
-        </el-table-column>
-    </el-table>
+    <div>
+        <!-- 表格 -->
+        <CustomTable
+            :tableColumns="columns"
+            :tableData="data"
+            :pageSize="pageSize"
+            :total = "total"
+            :pageSizes="[5, 10, 15, 20, 30]"
+            :showSelection="true"
+            @update:currentPage="currentPage = $event"
+            @update:pageSize="pageSize = $event"
+            @selection-change="handleSelectionChange"
+        />
+    </div>
 </template>
 
-<script>
-export default {
-    methods: {
-        handleClick(row) {
-            console.log(row)
-        },
-    },
+<script setup>
+import {onMounted, ref} from 'vue';
+import CustomTable from '@/components/ActionTableCont.vue';
+import {getTaskList} from "@/api/task";
 
-    data() {
-        return {
-            tableData: [
-                {
-                    date: '2016-05-02',
-                    name: '王小虎',
-                    province: '上海',
-                    city: '普陀区',
-                    address: '上海市普陀区金沙江路 1518 弄',
-                    zip: 200333,
-                },
-                {
-                    date: '2016-05-04',
-                    name: '王小虎',
-                    province: '上海',
-                    city: '普陀区',
-                    address: '上海市普陀区金沙江路 1517 弄',
-                    zip: 200333,
-                },
-                {
-                    date: '2016-05-01',
-                    name: '王小虎',
-                    province: '上海',
-                    city: '普陀区',
-                    address: '上海市普陀区金沙江路 1519 弄',
-                    zip: 200333,
-                },
-                {
-                    date: '2016-05-03',
-                    name: '王小虎',
-                    province: '上海',
-                    city: '普陀区',
-                    address: '上海市普陀区金沙江路 1516 弄',
-                    zip: 200333,
-                },
-            ],
+
+const data = ref([]);
+const total =  ref(0);
+const currentPage = ref(1);
+const pageSize = ref(5);
+
+const columns = ref([
+    {
+        prop: 'taskName',
+        label: '任务名称',
+    },
+    {
+        prop: 'status',
+        label: '任务状态',
+    },
+    {
+        prop: 'createTime',
+        label: '创建日期',
+    },
+]);
+
+const getList = async () => {
+    try {
+        let taskForm = {
+            pageSize: pageSize.value,
+            pageNum: currentPage.value
         }
-    },
-}
+        const res = await getTaskList(taskForm);
+        data.value = res.data.records,
+            total.value = res.data.total
+        console.log("sadad"+  data.value)
+
+    } catch (error) {
+        console.log('登录请求失败，请稍后再试'+error);
+
+    }
+};
+
+onMounted(() => {
+    getList()
+})
+
+
+// 用于存储选中的数据
+const selectedData = ref([]);
+
+// 处理选中数据变化
+const handleSelectionChange = (selection) => {
+    selectedData.value = selection;
+};
+
+// 获取选中数据
+const handleDelete = () => {
+    console.log('Selected Data:', selectedData.value);
+    console.log('Selected  Data length:', selectedData.value.length);
+    if (selectedData.value.length > 0) {
+        // 删除逻辑
+        console.log('Deleting selected data...');
+        selectedData.value = [];
+    } else {
+        console.log('No selected data to delete.');
+    }
+
+};
 </script>
-
-<style>
-
-</style>

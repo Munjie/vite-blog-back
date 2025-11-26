@@ -1,7 +1,7 @@
 <template>
     <div>
         <!-- 表格 -->
-        <el-table
+        <el-table class="mgb20" :style="{ width: '100%' }"
                 :data="currentPageData"
                 style="width: 100%"
                 border

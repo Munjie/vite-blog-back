@@ -177,7 +177,7 @@ export const useUserStore = defineStore('useAllData', {
         resetStore() {
             // 重置为初始状态
             Object.assign(this.$state, stateIni())
-            localStorage.removeItem('useAllData-store')
+            localStorage.removeItem('user-store')
         },
         // tabs
         setTabsData(val: any) {
@@ -207,7 +207,7 @@ export const useUserStore = defineStore('useAllData', {
     },
     // Persist 配置（修正：移除 enabled 和 strategies，使用 pick）
     persist: {
-        key: 'useAllData-store',
+        key: 'user-store',
         storage: localStorage,
         pick: ['token', 'menuData','menus', 'username', 'userid'] // 使用 pick 指定持久化字段
     }

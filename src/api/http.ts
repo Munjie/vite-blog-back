@@ -4,6 +4,7 @@ import axios, {
     type AxiosResponse,
     type InternalAxiosRequestConfig
 } from 'axios';
+import {ElMessage} from "element-plus";
 
 // 1. 定义后端返回的标准数据结构
 // 这里的结构根据你们后端的实际返回修改，通常包含 code, data, message
@@ -42,19 +43,12 @@ service.interceptors.response.use(
     (response: AxiosResponse) => {
         // 这里的 response.data 是后端返回的原始数据
         const { code, message} = response.data;
-
         // 假设后端约定 code === 200 为成功
         if (code === 200) {
             // 直接返回其中的 data，这样前端调用时就不用多解构一层
             return response.data;
         } else {
-            // 处理业务错误 (例如 code === 401 未登录)
-            if (code === 401) {
-                // logic: 清除 token，跳转登录页
-                console.error('登录已过期');
-            } else {
-                console.error(message || '系统错误');
-            }
+            ElMessage.error(message || '系统错误')
             return Promise.reject(new Error(message || 'Error'));
         }
     },
@@ -75,11 +69,12 @@ service.interceptors.response.use(
             case 504: message = '网络超时(504)'; break;
             default: message = `连接出错(${status})!`;
         }
-
-        console.error(message); // 建议此处替换为 UI 库的消息提示，如 ElMessage.error(message)
+        ElMessage.error(message)
         return Promise.reject(error);
     }
 );
+
+
 
 // 5. 导出封装好的请求方法
 // 这里我们通过泛型 T 指定返回数据的类型，Result<T> 对应上面定义的接口
