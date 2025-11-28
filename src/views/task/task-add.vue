@@ -114,7 +114,8 @@ import { UploadFilled } from '@element-plus/icons-vue'
 import { ElMessage, type UploadUserFile, type UploadInstance, type UploadProps } from 'element-plus'
 import axios from 'axios' // 假设你使用 axios
 
-
+import {uploadTask} from "../../api/task.ts";
+import {getTaskList} from "../../api/task.ts";
 // Upload 实例 ref (用于操作清空等)
 const uploadRef = ref<UploadInstance>()
 // 文件列表
@@ -160,28 +161,26 @@ const submitAll = async () => {
     try {
         // 2. 构建 FormData 对象 (用于同时传输文件和文本)
         const formData = new FormData()
+        formData.append('info', new Blob([JSON.stringify(form)], {type: "application/json"}));
 
-        // 添加文本数据
+      /*  // 添加文本数据
         formData.append('title', fullTitle.value) // 完整的标题
         formData.append('year', form.startYear)   // 单独字段也传过去，方便后端处理
         formData.append('semester', form.semester)
-        formData.append('examType', form.examType)
-
+        formData.append('examType', form.examType)*/
         // 添加文件数据 (遍历 fileList)
         fileList.value.forEach((file) => {
             if (file.raw) {
-                // 'files' 是后端接收文件的参数名，例如 Java SpringBoot 或 Node Multer
-                // 如果后端要求数组，append 多次同一个 key 即可
                 formData.append('files', file.raw)
             }
         })
-
+        // const res = await uploadTask(formData);
         // 3. 发送请求 (模拟 axios)
-        // const res = await axios.post('/api/analysis/upload', formData, {
-        //   headers: {
-        //     'Content-Type': 'multipart/form-data' // 必须指定
-        //   }
-        // })
+        const res = await axios.post('/api/score-manage/upload', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data' // 必须指定
+          }
+        })
 
         // --- 模拟请求延迟 ---
         await new Promise(resolve => setTimeout(resolve, 1500))

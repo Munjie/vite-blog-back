@@ -8,3 +8,12 @@ export const getTaskList = (data?: object) => {
         data
     );
 };
+
+
+export const uploadTask = (data?: object) => {
+    debugger
+    return http.post(
+        '/api/score-manage/upload',
+        data
+    );
+};
