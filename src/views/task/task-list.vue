@@ -3,8 +3,8 @@
         <!-- 表格 -->
         <div class="container">
         <CustomTable
-            :tableColumns="columns"
-            :tableData="data"
+            :tableColumns="tableColumns"
+            :tableData="tableData"
             :pageSize="pageSize"
             :total = "total"
             :pageSizes="[5, 10, 15, 20, 30]"
@@ -12,7 +12,11 @@
             @update:current-page="handlePageChange"
             @update:page-size="handlePageSizeChange"
             @selection-change="handleSelectionChange"
-        />
+        >
+            <template #toolbarBtn>
+                <el-button type="warning" :icon="CirclePlusFilled" @click="handleAdd">新增</el-button>
+            </template>
+        </CustomTable>
         </div>
     </div>
 </template>
@@ -21,15 +25,23 @@
 import {onMounted, reactive, ref} from 'vue';
 import CustomTable from '@/components/ActionTableCont.vue';
 import {getTaskList} from "@/api/task";
+import { CirclePlusFilled } from '@element-plus/icons-vue';
+import {useRouter} from "vue-router";
 
+const router = useRouter()
 
+// 2. 定义点击事件处理函数
+const handleAdd = () => {
+    router.push('/task-add');
+}
 
-const data = ref([]);
+const tableData = ref([]);
 const total =  ref(0);
 const currentPage = ref(1);
 const pageSize = ref(5);
-
-const columns = ref([
+const visible = ref(false);
+const tableColumns = ref([
+    { type: 'index', label: '序号', align: 'center' ,width: 80},
     {
         prop: 'taskName',
         label: '任务名称',
@@ -42,15 +54,13 @@ const columns = ref([
         prop: 'createTime',
         label: '创建日期',
     },
+    { prop: 'operator', label: '操作', width: 260},
 ]);
 
 // 查询相关
 const query = reactive({
     name: '',
 });
-const handleSearch = () => {
-    changePage(1);
-};
 
 const getList = async () => {
     try {
@@ -59,9 +69,9 @@ const getList = async () => {
             pageNum: currentPage.value
         }
         const res = await getTaskList(taskForm);
-        data.value = res.data.records,
+        tableData.value = res.data.records,
             total.value = res.data.total
-        console.log('API数据:', data.value);
+        console.log('API数据:', tableData.value);
 
     } catch (error) {
         console.log('登录请求失败，请稍后再试'+error);

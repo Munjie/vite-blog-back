@@ -12,7 +12,10 @@ export const routes = [
                 path: 'home',
                 name: 'home',
                 component: () => import('@/views/home/index.vue'),
-                meta: {}
+                meta: {
+                    title: '首页',
+                    permiss: '13',
+                }
 
             },
             {
@@ -23,6 +26,24 @@ export const routes = [
                     permiss: '13',
                 },
                 component: () => import('@/views/system/menu.vue'),
+            },
+            {
+                path: '/task-list',
+                name: 'task-list',
+                meta: {
+                    title: '任务列表',
+                    permiss: '13',
+                },
+                component: () => import('@/views/task/task-list.vue'),
+            },
+            {
+                path: '/task-add',
+                name: 'task-add',
+                meta: {
+                    title: '新增任务',
+                    permiss: '13',
+                },
+                component: () => import('@/views/task/task-add.vue'),
             },
         ],
     },
