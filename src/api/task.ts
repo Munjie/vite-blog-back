@@ -10,6 +10,11 @@ export const getTaskList = (data?: object) => {
 };
 
 
+
+export function deleteTask(taskId: number) {
+    return http.delete<void>('/api/task/delete-task', { taskId: taskId });
+}
+
 export const uploadTask = (data?: object) => {
     debugger
     return http.post(

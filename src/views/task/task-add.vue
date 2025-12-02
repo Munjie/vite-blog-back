@@ -116,6 +116,7 @@ import axios from 'axios' // 假设你使用 axios
 
 import {uploadTask} from "../../api/task.ts";
 import {getTaskList} from "../../api/task.ts";
+import router from "../../router";
 // Upload 实例 ref (用于操作清空等)
 const uploadRef = ref<UploadInstance>()
 // 文件列表
@@ -183,6 +184,7 @@ const submitAll = async () => {
         if (res.data.code === 200) {
             ElMessage.success(res.data.data)
             resetForm()
+            await router.push('/task-list');
         }else {
             ElMessage.error(res.data.data)
         }

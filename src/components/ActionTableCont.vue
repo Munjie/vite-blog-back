@@ -49,7 +49,7 @@
                                 <el-button type="primary" size="small" :icon="Edit" @click="editFunc(row)">
                                     编辑
                                 </el-button>
-                                <el-button type="danger" size="small" :icon="Delete" @click="handleDelete(row)">
+                                <el-button type="danger" size="small" :icon="Delete" @click="deleteFunc(row)">
                                     删除
                                 </el-button>
                             </template>
@@ -65,37 +65,6 @@
             </template>
         </el-table>
 
-<!--        <el-table class="mgb20" :style="{ width: '100%' }"
-                  ref="tableRef"
-                  :key="currentPage"
-                :data="tableData"
-                style="width: 100%"
-                border
-                @selection-change="handleSelectionChange"
-        >
-            &lt;!&ndash; 选择列 &ndash;&gt;
-            <el-table-column
-                    v-if="showSelection"
-                    type="selection"
-                    align="center"
-            ></el-table-column>
-
-            &lt;!&ndash; 序号列 &ndash;&gt;
-            <el-table-column
-                    type="index"
-                    label="序号"
-                    align="center"
-            ></el-table-column>
-
-            &lt;!&ndash; 动态列 &ndash;&gt;
-            <el-table-column
-                    v-for="column in visibleColumns"
-                    :key="column.prop"
-                    :prop="column.prop"
-                    :label="column.label"
-                    :align="column.align || 'center'"
-            ></el-table-column>
-        </el-table>-->
 
         <!-- 分页 -->
         <el-pagination
@@ -151,6 +120,22 @@ const props = defineProps({
         default: true
     },
     delSelection: {
+        type: Function,
+        default: () => { }
+    },
+    delFunc: {
+        type: Function,
+        default: () => { }
+    },
+    viewFunc: {
+        type: Function,
+        default: () => { }
+    },
+    editFunc: {
+        type: Function,
+        default: () => { }
+    },
+    deleteFunc: {
         type: Function,
         default: () => { }
     },

@@ -7,37 +7,34 @@
             :tableData="tableData"
             :pageSize="pageSize"
             :total = "total"
-            :pageSizes="[5, 10, 15, 20, 30]"
+            :pageSizes="[10, 20, 40, 60]"
             :showSelection="true"
-            :viewFunc="handleView"
-            :deleteFunc="deleteFun"
             @update:current-page="handlePageChange"
             @update:page-size="handlePageSizeChange"
             @selection-change="handleSelectionChange"
         >
-            <template #toolbarBtn>
-                <el-button type="warning" :icon="CirclePlusFilled" @click="handleAdd">新增</el-button>
-            </template>
         </CustomTable>
         </div>
     </div>
 </template>
 
-<script setup lang="ts">
-import {onMounted, reactive, ref, watch} from 'vue';
+<script setup>
+import {onMounted, reactive, ref} from 'vue';
 import CustomTable from '@/components/ActionTableCont.vue';
-import {getTaskList,deleteTask} from "../../api/task.ts";
 import { CirclePlusFilled } from '@element-plus/icons-vue';
 import {useRouter} from "vue-router";
+import {getScoreList} from "@/api/student.js";
 const router = useRouter()
-import { useRoute } from 'vue-router';
+import {useRoute} from 'vue-router'
+const route = useRoute()
+const taskId = ref()
 
-const route = useRoute();
-// 2. 定义点击事件处理函数
-const handleAdd = () => {
-    router.push('/task-add');
-}
-const  taskId = ref();
+onMounted(() => {
+    taskId.value = route.query.taskId
+    getList(taskId.value)
+})
+
+
 const tableData = ref([]);
 const total =  ref(0);
 const currentPage = ref(1);
@@ -46,20 +43,24 @@ const visible = ref(false);
 const tableColumns = ref([
     { type: 'index', label: '序号', align: 'center' ,width: 80},
     {
-        prop: 'taskName',
-        label: '任务名称',
+        prop: 'studentId',
+        label: '学号',
     },
     {
-        prop: 'title',
-        label: '标题',
+        prop: 'name',
+        label: '姓名',
     },
     {
-        prop: 'status',
-        label: '任务状态',
+        prop: 'lesson',
+        label: '班级',
     },
     {
-        prop: 'createTime',
-        label: '创建日期',
+        prop: 'school',
+        label: '学校',
+    },
+    {
+        prop: 'geographyScore',
+        label: '地理成绩',
     },
     { prop: 'operator', label: '操作', width: 260},
 ]);
@@ -70,30 +71,15 @@ const query = reactive({
 });
 
 
-const handleView = (row: { id: string | number }) => {
-    console.log(row.id)
-    router.push({
-        path: '/score-list',
-        query: {
-            taskId: row.id
-        }
-    });
-};
 
-const deleteFun = async (row: { id: string | number }) => {
-    taskId.value = row.id;
-    await deleteTask(taskId.value);
-    await fetchList();
-
-};
-
-const fetchList = async () => {
+const getList = async (any) => {
     try {
         let taskForm = {
             pageSize: pageSize.value,
-            pageNum: currentPage.value
+            pageNum: currentPage.value,
+            taskId : any
         }
-        const res = await getTaskList(taskForm);
+        const res = await getScoreList(taskForm);
         tableData.value = res.data.records,
             total.value = res.data.total
         console.log('API数据:', tableData.value);
@@ -104,31 +90,17 @@ const fetchList = async () => {
     }
 };
 
-onMounted(() => {
-    fetchList()
-})
 
 // 分页变化处理（替换原 @update 事件，避免直接赋值导致 watch 延迟）
 const handlePageChange = (page) => {
     currentPage.value = page;
-    fetchList();  // 立即加载新页
+    getList();  // 立即加载新页
 };
 
 const handlePageSizeChange = (size) => {
     pageSize.value = size;
-    fetchList();  // 页大小变化也重新加载
+    getList();  // 页大小变化也重新加载
 };
-
-watch(
-    () => route.path, // 监听路由路径
-    () => {
-        // 确保只有在当前组件是活跃状态时才重新查询
-        if (route.path === '/task-list') {
-            fetchList();
-        }
-    },
-    { immediate: false } // 初始时不执行，onMounted已经执行过了
-);
 // 监听页码或页大小变化，重新查询
 /*watch(
     [currentPage, pageSize],

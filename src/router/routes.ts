@@ -45,6 +45,15 @@ export const routes = [
                 },
                 component: () => import('@/views/task/task-add.vue'),
             },
+            {
+                path: '/score-list',
+                name: 'score-list',
+                meta: {
+                    title: '成绩列表',
+                    permiss: '13',
+                },
+                component: () => import('@/views/student/score-list.vue'),
+            },
         ],
     },
     {
