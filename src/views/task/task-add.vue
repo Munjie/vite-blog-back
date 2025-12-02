@@ -161,14 +161,13 @@ const submitAll = async () => {
     try {
         // 2. 构建 FormData 对象 (用于同时传输文件和文本)
         const formData = new FormData()
-        formData.append('info', new Blob([JSON.stringify(form)], {type: "application/json"}));
+        let infoForm = {
+            taskName: form.taskName,
+            title: fullTitle.value
+        }
+        formData.append('info', new Blob([JSON.stringify(infoForm)], {type: "application/json"}));
 
-      /*  // 添加文本数据
-        formData.append('title', fullTitle.value) // 完整的标题
-        formData.append('year', form.startYear)   // 单独字段也传过去，方便后端处理
-        formData.append('semester', form.semester)
-        formData.append('examType', form.examType)*/
-        // 添加文件数据 (遍历 fileList)
+
         fileList.value.forEach((file) => {
             if (file.raw) {
                 formData.append('files', file.raw)
@@ -181,16 +180,12 @@ const submitAll = async () => {
             'Content-Type': 'multipart/form-data' // 必须指定
           }
         })
-
-        // --- 模拟请求延迟 ---
-        await new Promise(resolve => setTimeout(resolve, 1500))
-        console.log('提交的数据：', Object.fromEntries(formData as any))
-
-        ElMessage.success('提交成功！')
-
-        // 4. 提交成功后清理
-        resetForm()
-
+        if (res.data.code === 200) {
+            ElMessage.success(res.data.data)
+            resetForm()
+        }else {
+            ElMessage.error(res.data.data)
+        }
     } catch (error) {
         console.error(error)
         ElMessage.error('上传失败，请重试')
