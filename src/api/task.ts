@@ -22,3 +22,9 @@ export const uploadTask = (data?: object) => {
         data
     );
 };
+
+
+export function exportReport(taskId: number) {
+    return http.get<Blob>('/api/task/export-report', { taskId: taskId });
+}
+

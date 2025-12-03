@@ -11,6 +11,8 @@
             :showSelection="true"
             :viewFunc="handleView"
             :deleteFunc="deleteFun"
+            :exportFunc="exportFun"
+            :showExport="true"
             @update:current-page="handlePageChange"
             @update:page-size="handlePageSizeChange"
             @selection-change="handleSelectionChange"
@@ -31,6 +33,8 @@ import { CirclePlusFilled } from '@element-plus/icons-vue';
 import {useRouter} from "vue-router";
 const router = useRouter()
 import { useRoute } from 'vue-router';
+import {ElMessage} from "element-plus";
+import axios from "axios";
 
 const route = useRoute();
 // 2. 定义点击事件处理函数
@@ -86,6 +90,39 @@ const deleteFun = async (row: { id: string | number }) => {
     await fetchList();
 
 };
+
+const exportFun = async (row: { id: string | number }) => {
+    // GET 方法不设置header  解压报错，使用post
+    debugger
+    taskId.value = row.id;
+    let info = {
+        taskId:  taskId.value,
+    }
+    const response = await axios.post('/api/task/export-report',  info, {
+        headers:{ 'Content-Type': 'application/json; application/octet-stream'},
+        responseType : "blob"
+    })
+    const fileName = name || (response.headers['content-disposition'] &&
+        decodeURI(response.headers['content-disposition'])
+            .split('filename=')[1]);
+    console.log(fileName)
+    const blob = new Blob([response.data], { type: 'application/zip' });
+    // 创建下载链接
+    const url = URL.createObjectURL(blob);
+    // 创建虚拟a标签进行下载
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    link.click();
+    // 释放URL对象
+    URL.revokeObjectURL(url);
+    link.remove();
+    ElMessage.success('下载完成')
+
+};
+
+
+
 
 const fetchList = async () => {
     try {

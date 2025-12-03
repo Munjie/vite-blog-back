@@ -46,11 +46,14 @@
                                 <el-button type="warning" size="small" :icon="View" @click="viewFunc(row)">
                                     查看
                                 </el-button>
-                                <el-button type="primary" size="small" :icon="Edit" @click="editFunc(row)">
+                                <el-button v-if="showEdit"  type="primary" size="small" :icon="Edit" @click="editFunc(row)">
                                     编辑
                                 </el-button>
                                 <el-button type="danger" size="small" :icon="Delete" @click="deleteFunc(row)">
                                     删除
+                                </el-button>
+                                <el-button v-if="showExport"  type="info" size="small" :icon="View" @click="exportFunc(row)">
+                                    导出
                                 </el-button>
                             </template>
                             <span v-else-if="item.formatter">
@@ -138,6 +141,18 @@ const props = defineProps({
     deleteFunc: {
         type: Function,
         default: () => { }
+    },
+    exportFunc: {
+        type: Function,
+        default: () => { }
+    },
+    showEdit: {
+        type: Boolean,
+        default: false
+    },
+    showExport: {
+        type: Boolean,
+        default: false
     },
 });
 
