@@ -42,6 +42,7 @@ const handleAdd = () => {
     router.push('/task-add');
 }
 const  taskId = ref();
+const  title = ref();
 const tableData = ref([]);
 const total =  ref(0);
 const currentPage = ref(1);
@@ -91,12 +92,14 @@ const deleteFun = async (row: { id: string | number }) => {
 
 };
 
-const exportFun = async (row: { id: string | number }) => {
+const exportFun = async (row: { id: string | number, title: string }) => {
     // GET 方法不设置header  解压报错，使用post
-    debugger
     taskId.value = row.id;
+    title.value = row.title;
+    debugger
     let info = {
         taskId:  taskId.value,
+        title:  title.value,
     }
     const response = await axios.post('/api/task/export-report',  info, {
         headers:{ 'Content-Type': 'application/json; application/octet-stream'},
