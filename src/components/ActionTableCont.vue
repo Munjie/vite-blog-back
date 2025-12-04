@@ -107,7 +107,7 @@ const props = defineProps({
     },
     pageSizes: {
         type: Array,
-        default: () => [5, 10, 20, 30],
+        default: () => [20, 30, 50],
     },
     showSelection: {
         type: Boolean,

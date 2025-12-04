@@ -1,6 +1,7 @@
 <template>
     <div>
         <!-- 表格 -->
+        <TableSearch :query="query" :options="searchOpt" :search="handleSearch" />
         <div class="container">
         <CustomTable
             :tableColumns="tableColumns"
@@ -18,16 +19,27 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import {onMounted, reactive, ref} from 'vue';
 import CustomTable from '@/components/ActionTableCont.vue';
-import { CirclePlusFilled } from '@element-plus/icons-vue';
+import TableSearch from '@/components/table-search.vue';
 import {useRouter} from "vue-router";
-import {getScoreList} from "@/api/student.js";
+import {getScoreList} from "@/api/student.ts";
 const router = useRouter()
 import {useRoute} from 'vue-router'
+import type {FormOptionList} from "@/types/form-option";
 const route = useRoute()
 const taskId = ref()
+
+// 查询相关
+const searchOpt = ref<FormOptionList[]>([
+    { type: 'input', label: '姓名：', prop: 'name' },
+    { type: 'input', label: '班级：', prop: 'lesson' }
+])
+const handleSearch = () => {
+    taskId.value = route.query.taskId
+    getList(taskId.value)
+};
 
 onMounted(() => {
     taskId.value = route.query.taskId
@@ -38,7 +50,7 @@ onMounted(() => {
 const tableData = ref([]);
 const total =  ref(0);
 const currentPage = ref(1);
-const pageSize = ref(5);
+const pageSize = ref(20);
 const visible = ref(false);
 const tableColumns = ref([
     { type: 'index', label: '序号', align: 'center' ,width: 80},
@@ -68,6 +80,7 @@ const tableColumns = ref([
 // 查询相关
 const query = reactive({
     name: '',
+    lesson: '',
 });
 
 
@@ -77,7 +90,9 @@ const getList = async (any) => {
         let taskForm = {
             pageSize: pageSize.value,
             pageNum: currentPage.value,
-            taskId : any
+            taskId : any,
+            name : query.name,
+            lesson : query.lesson
         }
         const res = await getScoreList(taskForm);
         tableData.value = res.data.records,

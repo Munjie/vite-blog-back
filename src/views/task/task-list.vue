@@ -47,7 +47,7 @@ const title = ref();
 const tableData = ref([]);
 const total = ref(0);
 const currentPage = ref(1);
-const pageSize = ref(5);
+const pageSize = ref(10);
 const visible = ref(false);
 const tableColumns = ref([
     {type: 'index', label: '序号', align: 'center', width: 80},
