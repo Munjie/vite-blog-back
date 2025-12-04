@@ -10,6 +10,7 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import 'element-plus/dist/index.css';
 import './assets/css/icon.css';
 import * as echarts from 'echarts'
+import Echarts from "vue-echarts";
 import { usePermissStore } from './stores/permiss';
 const pina = createPinia();
 pina.use(piniaPluginPersistedstate);
@@ -35,4 +36,5 @@ app.directive('permiss', {
         }
     },
 });
+app.component("v-chart", Echarts);
 app.mount('#app')

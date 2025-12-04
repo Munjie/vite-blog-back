@@ -1,5 +1,6 @@
 <template>
     <div>
+        <TableSearch :query="query" :options="searchOpt" :search="handleSearch" />
         <el-row :gutter="20" class="mgb20">
             <el-col :span="6">
                 <el-card shadow="hover" body-class="card-body">
@@ -7,7 +8,7 @@
                         <Notebook />
                     </el-icon>
                     <div class="card-content">
-                        <countup class="card-num color1" :end="6666" />
+                        <countup class="card-num color1"  :end="total" />
                         <div>班级总分最高</div>
                     </div>
                 </el-card>
@@ -18,7 +19,7 @@
                         <School />
                     </el-icon>
                     <div class="card-content">
-                        <countup class="card-num color2" :end="168" />
+                        <countup class="card-num color2"  :end="avg" />
                         <div>班级平均分最高</div>
                     </div>
                 </el-card>
@@ -52,27 +53,24 @@
                 <el-card shadow="hover">
                     <div class="card-header">
                         <p class="card-header-title">成绩动态</p>
-                        <p class="card-header-desc">最近半年成绩变化最快学生</p>
                     </div>
-                    <v-chart class="chart" :option="dashOpt1" />
+                    <v-chart class="chart" :option="classScoreChartOptions" />
                 </el-card>
             </el-col>
             <el-col :span="6">
                 <el-card shadow="hover">
                     <div class="card-header">
                         <p class="card-header-title">成绩分布</p>
-                        <p class="card-header-desc">最近半年学生学习情况分布</p>
                     </div>
                     <v-chart class="chart" :option="dashOpt2" />
                 </el-card>
             </el-col>
         </el-row>
-<!--        <el-row :gutter="20">
+        <el-row :gutter="20">
             <el-col :span="7">
                 <el-card shadow="hover" :body-style="{ height: '400px' }">
                     <div class="card-header">
-                        <p class="card-header-title">时间线</p>
-                        <p class="card-header-desc">最新的销售动态和活动信息</p>
+                        <p class="card-header-title">平均分</p>
                     </div>
                     <el-timeline>
                         <el-timeline-item v-for="(activity, index) in activities" :key="index" :color="activity.color">
@@ -90,8 +88,7 @@
             <el-col :span="10">
                 <el-card shadow="hover" :body-style="{ height: '400px' }">
                     <div class="card-header">
-                        <p class="card-header-title">渠道统计</p>
-                        <p class="card-header-desc">最近一个月的订单来源统计</p>
+                        <p class="card-header-title">中位数</p>
                     </div>
                     <v-chart class="map-chart" :option="mapOptions" />
                 </el-card>
@@ -100,7 +97,6 @@
                 <el-card shadow="hover" :body-style="{ height: '400px' }">
                     <div class="card-header">
                         <p class="card-header-title">排行榜</p>
-                        <p class="card-header-desc">销售商品的热门榜单Top5</p>
                     </div>
                     <div>
                         <div class="rank-item" v-for="(rank, index) in ranks">
@@ -108,7 +104,7 @@
                             <div class="rank-item-content">
                                 <div class="rank-item-top">
                                     <div class="rank-item-title">{{ rank.title }}</div>
-                                    <div class="rank-item-desc">销量：{{ rank.value }}</div>
+                                    <div class="rank-item-desc">分数：{{ rank.value }}</div>
                                 </div>
                                 <el-progress
                                     :show-text="false"
@@ -122,7 +118,7 @@
                     </div>
                 </el-card>
             </el-col>
-        </el-row>-->
+        </el-row>
     </div>
 </template>
 
@@ -138,9 +134,14 @@ import {
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';;
 // 引入 echarts 库
-import * as VChart from 'echarts'
+import VChart from 'vue-echarts'
 import { dashOpt1, dashOpt2 } from '../chart/options';
 import chinaMap from '../../utils/china';
+import {onMounted, reactive, ref} from "vue";
+import {getHomeData} from "../../api/home.ts";
+import type {FormOptionList} from "../../types/form-option.ts";
+
+
 use([
     CanvasRenderer,
     BarChart,
@@ -154,6 +155,67 @@ use([
     MapChart,
 ]);
 registerMap('china', chinaMap);
+// 查询相关
+const query = reactive({
+    name: '',
+    lesson: '',
+});
+// 查询相关
+const searchOpt = ref<FormOptionList[]>([
+    { type: 'input', label: '姓名：', prop: 'name' },
+    { type: 'input', label: '班级：', prop: 'lesson' }
+])
+const handleSearch = () => {
+    fetchHomeData()
+};
+const classScoreChartOptions = ref<any>({});
+const total = ref(0.0);
+const avg = ref(0.0);
+const fetchHomeData = async () => {
+    try {
+        let homeForm = {
+            name : query.name,
+            lesson : query.lesson
+        }
+        const res = await getHomeData(homeForm);
+        total.value = res.data.total
+        avg.value = res.data.avg
+        classScoreChartOptions.value = generateDashOpt(res.data.scoresBar);
+        console.log( classScoreChartOptions.value)
+    } catch (error) {
+        console.log('登录请求失败，请稍后再试'+error);
+
+    }
+};
+onMounted(() => {
+    fetchHomeData();
+});
+
+
+const generateDashOpt = (data: any) => {
+    return {
+        // --- X 轴配置 ---
+        xAxis: {
+            type: 'category',
+            boundaryGap: false,
+            data: data.categories,
+        },
+        yAxis: {
+            type: 'value',
+        },
+        color: ['#009688', '#f44336'],
+        series: [
+            {
+                type: 'bar',
+                smooth: true,
+                data: data.value,
+            },
+        ],
+        tooltip: {
+            trigger: 'axis',
+        }
+    };
+};
 </script>
 
 <style>

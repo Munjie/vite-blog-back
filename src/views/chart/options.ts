@@ -1,4 +1,4 @@
-import { graphic } from 'echarts/core';
+
 export const barOptions = {
     xAxis: {
         type: 'category',
@@ -242,24 +242,7 @@ export const dashOpt1 = {
     color: ['#009688', '#f44336'],
     series: [
         {
-            type: 'line',
-            areaStyle: {
-                color: new graphic.LinearGradient(0, 0, 0, 1, [
-                    {
-                        offset: 0,
-                        color: 'rgba(0, 150, 136,0.8)',
-                    },
-                    {
-                        offset: 1,
-                        color: 'rgba(0, 150, 136,0.2)',
-                    },
-                ]),
-            },
-            smooth: true,
-            data: [120, 132, 301, 134, 90, 230, 210],
-        },
-        {
-            type: 'line',
+            type: 'bar',
             smooth: true,
             data: [220, 122, 191, 234, 190, 130, 310],
         },
