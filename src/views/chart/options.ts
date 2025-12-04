@@ -251,26 +251,17 @@ export const dashOpt1 = {
 
 export const dashOpt2 = {
     legend: {
-        bottom: '1%',
         left: 'center',
     },
-    color: ['#3f51b5', '#009688', '#f44336', '#00bcd4', '#1ABC9C'],
+    tooltip: {
+        trigger: 'item'
+    },
     series: [
         {
             type: 'pie',
-            radius: ['40%', '70%'],
-            avoidLabelOverlap: false,
-            itemStyle: {
-                borderRadius: 10,
-                borderColor: '#fff',
-                borderWidth: 2,
-            },
             data: [
-                { value: 1048, name: '数码' },
-                { value: 735, name: '食品' },
-                { value: 580, name: '母婴' },
-                { value: 484, name: '家电' },
-                { value: 300, name: '运动' },
+                { value: 56, name: '及格' },
+                { value: 32, name: '不及格' },
             ],
         },
     ],

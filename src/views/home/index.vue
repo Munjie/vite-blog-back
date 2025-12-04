@@ -62,7 +62,7 @@
                     <div class="card-header">
                         <p class="card-header-title">成绩分布</p>
                     </div>
-                    <v-chart class="chart" :option="dashOpt2" />
+                    <v-chart class="chart" :option="scorePie" />
                 </el-card>
             </el-col>
         </el-row>
@@ -135,7 +135,7 @@ import {
 import { CanvasRenderer } from 'echarts/renderers';;
 // 引入 echarts 库
 import VChart from 'vue-echarts'
-import { dashOpt1, dashOpt2 } from '../chart/options';
+import {dashOpt2 } from '../chart/options';
 import chinaMap from '../../utils/china';
 import {onMounted, reactive, ref} from "vue";
 import {getHomeData} from "../../api/home.ts";
@@ -169,6 +169,7 @@ const handleSearch = () => {
     fetchHomeData()
 };
 const classScoreChartOptions = ref<any>({});
+const scorePie = ref<any>({});
 const total = ref(0.0);
 const avg = ref(0.0);
 const fetchHomeData = async () => {
@@ -181,6 +182,7 @@ const fetchHomeData = async () => {
         total.value = res.data.total
         avg.value = res.data.avg
         classScoreChartOptions.value = generateDashOpt(res.data.scoresBar);
+        scorePie.value = generatePie(res.data.scorePies);
         console.log( classScoreChartOptions.value)
     } catch (error) {
         console.log('登录请求失败，请稍后再试'+error);
@@ -197,13 +199,11 @@ const generateDashOpt = (data: any) => {
         // --- X 轴配置 ---
         xAxis: {
             type: 'category',
-            boundaryGap: false,
             data: data.categories,
         },
         yAxis: {
             type: 'value',
         },
-        color: ['#009688', '#f44336'],
         series: [
             {
                 type: 'bar',
@@ -214,6 +214,23 @@ const generateDashOpt = (data: any) => {
         tooltip: {
             trigger: 'axis',
         }
+    };
+};
+
+const generatePie = (data: any) => {
+    return {
+        legend: {
+            left: 'center',
+        },
+        tooltip: {
+            trigger: 'item'
+        },
+        series: [
+            {
+                type: 'pie',
+                data: data
+            },
+        ],
     };
 };
 </script>
