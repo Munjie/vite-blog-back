@@ -4,44 +4,44 @@
             <el-col :span="6">
                 <el-card shadow="hover" body-class="card-body">
                     <el-icon class="card-icon bg1">
-                        <User />
+                        <Notebook />
                     </el-icon>
                     <div class="card-content">
                         <countup class="card-num color1" :end="6666" />
-                        <div>用户访问量</div>
+                        <div>班级总分最高</div>
                     </div>
                 </el-card>
             </el-col>
             <el-col :span="6">
                 <el-card shadow="hover" body-class="card-body">
                     <el-icon class="card-icon bg2">
-                        <ChatDotRound />
+                        <School />
                     </el-icon>
                     <div class="card-content">
                         <countup class="card-num color2" :end="168" />
-                        <div>系统消息</div>
+                        <div>班级平均分最高</div>
                     </div>
                 </el-card>
             </el-col>
             <el-col :span="6">
                 <el-card shadow="hover" body-class="card-body">
                     <el-icon class="card-icon bg3">
-                        <Goods />
+                        <Top />
                     </el-icon>
                     <div class="card-content">
                         <countup class="card-num color3" :end="8888" />
-                        <div>商品数量</div>
+                        <div>及格人数最高</div>
                     </div>
                 </el-card>
             </el-col>
             <el-col :span="6">
                 <el-card shadow="hover" body-class="card-body">
                     <el-icon class="card-icon bg4">
-                        <ShoppingCartFull />
+                        <Star />
                     </el-icon>
                     <div class="card-content">
                         <countup class="card-num color4" :end="568" />
-                        <div>今日订单量</div>
+                        <div>及格率最低</div>
                     </div>
                 </el-card>
             </el-col>
@@ -51,8 +51,8 @@
             <el-col :span="18">
                 <el-card shadow="hover">
                     <div class="card-header">
-                        <p class="card-header-title">订单动态</p>
-                        <p class="card-header-desc">最近一周订单状态，包括订单成交量和订单退货量</p>
+                        <p class="card-header-title">成绩动态</p>
+                        <p class="card-header-desc">最近半年成绩变化最快学生</p>
                     </div>
                     <v-chart class="chart" :option="dashOpt1" />
                 </el-card>
@@ -60,8 +60,8 @@
             <el-col :span="6">
                 <el-card shadow="hover">
                     <div class="card-header">
-                        <p class="card-header-title">品类分布</p>
-                        <p class="card-header-desc">最近一个月销售商品的品类情况</p>
+                        <p class="card-header-title">成绩分布</p>
+                        <p class="card-header-desc">最近半年学生学习情况分布</p>
                     </div>
                     <v-chart class="chart" :option="dashOpt2" />
                 </el-card>
