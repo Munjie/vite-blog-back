@@ -67,7 +67,7 @@
                 style="margin-bottom: 20px"
             />
 
-            <div class="section-title">2. 上传 Excel 文件 (支持多选)</div>
+            <div class="section-title">2. 上传Excel文件(支持多选)</div>
 
             <el-form-item label="上传附件">
                 <el-upload
@@ -83,11 +83,11 @@
                 >
                     <el-icon class="el-icon--upload"><upload-filled /></el-icon>
                     <div class="el-upload__text">
-                        拖拽文件到此处 或 <em>点击上传</em>
+                       拖拽文件到此处或<em>点击上传</em>
                     </div>
                     <template #tip>
                         <div class="el-upload__tip">
-                            支持 .xlsx / .xls 格式，单次最多上传50个文件
+                            支持.xlsx/.xls格式,单次最多上传50个文件, 文件名是学生成绩和试题分析的文件
                         </div>
                     </template>
                 </el-upload>
@@ -142,7 +142,7 @@ const fullTitle = computed(() => {
 // --- 3. 文件处理逻辑 ---
 // 当文件超出限制时的回调
 const handleExceed: UploadProps['onExceed'] = (files) => {
-    ElMessage.warning(`最多只能选择 5 个文件，你当前选择了 ${files.length} 个文件。`)
+    ElMessage.warning(`最多只能选择50个文件，你当前选择了 ${files.length} 个文件。`)
 }
 
 // --- 4. 提交逻辑 (FormData) ---
@@ -183,8 +183,12 @@ const submitAll = async () => {
         })
         if (res.data.code === 200) {
             ElMessage.success(res.data.data)
-            resetForm()
-            await router.push('/task-list');
+            try {
+                resetForm();
+            } catch (e) {
+                console.error("重置表单失败", e);
+            }
+            await router.replace('/task-list');
         }else {
             ElMessage.error(res.data.data)
         }

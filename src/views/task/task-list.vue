@@ -2,25 +2,25 @@
     <div>
         <!-- 表格 -->
         <div class="container">
-        <CustomTable
-            :tableColumns="tableColumns"
-            :tableData="tableData"
-            :pageSize="pageSize"
-            :total = "total"
-            :pageSizes="[5, 10, 15, 20, 30]"
-            :showSelection="true"
-            :viewFunc="handleView"
-            :deleteFunc="deleteFun"
-            :exportFunc="exportFun"
-            :showExport="true"
-            @update:current-page="handlePageChange"
-            @update:page-size="handlePageSizeChange"
-            @selection-change="handleSelectionChange"
-        >
-            <template #toolbarBtn>
-                <el-button type="warning" :icon="CirclePlusFilled" @click="handleAdd">新增</el-button>
-            </template>
-        </CustomTable>
+            <CustomTable
+                    :tableColumns="tableColumns"
+                    :tableData="tableData"
+                    :pageSize="pageSize"
+                    :total="total"
+                    :pageSizes="[5, 10, 15, 20, 30]"
+                    :showSelection="true"
+                    :viewFunc="handleView"
+                    :deleteFunc="deleteFun"
+                    :exportFunc="exportFun"
+                    :showExport="true"
+                    @update:current-page="handlePageChange"
+                    @update:page-size="handlePageSizeChange"
+                    @selection-change="handleSelectionChange"
+            >
+                <template #toolbarBtn>
+                    <el-button type="warning" :icon="CirclePlusFilled" @click="handleAdd">新增任务</el-button>
+                </template>
+            </CustomTable>
         </div>
     </div>
 </template>
@@ -28,12 +28,13 @@
 <script setup lang="ts">
 import {onMounted, reactive, ref, watch} from 'vue';
 import CustomTable from '@/components/ActionTableCont.vue';
-import {getTaskList,deleteTask} from "../../api/task.ts";
-import { CirclePlusFilled } from '@element-plus/icons-vue';
+import {getTaskList, deleteTask} from "../../api/task.ts";
+import {CirclePlusFilled} from '@element-plus/icons-vue';
 import {useRouter} from "vue-router";
+
 const router = useRouter()
-import { useRoute } from 'vue-router';
-import {ElMessage} from "element-plus";
+import {useRoute} from 'vue-router';
+import {ElMessage, ElMessageBox} from "element-plus";
 import axios from "axios";
 
 const route = useRoute();
@@ -41,15 +42,15 @@ const route = useRoute();
 const handleAdd = () => {
     router.push('/task-add');
 }
-const  taskId = ref();
-const  title = ref();
+const taskId = ref();
+const title = ref();
 const tableData = ref([]);
-const total =  ref(0);
+const total = ref(0);
 const currentPage = ref(1);
 const pageSize = ref(5);
 const visible = ref(false);
 const tableColumns = ref([
-    { type: 'index', label: '序号', align: 'center' ,width: 80},
+    {type: 'index', label: '序号', align: 'center', width: 80},
     {
         prop: 'taskName',
         label: '任务名称',
@@ -66,7 +67,7 @@ const tableColumns = ref([
         prop: 'createTime',
         label: '创建日期',
     },
-    { prop: 'operator', label: '操作', width: 260},
+    {prop: 'operator', label: '操作', width: 260},
 ]);
 
 // 查询相关
@@ -85,31 +86,53 @@ const handleView = (row: { id: string | number }) => {
     });
 };
 
-const deleteFun = async (row: { id: string | number }) => {
+/*const deleteFun = async (row: { id: string | number }) => {
     taskId.value = row.id;
     await deleteTask(taskId.value);
+    ElMessage.success("删除成功")
     await fetchList();
 
-};
+};*/
 
+
+const deleteFun = async (row: { id: string | number }) => {
+    try {
+        await ElMessageBox.confirm(
+            '确定要删除这条数据吗？',
+            '警告',
+            {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning' as 'warning',
+            }
+        )
+        // 用户点击确定后
+        taskId.value = row.id
+        await deleteTask(taskId.value)
+        ElMessage.success("删除成功")
+        await fetchList()
+    } catch (error) {
+        console.log('用户取消操作')
+    }
+}
 const exportFun = async (row: { id: string | number, title: string }) => {
     // GET 方法不设置header  解压报错，使用post
     taskId.value = row.id;
     title.value = row.title;
     debugger
     let info = {
-        taskId:  taskId.value,
-        title:  title.value,
+        taskId: taskId.value,
+        title: title.value,
     }
-    const response = await axios.post('/api/task/export-report',  info, {
-        headers:{ 'Content-Type': 'application/json; application/octet-stream'},
-        responseType : "blob"
+    const response = await axios.post('/api/task/export-report', info, {
+        headers: {'Content-Type': 'application/json; application/octet-stream'},
+        responseType: "blob"
     })
     const fileName = name || (response.headers['content-disposition'] &&
         decodeURI(response.headers['content-disposition'])
             .split('filename=')[1]);
     console.log(fileName)
-    const blob = new Blob([response.data], { type: 'application/zip' });
+    const blob = new Blob([response.data], {type: 'application/zip'});
     // 创建下载链接
     const url = URL.createObjectURL(blob);
     // 创建虚拟a标签进行下载
@@ -125,8 +148,6 @@ const exportFun = async (row: { id: string | number, title: string }) => {
 };
 
 
-
-
 const fetchList = async () => {
     try {
         let taskForm = {
@@ -139,7 +160,7 @@ const fetchList = async () => {
         console.log('API数据:', tableData.value);
 
     } catch (error) {
-        console.log('登录请求失败，请稍后再试'+error);
+        console.log('登录请求失败，请稍后再试' + error);
 
     }
 };
@@ -167,7 +188,7 @@ watch(
             fetchList();
         }
     },
-    { immediate: false } // 初始时不执行，onMounted已经执行过了
+    {immediate: false} // 初始时不执行，onMounted已经执行过了
 );
 // 监听页码或页大小变化，重新查询
 /*watch(
