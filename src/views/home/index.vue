@@ -9,7 +9,7 @@
                     </el-icon>
                     <div class="card-content">
                         <countup class="card-num color1"  :end="total" />
-                        <div>班级总分最高</div>
+                        <div>地理总分最高{{maxTotalClass}}</div>
                     </div>
                 </el-card>
             </el-col>
@@ -20,7 +20,7 @@
                     </el-icon>
                     <div class="card-content">
                         <countup class="card-num color2"  :end="avg" />
-                        <div>班级平均分最高</div>
+                        <div>地理平均分最高{{maxAvgClass}}</div>
                     </div>
                 </el-card>
             </el-col>
@@ -30,8 +30,8 @@
                         <Top />
                     </el-icon>
                     <div class="card-content">
-                        <countup class="card-num color3" :end="8888" />
-                        <div>及格人数最高</div>
+                        <countup class="card-num color3" :end="maxGt" />
+                        <div>40分以上人数最多{{maxGtClass}}</div>
                     </div>
                 </el-card>
             </el-col>
@@ -41,8 +41,8 @@
                         <Star />
                     </el-icon>
                     <div class="card-content">
-                        <countup class="card-num color4" :end="568" />
-                        <div>及格率最低</div>
+                        <countup class="card-num color4" :end="maxLt" />
+                        <div>30分以下人数最多{{maxLtClass}}</div>
                     </div>
                 </el-card>
             </el-col>
@@ -54,7 +54,6 @@
                     <div class="card-header">
                         <p class="card-header-title">成绩动态</p>
                     </div>
-<!--                    <v-chart class="chart" :option="boxOptions" />-->
                     <BoxPlotChart
                         :data="data"
                         :loading="loading"
@@ -141,7 +140,6 @@ import {
 import { CanvasRenderer } from 'echarts/renderers';;
 // 引入 echarts 库
 import VChart from 'vue-echarts'
-import {boxOptions, dashOpt2} from '../chart/options';
 import chinaMap from '../../utils/china';
 import {onMounted, reactive, ref} from "vue";
 import {getHomeData} from "../../api/home.ts";
@@ -184,7 +182,13 @@ const data = ref<BoxPlotDataVO[]>([]);
 const loading = ref(true);
 const error = ref<string | null>(null);
 
+const maxTotalClass = ref();
+const maxAvgClass = ref();
 
+const maxGtClass = ref();
+const maxLtClass = ref();
+const maxGt = ref();
+const maxLt = ref();
 const fetchHomeData = async () => {
     try {
         let homeForm = {
@@ -192,6 +196,14 @@ const fetchHomeData = async () => {
             lesson : query.lesson
         }
         const res = await getHomeData(homeForm);
+        maxTotalClass.value = res.data.maxSumClass
+        maxAvgClass.value = res.data.maxAvgClass
+        //
+        maxGtClass.value = res.data.maxGtClass
+        maxLtClass.value = res.data.maxLtClass
+        maxGt.value = res.data.maxGt
+        maxLt.value = res.data.maxLt
+        //
         total.value = res.data.total
         avg.value = res.data.avg
         classScoreChartOptions.value = generateDashOpt(res.data.scoresBar);
