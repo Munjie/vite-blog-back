@@ -61,6 +61,7 @@ declare module 'vue' {
     MainTagsCont: typeof import('./../components/MainTagsCont.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    ScoreBoxPlot: typeof import('./../components/ScoreBoxPlot.vue')['default']
     Sidebar: typeof import('./../components/sidebar.vue')['default']
     Svgicon: typeof import('./../components/svgicon/index.vue')['default']
     TableCustom: typeof import('./../components/table-custom.vue')['default']

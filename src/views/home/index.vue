@@ -54,7 +54,12 @@
                     <div class="card-header">
                         <p class="card-header-title">成绩动态</p>
                     </div>
-                    <v-chart class="chart" :option="classScoreChartOptions" />
+<!--                    <v-chart class="chart" :option="boxOptions" />-->
+                    <BoxPlotChart
+                        :data="data"
+                        :loading="loading"
+                        title="各班级成绩箱线图"
+                    />
                 </el-card>
             </el-col>
             <el-col :span="6">
@@ -124,7 +129,8 @@
 
 <script setup lang="ts" name="dashboard">
 import { use, registerMap } from 'echarts/core';
-import { BarChart, LineChart, PieChart, MapChart } from 'echarts/charts';
+import {BarChart, LineChart, PieChart, MapChart, BoxplotChart} from 'echarts/charts';
+import BoxPlotChart from '@/components/ScoreBoxPlot.vue';
 import {
     GridComponent,
     TooltipComponent,
@@ -135,14 +141,16 @@ import {
 import { CanvasRenderer } from 'echarts/renderers';;
 // 引入 echarts 库
 import VChart from 'vue-echarts'
-import {dashOpt2 } from '../chart/options';
+import {boxOptions, dashOpt2} from '../chart/options';
 import chinaMap from '../../utils/china';
 import {onMounted, reactive, ref} from "vue";
 import {getHomeData} from "../../api/home.ts";
 import type {FormOptionList} from "../../types/form-option.ts";
+import type {BoxPlotDataVO} from "../../types/BoxPlotData.ts";
 
 
 use([
+    BoxplotChart,
     CanvasRenderer,
     BarChart,
     GridComponent,
@@ -172,6 +180,11 @@ const classScoreChartOptions = ref<any>({});
 const scorePie = ref<any>({});
 const total = ref(0.0);
 const avg = ref(0.0);
+const data = ref<BoxPlotDataVO[]>([]);
+const loading = ref(true);
+const error = ref<string | null>(null);
+
+
 const fetchHomeData = async () => {
     try {
         let homeForm = {
@@ -183,6 +196,7 @@ const fetchHomeData = async () => {
         avg.value = res.data.avg
         classScoreChartOptions.value = generateDashOpt(res.data.scoresBar);
         scorePie.value = generatePie(res.data.scorePies);
+        data.value = res.data.boxPlotDataVOS;
         console.log( classScoreChartOptions.value)
     } catch (error) {
         console.log('登录请求失败，请稍后再试'+error);
