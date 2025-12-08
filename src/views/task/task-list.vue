@@ -122,9 +122,19 @@ const exportFun = async (row: { id: string | number, title: string }) => {
         headers: {'Content-Type': 'application/json; application/octet-stream'},
         responseType: "blob"
     })
-    const fileName = name || (response.headers['content-disposition'] &&
+   /* const fileName = name || (response.headers['content-disposition'] &&
         decodeURI(response.headers['content-disposition'])
-            .split('filename=')[1]);
+            .split('filename=')[1]);*/
+    const disposition = response.headers['content-disposition'] ?? response.headers['Content-Disposition'];
+    let fileName = '下载文件';
+
+    if (disposition) {
+        // 匹配 filename*="UTF-8''xxx" 或 filename="xxx" 或 filename=xxx
+        const match = disposition.match(/filename[*]?=(?:UTF-8'')?([^;]+)/i);
+        if (match?.[1]) {
+            fileName = decodeURIComponent(match[1].replace(/"/g, ''));
+        }
+    }
     console.log(fileName)
     const blob = new Blob([response.data], {type: 'application/zip'});
     // 创建下载链接
