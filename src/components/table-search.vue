@@ -5,9 +5,19 @@
 				<!-- 文本框、下拉框、日期框 -->
 				<el-input v-if="item.type === 'input'" v-model="query[item.prop]" :disabled="item.disabled"
 									:placeholder="item.placeholder" clearable></el-input>
-				<el-select v-else-if="item.type === 'select'" v-model="query[item.prop]" :disabled="item.disabled"
-									 :placeholder="item.placeholder" clearable>
-					<el-option v-for="opt in item.opts" :label="opt.label" :value="opt.value"></el-option>
+				<el-select v-else-if="item.type === 'select'"
+									 v-model="query[item.prop]"
+									 :disabled="item.disabled"
+									 :placeholder="item.placeholder"
+									 :loading="item.loading"
+									 @change="handleSelectChange"
+									  clearable style="width: 150px">
+					<el-option
+							v-for="opt in item.opts"
+							:key="opt.value"
+							:label="opt.label"
+							:value="opt.value"
+					/>
 				</el-select>
 				<el-date-picker v-else-if="item.type === 'date'" type="date" v-model="query[item.prop]"
 												:value-format="item.format"></el-date-picker>
@@ -49,7 +59,13 @@ const searchRef = ref<FormInstance>();
 const resetForm = (formEl: FormInstance | undefined) => {
 	if (!formEl) return
 	formEl.resetFields()
-	props.search();
+	props.search?.();
+}
+
+// 方法
+const handleSelectChange = () => {
+	// 只要下拉框变化，立刻触发搜索
+	props.search?.();
 }
 </script>
 
@@ -60,5 +76,10 @@ const resetForm = (formEl: FormInstance | undefined) => {
 	margin-bottom: 10px;
 	border: 1px solid #ddd;
 	border-radius: 5px
+}
+/* 在全局样式或组件样式里加上 */
+.fixed-select .el-select__selected-item,
+.force-render .el-select__input {
+	color: #606266 !important;
 }
 </style>

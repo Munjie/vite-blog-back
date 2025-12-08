@@ -45,7 +45,6 @@ service.interceptors.response.use(
     (response: AxiosResponse) => {
         // 这里的 response.data 是后端返回的原始数据
         if (response.status === 200) {
-            debugger
             const code = response.data.code;
             const message = response.data.message;
             if (code === undefined) {
