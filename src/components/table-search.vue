@@ -36,10 +36,13 @@ const props = defineProps({
 		required: true
 	},
 	search: {
-		type: Function,
-		default: () => { }
+		// 明确指定参数和返回值
+		type: Function as PropType<(evt?: MouseEvent) => void>,
+		default: () => {}
 	}
 });
+
+
 
 const searchRef = ref<FormInstance>();
 const resetForm = (formEl: FormInstance | undefined) => {

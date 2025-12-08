@@ -108,13 +108,15 @@ const getList = async (any) => {
 
 // 分页变化处理（替换原 @update 事件，避免直接赋值导致 watch 延迟）
 const handlePageChange = (page) => {
+    taskId.value = route.query.taskId
     currentPage.value = page;
-    getList();  // 立即加载新页
+    getList(taskId.value);  // 立即加载新页
 };
 
 const handlePageSizeChange = (size) => {
+    taskId.value = route.query.taskId
     pageSize.value = size;
-    getList();  // 页大小变化也重新加载
+    getList(taskId.value);  // 页大小变化也重新加载
 };
 // 监听页码或页大小变化，重新查询
 /*watch(
@@ -129,20 +131,9 @@ const selectedData = ref([]);
 
 // 处理选中数据变化
 const handleSelectionChange = (selection) => {
+    taskId.value = route.query.taskId
     selectedData.value = selection;
 };
 
 // 获取选中数据
-const handleDelete = () => {
-    console.log('Selected Data:', selectedData.value);
-    console.log('Selected  Data length:', selectedData.value.length);
-    if (selectedData.value.length > 0) {
-        // 删除逻辑
-        console.log('Deleting selected data...');
-        selectedData.value = [];
-    } else {
-        console.log('No selected data to delete.');
-    }
-
-};
 </script>

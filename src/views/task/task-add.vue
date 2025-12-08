@@ -114,8 +114,6 @@ import { UploadFilled } from '@element-plus/icons-vue'
 import { ElMessage, type UploadUserFile, type UploadInstance, type UploadProps } from 'element-plus'
 import axios from 'axios' // 假设你使用 axios
 
-import {uploadTask} from "../../api/task.ts";
-import {getTaskList} from "../../api/task.ts";
 import router from "../../router";
 // Upload 实例 ref (用于操作清空等)
 const uploadRef = ref<UploadInstance>()

@@ -7,10 +7,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
-// 2. 引入 ECharts 核心库和 TypeScript 类型
 import * as echarts from 'echarts';
-// 引入 ECharts 选项的 TypeScript 类型，用于代码提示和类型检查
-import type { EChartsOption } from 'echarts';
+
 
 // 3. 定义响应式变量
 const chartRef = ref<HTMLElement | null>(null); // 绑定 DOM 的引用
