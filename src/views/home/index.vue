@@ -76,7 +76,7 @@
                     <div class="card-header">
                         <p class="card-header-title">平均分</p>
                     </div>
-                    <el-timeline>
+<!--                    <el-timeline>
                         <el-timeline-item v-for="(activity, index) in activities" :key="index" :color="activity.color">
                             <div class="timeline-item">
                                 <div>
@@ -86,7 +86,7 @@
                                 <div class="timeline-time">{{ activity.timestamp }}</div>
                             </div>
                         </el-timeline-item>
-                    </el-timeline>
+                    </el-timeline>-->
                 </el-card>
             </el-col>
             <el-col :span="10">
@@ -94,7 +94,7 @@
                     <div class="card-header">
                         <p class="card-header-title">中位数</p>
                     </div>
-                    <v-chart class="map-chart" :option="mapOptions" />
+<!--                    <v-chart class="map-chart" :option="mapOptions" />-->
                 </el-card>
             </el-col>
             <el-col :span="7">
@@ -103,7 +103,7 @@
                         <p class="card-header-title">排行榜</p>
                     </div>
                     <div>
-                        <div class="rank-item" v-for="(rank, index) in ranks">
+<!--                        <div class="rank-item" v-for="(rank, index) in ranks">
                             <div class="rank-item-avatar">{{ index + 1 }}</div>
                             <div class="rank-item-content">
                                 <div class="rank-item-top">
@@ -118,7 +118,7 @@
                                     :color="rank.color"
                                 />
                             </div>
-                        </div>
+                        </div>-->
                     </div>
                 </el-card>
             </el-col>
@@ -180,7 +180,6 @@ const total = ref(0.0);
 const avg = ref(0.0);
 const data = ref<BoxPlotDataVO[]>([]);
 const loading = ref(true);
-const error = ref<string | null>(null);
 
 const maxTotalClass = ref();
 const maxAvgClass = ref();

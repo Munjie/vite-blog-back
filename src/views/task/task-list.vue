@@ -26,7 +26,7 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, reactive, ref, watch} from 'vue';
+import {onMounted, ref, watch} from 'vue';
 import CustomTable from '@/components/ActionTableCont.vue';
 import {getTaskList, deleteTask} from "../../api/task.ts";
 import {CirclePlusFilled} from '@element-plus/icons-vue';
@@ -48,7 +48,6 @@ const tableData = ref([]);
 const total = ref(0);
 const currentPage = ref(1);
 const pageSize = ref(10);
-const visible = ref(false);
 const tableColumns = ref([
     {type: 'index', label: '序号', align: 'center', width: 80},
     {
@@ -71,11 +70,6 @@ const tableColumns = ref([
 ]);
 
 // 查询相关
-const query = reactive({
-    name: '',
-});
-
-
 const handleView = (row: { id: string | number }) => {
     console.log(row.id)
     router.push({
@@ -170,12 +164,12 @@ onMounted(() => {
 })
 
 // 分页变化处理（替换原 @update 事件，避免直接赋值导致 watch 延迟）
-const handlePageChange = (page) => {
+const handlePageChange = (page:any) => {
     currentPage.value = page;
     fetchList();  // 立即加载新页
 };
 
-const handlePageSizeChange = (size) => {
+const handlePageSizeChange = (size:any) => {
     pageSize.value = size;
     fetchList();  // 页大小变化也重新加载
 };
@@ -202,12 +196,12 @@ watch(
 const selectedData = ref([]);
 
 // 处理选中数据变化
-const handleSelectionChange = (selection) => {
+const handleSelectionChange = (selection:any) => {
     selectedData.value = selection;
 };
 
 // 获取选中数据
-const handleDelete = () => {
+/*const handleDelete = () => {
     console.log('Selected Data:', selectedData.value);
     console.log('Selected  Data length:', selectedData.value.length);
     if (selectedData.value.length > 0) {
@@ -218,5 +212,5 @@ const handleDelete = () => {
         console.log('No selected data to delete.');
     }
 
-};
+};*/
 </script>

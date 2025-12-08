@@ -21,10 +21,11 @@
 </template>
 
 <script lang="ts" setup>
-import { FormInstance } from 'element-plus';
+import type { FormInstance } from 'element-plus';
 import { Search, Refresh } from '@element-plus/icons-vue';
-import { PropType, ref } from 'vue';
-import type { FormOptionList } from '@/types/form-option';
+import { ref } from 'vue';
+import type { PropType } from 'vue';
+import type { FormOptionList } from '../types/form-option.ts';
 
 const props = defineProps({
 	query: {
