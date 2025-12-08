@@ -188,7 +188,7 @@ const submitAll = async () => {
             }
             await router.replace('/task-list');
         }else {
-            ElMessage.error(res.data.data)
+            ElMessage.error(res.data.message)
         }
     } catch (error) {
         console.error(error)
