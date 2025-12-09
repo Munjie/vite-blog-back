@@ -212,7 +212,7 @@ searchOpt.value = [
         label: '任务名称：',
         prop: 'taskName',
         placeholder: '选择统计任务',
-        opts:taskOptions.value
+        opts:taskOptions
         /*opts: [
             {label:'任务1',value:'1'},
             {label:'任务2',value:'2'},
@@ -253,7 +253,7 @@ const fetchHomeAllTask = async () => {
         // 替换成你的真实接口
         const res = await getHomeAllTask();
         taskOptions.value = (res as any).data.map((item: any) => ({
-            label: item.taskName,
+            label: item.label,
             value: String(item.value)
         }))
         query.value.taskName = taskOptions.value[0]?.value ?? ''
