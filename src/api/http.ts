@@ -118,7 +118,8 @@ service.interceptors.response.use(
                 message = '请求错误(400)';
                 break;
             case 401:
-                message = '未授权，请重新登录(401)';
+                message = '登录过期,请重新登录';
+                router.push({ name: 'login' })
                 break;
             case 403:
                 message = '拒绝访问(403)';
