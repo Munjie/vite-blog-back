@@ -9,7 +9,6 @@
 									 v-model="query[item.prop]"
 									 :disabled="item.disabled"
 									 :placeholder="item.placeholder"
-									 :loading="item.loading"
 									 @change="handleSelectChange"
 									  clearable style="width: 150px">
 					<el-option
@@ -33,7 +32,7 @@
 <script lang="ts" setup>
 import type { FormInstance } from 'element-plus';
 import { Search, Refresh } from '@element-plus/icons-vue';
-import { ref } from 'vue';
+import {ref} from 'vue';
 import type { PropType } from 'vue';
 import type { FormOptionList } from '../types/form-option.ts';
 

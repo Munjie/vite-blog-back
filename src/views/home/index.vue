@@ -172,8 +172,8 @@ const query = ref({
 });
 const searchOpt = ref<FormOptionList[]>([])
 // 查询相关
-// 任务下拉选项（动态加载）
-const taskOptions = ref<any>([])
+// const taskOptions = ref<{ label: string; value: number; }[]>([]);
+const taskOptions = ref();
 // loading 状态
 const taskLoading = ref(false)
 const handleSearch = () => {
@@ -193,6 +193,32 @@ const maxGtClass = ref();
 const maxLtClass = ref();
 const maxGt = ref();
 const maxLt = ref();
+
+searchOpt.value = [
+    {
+        type: 'input',
+        label: '姓名：',
+        prop: 'name',
+        placeholder: '请输入姓名'
+    },
+    {
+        type: 'input',
+        label: '班级：',
+        prop: 'lesson',
+        placeholder: '请输入班级'
+    },
+    {
+        type: 'select',
+        label: '任务名称：',
+        prop: 'taskName',
+        placeholder: '选择统计任务',
+        opts:taskOptions.value
+        /*opts: [
+            {label:'任务1',value:'1'},
+            {label:'任务2',value:'2'},
+        ]*/
+    }
+];
 const fetchHomeData = async () => {
     try {
         let homeForm = {
@@ -226,11 +252,10 @@ const fetchHomeAllTask = async () => {
     try {
         // 替换成你的真实接口
         const res = await getHomeAllTask();
-        const  option = (res as any).data.map((item: any) => ({
+        taskOptions.value = (res as any).data.map((item: any) => ({
             label: item.taskName,
-            value: String(item.id)
+            value: String(item.value)
         }))
-        taskOptions.value = option
         query.value.taskName = taskOptions.value[0]?.value ?? ''
         // 自动触发搜索（关键！）
         await nextTick()
@@ -244,30 +269,9 @@ const fetchHomeAllTask = async () => {
         taskLoading.value = false
     }
 }
-onMounted(() => {
-    fetchHomeAllTask();
-    searchOpt.value = [
-        {
-            type: 'input',
-            label: '姓名：',
-            prop: 'name',
-            placeholder: '请输入姓名'
-        },
-        {
-            type: 'input',
-            label: '班级：',
-            prop: 'lesson',
-            placeholder: '请输入班级'
-        },
-        {
-            type: 'select',
-            label: '任务名称：',
-            prop: 'taskName',
-            placeholder: '选择统计任务',
-            opts:  taskOptions,
-            loading: taskLoading
-        }
-    ];
+onMounted(async () => {
+    await fetchHomeAllTask();
+    console.log("656565"+taskOptions.value)
 });
 
 
