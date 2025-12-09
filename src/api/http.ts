@@ -5,6 +5,8 @@ import axios, {
     type InternalAxiosRequestConfig
 } from 'axios';
 import {ElMessage} from "element-plus";
+import router from "../router";
+import { useUserStore } from '../stores';
 
 
 // 1. 定义后端返回的标准数据结构
@@ -26,19 +28,62 @@ const service: AxiosInstance = axios.create({
 });
 
 // 3. 请求拦截器 (Request Interceptor)
+// 请求拦截器（完美版）
 service.interceptors.request.use(
+    (config: InternalAxiosRequestConfig) => {
+        const userStore = useUserStore();
+        // 优先从 Pinia 拿 token（推荐），没有再 fallback 到 localStorage
+        let token = userStore.getToken || localStorage.getItem('token') || ''
+        // 如果还是没有，说明真的没登录 → 拦截请求 + 跳转登录
+        if (!token) {
+            // 避免在登录页重复跳转
+            if (router.currentRoute.value.name !== 'login') {
+                ElMessage.closeAll()
+                // 清除残留的无效状态
+                userStore.logout?.()
+                // 跳转登录并带上当前页面地址（登录成功后自动跳回来）
+               /* router.push({
+                    name: 'login',
+                    query: {
+                        redirect: router.currentRoute.value.fullPath,
+                    },
+                })*/
+                Promise.reject().then(() =>   router.push({
+                    name: 'login',
+                    query: {
+                        redirect: router.currentRoute.value.fullPath,
+                    },
+                }));
+            }
+        }
+        // 有 token 就塞进 header（标准 Bearer 格式）
+        config.headers.Authorization = `Bearer ${token}`
+        return config
+    },
+    (error: AxiosError) => {
+        // 请求配置出错（比如没网、timeout）
+        ElMessage.error('请求出错，请检查网络')
+        return Promise.reject(error)
+    }
+)
+/*service.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
         // 在这里获取 Token (假设存在 localStorage 或 Pinia 中)
         const token = localStorage.getItem('token');
+        debugger
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
+        }else {
+            router.push({ name: 'login' })
+            ElMessage.error('登录状态已失效，请重新登录')
+            return Promise.reject();
         }
         return config;
     },
     (error: AxiosError) => {
         return Promise.reject(error);
     }
-);
+);*/
 
 // 4. 响应拦截器 (Response Interceptor)
 service.interceptors.response.use(
