@@ -213,10 +213,6 @@ searchOpt.value = [
         prop: 'taskName',
         placeholder: '选择统计任务',
         opts:taskOptions
-        /*opts: [
-            {label:'任务1',value:'1'},
-            {label:'任务2',value:'2'},
-        ]*/
     }
 ];
 const fetchHomeData = async () => {
@@ -271,7 +267,6 @@ const fetchHomeAllTask = async () => {
 }
 onMounted(async () => {
     await fetchHomeAllTask();
-    console.log("656565"+taskOptions.value)
 });
 
 

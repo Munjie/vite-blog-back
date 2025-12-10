@@ -2,7 +2,7 @@
     <div class="header">
         <!-- 折叠按钮 -->
         <div class="header-left">
-            <img class="logo" src="../assets/img/logo.svg" alt="" />
+            <img class="logo" src="../assets/img/login-index.svg" alt="" />
             <div class="web-title">AI Cloud System</div>
             <div class="collapse-btn" @click="collapseChage">
                 <el-icon v-if="sidebar.collapse">
@@ -15,7 +15,7 @@
         </div>
         <div class="header-right">
             <div class="header-user-con">
-                <div class="btn-icon" @click="router.push('/theme')">
+<!--                <div class="btn-icon" @click="router.push('/theme')">
                     <el-tooltip effect="dark" content="设置主题" placement="bottom">
                         <i class="el-icon-lx-skin"></i>
                     </el-tooltip>
@@ -34,7 +34,7 @@
                     <el-tooltip effect="dark" content="全屏" placement="bottom">
                         <i class="el-icon-lx-full"></i>
                     </el-tooltip>
-                </div>
+                </div>-->
                 <!-- 用户头像 -->
                 <el-avatar class="user-avator" :size="30" :src="imgurl" />
                 <!-- 用户名下拉菜单 -->
@@ -60,11 +60,12 @@
 import { onMounted } from 'vue';
 import { useSidebarStore } from '../stores/sidebar';
 import { useRouter } from 'vue-router';
-import imgurl from '../assets/img/img.jpg';
+// import imgurl from '../assets/img/img.jpg';
+import imgurl from '../assets/img/user-head.svg';
 import {useUserStore} from '../stores';
 import {logout} from '../api/login.ts'
 const username: string | null = localStorage.getItem('vuems_name');
-const message: number = 2;
+// const message: number = 2;
 
 const sidebar = useSidebarStore();
 const store = useUserStore();
@@ -91,13 +92,13 @@ const handleCommand = (command: string) => {
     }
 };
 
-const setFullScreen = () => {
+/*const setFullScreen = () => {
     if (document.fullscreenElement) {
         document.exitFullscreen();
     } else {
         document.body.requestFullscreen.call(document.body);
     }
-};
+};*/
 </script>
 <style scoped>
 .header {
