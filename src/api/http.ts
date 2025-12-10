@@ -31,6 +31,7 @@ const service: AxiosInstance = axios.create({
 // 请求拦截器（完美版）
 service.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
+        debugger
         const userStore = useUserStore();
         // 优先从 Pinia 拿 token（推荐），没有再 fallback 到 localStorage
         let token = userStore.getToken || localStorage.getItem('token') || ''

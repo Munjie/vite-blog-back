@@ -83,8 +83,10 @@ onMounted(() => {
 const router = useRouter();
 const handleCommand = (command: string) => {
     if (command == 'loginout') {
-        logout();
-        store.logout();
+        logout().then(res =>{
+            console.log(res.message)
+            store.logout();
+        });
     } else if (command == 'user') {
         router.push('/ucenter');
     }
