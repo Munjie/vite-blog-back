@@ -7,7 +7,7 @@
             </div>
             <el-form :model="form" :rules="rules" ref="loginFormRef" size="large">
                 <el-form-item prop="username">
-                    <el-input v-model="form.username" placeholder="User">
+                    <el-input v-model="form.username"    @keyup.enter="handleLogin" placeholder="User">
                         <template #prepend>
                             <el-icon>
                                 <User />
