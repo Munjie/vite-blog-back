@@ -116,6 +116,15 @@ export default defineConfig((mode): any =>{
                     drop_console: true,
                     drop_debugger: true
                 }
+            },
+            rollupOptions: {
+                // 直接告诉 rollup 忽略类型检查
+                onwarn(warning:any, handler:any) {
+                    if (warning.code === 'TS7016' && warning.message.includes('@wangeditor')) {
+                        return
+                    }
+                    handler(warning)
+                }
             }
         }
     }
