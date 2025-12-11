@@ -63,6 +63,15 @@ export const routes = [
                 },
                 component: () => import('@/views/article/article-editor.vue'),
             },
+            {
+                path: '/article-view',
+                name: '/article-view',
+                meta: {
+                    title: '文章详情',
+                    permiss: '13',
+                },
+                component: () => import('@/views/article/article-view.vue'),
+            },
         ],
     },
     {

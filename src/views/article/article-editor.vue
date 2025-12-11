@@ -26,10 +26,12 @@
             <el-form-item style="width: 25%">
                 <div class="publish-btn">
                     <el-button
-                        type="danger"
+                        type="primary"
                         size="small"
-                    >发布文章</el-button
-                    >
+                        :loading="loading"
+                        @click="submitAll"
+                    >发布文章
+                    </el-button>
                 </div>
             </el-form-item>
             <el-form-item style="width: 100%; height: auto" prop="article_content">
@@ -44,11 +46,39 @@
 import { ref } from 'vue'
 import  MdEditor  from "md-editor-v3";
 import "md-editor-v3/lib/style.css";
+import {ElMessage} from "element-plus";
+import {addArticle} from "../../api/article.ts";
 // 文章数据
 const title = ref('')
 // const coverUrl = ref('') // 封面图地址
 const content = ref('')
+const indexImage = ref('')
 
+const loading = ref(false)
+const submitAll = async () => {
+    loading.value = true
+    try {
+        let articleForm = {
+            title: title.value,
+            content: content.value,
+            indexImage: indexImage.value
+        }
+        const res = await addArticle(articleForm);
+        if (res.code === 200) {
+          /*  await router.push({
+                path: '/article-view',
+                query: {
+                    id: res.data
+                }
+            });*/
+        }
+
+    } catch (error) {
+        ElMessage.error('新增失败,请重试')
+    } finally {
+        loading.value = false
+    }
+}
 // 封面图上传处理
 /*const handleCoverUpload = (e: Event) => {
     const file = (e.target as HTMLInputElement).files?.[0]
