@@ -7,3 +7,16 @@ export const addArticle = (data?: object) => {
         data
     );
 };
+
+
+export const getArticleList = (data?: object) => {
+    return http.post(
+        '/api/article/page-all-article',
+        data
+    );
+};
+
+
+export function deleteArticle(id: number) {
+    return http.delete<void>('/api/article/delete-article', { id: id });
+}

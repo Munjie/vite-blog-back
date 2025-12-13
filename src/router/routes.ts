@@ -72,6 +72,15 @@ export const routes = [
                 },
                 component: () => import('@/views/article/article-view.vue'),
             },
+              {
+                path: '/article-list',
+                name: '/article-list',
+                meta: {
+                    title: '文章列表',
+                    permiss: '13',
+                },
+                component: () => import('@/views/article/article-list.vue'),
+            },
         ],
     },
     {
