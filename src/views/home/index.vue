@@ -1,48 +1,48 @@
 <template>
     <div>
-        <TableSearch :query="query" :options="searchOpt" :search="handleSearch" />
+        <TableSearch :query="query" :options="searchOpt" :search="handleSearch"/>
         <el-row :gutter="20" class="mgb20">
             <el-col :span="6">
                 <el-card shadow="hover" body-class="card-body">
                     <el-icon class="card-icon bg1">
-                        <Notebook />
+                        <Notebook/>
                     </el-icon>
                     <div class="card-content">
-                        <countup class="card-num color1"  :end="total" />
-                        <div>地理总分最高{{maxTotalClass}}</div>
+                        <countup class="card-num color1" :end="total"/>
+                        <div>地理总分最高{{ maxTotalClass }}</div>
                     </div>
                 </el-card>
             </el-col>
             <el-col :span="6">
                 <el-card shadow="hover" body-class="card-body">
                     <el-icon class="card-icon bg2">
-                        <School />
+                        <School/>
                     </el-icon>
                     <div class="card-content">
-                        <countup class="card-num color2"  :end="avg" />
-                        <div>地理平均分最高{{maxAvgClass}}</div>
+                        <countup class="card-num color2" :end="avg"/>
+                        <div>地理平均分最高{{ maxAvgClass }}</div>
                     </div>
                 </el-card>
             </el-col>
             <el-col :span="6">
                 <el-card shadow="hover" body-class="card-body">
                     <el-icon class="card-icon bg3">
-                        <Top />
+                        <Top/>
                     </el-icon>
                     <div class="card-content">
-                        <countup class="card-num color3" :end="maxGt" />
-                        <div>40分以上人数最多{{maxGtClass}}</div>
+                        <countup class="card-num color3" :end="maxGt"/>
+                        <div>40分以上人数最多{{ maxGtClass }}</div>
                     </div>
                 </el-card>
             </el-col>
             <el-col :span="6">
                 <el-card shadow="hover" body-class="card-body">
                     <el-icon class="card-icon bg4">
-                        <Star />
+                        <Star/>
                     </el-icon>
                     <div class="card-content">
-                        <countup class="card-num color4" :end="maxLt" />
-                        <div>30分以下人数最多{{maxLtClass}}</div>
+                        <countup class="card-num color4" :end="maxLt"/>
+                        <div>30分以下人数最多{{ maxLtClass }}</div>
                     </div>
                 </el-card>
             </el-col>
@@ -55,9 +55,9 @@
                         <p class="card-header-title">成绩动态</p>
                     </div>
                     <BoxPlotChart
-                        :data="data"
-                        :loading="loading"
-                        title="各班级成绩箱线图"
+                            :data="data"
+                            :loading="loading"
+                            title="各班级成绩箱线图"
                     />
                 </el-card>
             </el-col>
@@ -66,7 +66,7 @@
                     <div class="card-header">
                         <p class="card-header-title">成绩分布</p>
                     </div>
-                    <v-chart class="chart" :option="scorePie" />
+                    <v-chart class="chart" :option="scorePie"/>
                 </el-card>
             </el-col>
         </el-row>
@@ -76,17 +76,17 @@
                     <div class="card-header">
                         <p class="card-header-title">平均分</p>
                     </div>
-                    <el-timeline>
-                        <el-timeline-item v-for="(activity, index) in activities" :key="index" :color="activity.color">
-                            <div class="timeline-item">
-                                <div>
-                                    <p>{{ activity.content }}</p>
-                                    <p class="timeline-desc">{{ activity.description }}</p>
-                                </div>
-                                <div class="timeline-time">{{ activity.timestamp }}</div>
-                            </div>
-                        </el-timeline-item>
-                    </el-timeline>
+                    <!--                    <el-timeline>
+                                            <el-timeline-item v-for="(activity, index) in activities" :key="index" :color="activity.color">
+                                                <div class="timeline-item">
+                                                    <div>
+                                                        <p>{{ activity.content }}</p>
+                                                        <p class="timeline-desc">{{ activity.description }}</p>
+                                                    </div>
+                                                    <div class="timeline-time">{{ activity.timestamp }}</div>
+                                                </div>
+                                            </el-timeline-item>
+                                        </el-timeline>-->
                 </el-card>
             </el-col>
             <el-col :span="10">
@@ -94,7 +94,7 @@
                     <div class="card-header">
                         <p class="card-header-title">中位数</p>
                     </div>
-                    <v-chart class="map-chart" :option="mapOptions" />
+                    <!--                    <v-chart class="map-chart" :option="mapOptions" />-->
                 </el-card>
             </el-col>
             <el-col :span="7">
@@ -103,22 +103,22 @@
                         <p class="card-header-title">排行榜</p>
                     </div>
                     <div>
-                        <div class="rank-item" v-for="(rank, index) in ranks">
-                            <div class="rank-item-avatar">{{ index + 1 }}</div>
-                            <div class="rank-item-content">
-                                <div class="rank-item-top">
-                                    <div class="rank-item-title">{{ rank.title }}</div>
-                                    <div class="rank-item-desc">分数：{{ rank.value }}</div>
-                                </div>
-                                <el-progress
-                                    :show-text="false"
-                                    striped
-                                    :stroke-width="10"
-                                    :percentage="rank.percent"
-                                    :color="rank.color"
-                                />
-                            </div>
-                        </div>
+                        <!--                        <div class="rank-item" v-for="(rank, index) in ranks">
+                                                    <div class="rank-item-avatar">{{ index + 1 }}</div>
+                                                    <div class="rank-item-content">
+                                                        <div class="rank-item-top">
+                                                            <div class="rank-item-title">{{ rank.title }}</div>
+                                                            <div class="rank-item-desc">分数：{{ rank.value }}</div>
+                                                        </div>
+                                                        <el-progress
+                                                            :show-text="false"
+                                                            striped
+                                                            :stroke-width="10"
+                                                            :percentage="rank.percent"
+                                                            :color="rank.color"
+                                                        />
+                                                    </div>
+                                                </div>-->
                     </div>
                 </el-card>
             </el-col>
@@ -127,7 +127,7 @@
 </template>
 
 <script setup lang="ts" name="dashboard">
-import { use, registerMap } from 'echarts/core';
+import {use, registerMap} from 'echarts/core';
 import {BarChart, LineChart, PieChart, MapChart, BoxplotChart} from 'echarts/charts';
 import BoxPlotChart from '@/components/ScoreBoxPlot.vue';
 import {
@@ -137,14 +137,17 @@ import {
     TitleComponent,
     VisualMapComponent,
 } from 'echarts/components';
-import { CanvasRenderer } from 'echarts/renderers';;
+import {CanvasRenderer} from 'echarts/renderers';
+
+;
 // 引入 echarts 库
 import VChart from 'vue-echarts'
 import chinaMap from '../../utils/china';
-import {onMounted, reactive, ref} from "vue";
-import {getHomeData} from "../../api/home.ts";
+import {nextTick, onMounted, ref} from "vue";
+import {getHomeAllTask, getHomeData} from "../../api/home.ts";
 import type {FormOptionList} from "../../types/form-option.ts";
 import type {BoxPlotDataVO} from "../../types/BoxPlotData.ts";
+import {ElMessage} from "element-plus";
 
 
 use([
@@ -162,15 +165,17 @@ use([
 ]);
 registerMap('china', chinaMap);
 // 查询相关
-const query = reactive({
+const query = ref({
     name: '',
     lesson: '',
+    taskName: '',
 });
+const searchOpt = ref<FormOptionList[]>([])
 // 查询相关
-const searchOpt = ref<FormOptionList[]>([
-    { type: 'input', label: '姓名：', prop: 'name' },
-    { type: 'input', label: '班级：', prop: 'lesson' }
-])
+// const taskOptions = ref<{ label: string; value: number; }[]>([]);
+const taskOptions = ref();
+// loading 状态
+const taskLoading = ref(false)
 const handleSearch = () => {
     fetchHomeData()
 };
@@ -180,7 +185,6 @@ const total = ref(0.0);
 const avg = ref(0.0);
 const data = ref<BoxPlotDataVO[]>([]);
 const loading = ref(true);
-const error = ref<string | null>(null);
 
 const maxTotalClass = ref();
 const maxAvgClass = ref();
@@ -189,11 +193,34 @@ const maxGtClass = ref();
 const maxLtClass = ref();
 const maxGt = ref();
 const maxLt = ref();
+
+searchOpt.value = [
+    {
+        type: 'input',
+        label: '姓名：',
+        prop: 'name',
+        placeholder: '请输入姓名'
+    },
+    {
+        type: 'input',
+        label: '班级：',
+        prop: 'lesson',
+        placeholder: '请输入班级'
+    },
+    {
+        type: 'select',
+        label: '任务名称：',
+        prop: 'taskName',
+        placeholder: '选择统计任务',
+        opts:taskOptions
+    }
+];
 const fetchHomeData = async () => {
     try {
         let homeForm = {
-            name : query.name,
-            lesson : query.lesson
+            name: query.value.name,
+            lesson: query.value.lesson,
+            taskName: query.value.taskName,
         }
         const res = await getHomeData(homeForm);
         maxTotalClass.value = res.data.maxSumClass
@@ -209,14 +236,37 @@ const fetchHomeData = async () => {
         classScoreChartOptions.value = generateDashOpt(res.data.scoresBar);
         scorePie.value = generatePie(res.data.scorePies);
         data.value = res.data.boxPlotDataVOS;
-        console.log( classScoreChartOptions.value)
+        console.log(classScoreChartOptions.value)
     } catch (error) {
-        console.log('登录请求失败，请稍后再试'+error);
+        console.log('登录请求失败，请稍后再试' + error);
 
     }
 };
-onMounted(() => {
-    fetchHomeData();
+
+const fetchHomeAllTask = async () => {
+    taskLoading.value = true
+    try {
+        // 替换成你的真实接口
+        const res = await getHomeAllTask();
+        taskOptions.value = (res as any).data.map((item: any) => ({
+            label: item.label,
+            value: String(item.value)
+        }))
+        query.value.taskName = taskOptions.value[0]?.value ?? ''
+        // 自动触发搜索（关键！）
+        await nextTick()
+        await fetchHomeData()
+
+    } catch (error) {
+        console.error('加载任务列表失败', error)
+        taskOptions.value = []
+        ElMessage.error('加载任务列表失败')
+    } finally {
+        taskLoading.value = false
+    }
+}
+onMounted(async () => {
+    await fetchHomeAllTask();
 });
 
 
@@ -390,6 +440,7 @@ const generatePie = (data: any) => {
     font-size: 14px;
     color: #999;
 }
+
 .map-chart {
     width: 100%;
     height: 350px;

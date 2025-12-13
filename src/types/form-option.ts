@@ -11,11 +11,12 @@ export interface FormOptionList {
     type: string;
     placeholder?: string;
     disabled?: boolean;
-    opts?: any[];
+    opts?: any;
     format?: string;
     activeValue?: any;
     inactiveValue?: any;
     activeText?: string;
     inactiveText?: string;
     required?: boolean;
+    loading?:boolean;
 }

@@ -5,9 +5,17 @@
     { "path": "./tsconfig.node.json" }
   ],
   "compilerOptions": {
+    "typeRoots": ["./node_modules/@types", "./src/types"],
     "baseUrl": ".",
     "paths": {
       "@/*":["src/*"]
     }
-  }
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.vue.d.ts",           // 保留你的其他声明
+    "src/**/*.editor.ts",      // 新增这行
+    "src/**/editor.vue"        // 或者直接排除你的编辑器文件
+  ]
 }

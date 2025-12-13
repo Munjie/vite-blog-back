@@ -7,3 +7,11 @@ export const login = (params: UnwrapNestedRefs<{password: string; username: stri
     // 返回的数据格式可以和服务端约定
     return http.post<UserInfo>('/api/user/login', params);
 }
+
+export const logout  = async () => {
+    try {
+        return await http.get('/api/user/logout')  ;
+    } catch (error) {
+        console.error(error);
+    }
+};

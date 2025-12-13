@@ -23,7 +23,7 @@ let countUp: any;
 onMounted(() => {
     const finalOptions = {
         // 默认设置为显示 2 位小数
-        decimalPlaces: 2,
+        decimalPlaces: 1,
         // 将用户传入的 options 展开，它会覆盖上面的默认值（如果用户传入了 decimals）
         ...props.options,
     };

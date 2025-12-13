@@ -2,12 +2,12 @@
     <div class="login-bg">
         <div class="login-container">
             <div class="login-header">
-                <img class="logo mr10" src="../../assets/logo.svg" alt="" />
+                <img class="logo mr10" src="../../assets/img/login-index.svg" alt="" />
                 <div class="login-title">AI Cloud System</div>
             </div>
             <el-form :model="form" :rules="rules" ref="loginFormRef" size="large">
                 <el-form-item prop="username">
-                    <el-input v-model="form.username" placeholder="User">
+                    <el-input v-model="form.username"    @keyup.enter="handleLogin" placeholder="User">
                         <template #prepend>
                             <el-icon>
                                 <User />
@@ -108,7 +108,7 @@ tabs.clearTabs();
     justify-content: center;
     width: 100%;
     height: 100vh;
-    background: url(../../assets/login-bg.jpg) center/cover no-repeat;
+    background: url(../../assets/img/bg_login.jpg) center/cover no-repeat;
 }
 
 .login-header {

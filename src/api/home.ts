@@ -8,6 +8,14 @@ export const getHomeData = (data?: object) => {
     );
 };
 
+export const getHomeAllTask  = async () => {
+    try {
+        return await http.get('/api/home/all-task')  ;
+    } catch (error) {
+        console.error('获取数据失败:', error);
+        return [];
+    }
+};
 
 
 

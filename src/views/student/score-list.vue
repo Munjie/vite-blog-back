@@ -23,11 +23,9 @@
 import {onMounted, reactive, ref} from 'vue';
 import CustomTable from '@/components/ActionTableCont.vue';
 import TableSearch from '@/components/table-search.vue';
-import {useRouter} from "vue-router";
-import {getScoreList} from "@/api/student.ts";
-const router = useRouter()
+import {getScoreList} from "../../api/student.ts";
 import {useRoute} from 'vue-router'
-import type {FormOptionList} from "@/types/form-option";
+import type {FormOptionList} from "../../types/form-option.ts";
 const route = useRoute()
 const taskId = ref()
 
@@ -51,7 +49,6 @@ const tableData = ref([]);
 const total =  ref(0);
 const currentPage = ref(1);
 const pageSize = ref(20);
-const visible = ref(false);
 const tableColumns = ref([
     { type: 'index', label: '序号', align: 'center' ,width: 80},
     {
@@ -85,7 +82,7 @@ const query = reactive({
 
 
 
-const getList = async (any) => {
+const getList = async (any: any) => {
     try {
         let taskForm = {
             pageSize: pageSize.value,
@@ -107,14 +104,16 @@ const getList = async (any) => {
 
 
 // 分页变化处理（替换原 @update 事件，避免直接赋值导致 watch 延迟）
-const handlePageChange = (page) => {
+const handlePageChange = (page: any) => {
+    taskId.value = route.query.taskId
     currentPage.value = page;
-    getList();  // 立即加载新页
+    getList(taskId.value);  // 立即加载新页
 };
 
-const handlePageSizeChange = (size) => {
+const handlePageSizeChange = (size: any) => {
+    taskId.value = route.query.taskId
     pageSize.value = size;
-    getList();  // 页大小变化也重新加载
+    getList(taskId.value);  // 页大小变化也重新加载
 };
 // 监听页码或页大小变化，重新查询
 /*watch(
@@ -128,21 +127,10 @@ const handlePageSizeChange = (size) => {
 const selectedData = ref([]);
 
 // 处理选中数据变化
-const handleSelectionChange = (selection) => {
+const handleSelectionChange = (selection: any) => {
+    taskId.value = route.query.taskId
     selectedData.value = selection;
 };
 
 // 获取选中数据
-const handleDelete = () => {
-    console.log('Selected Data:', selectedData.value);
-    console.log('Selected  Data length:', selectedData.value.length);
-    if (selectedData.value.length > 0) {
-        // 删除逻辑
-        console.log('Deleting selected data...');
-        selectedData.value = [];
-    } else {
-        console.log('No selected data to delete.');
-    }
-
-};
 </script>
