@@ -48,6 +48,7 @@ import  MdEditor  from "md-editor-v3";
 import "md-editor-v3/lib/style.css";
 import {ElMessage} from "element-plus";
 import {addArticle} from "../../api/article.ts";
+import router from "../../router";
 // 文章数据
 const title = ref('')
 // const coverUrl = ref('') // 封面图地址
@@ -64,15 +65,10 @@ const submitAll = async () => {
             indexImage: indexImage.value
         }
         const res = await addArticle(articleForm);
-        if (res.code === 200) {
-          /*  await router.push({
-                path: '/article-view',
-                query: {
-                    id: res.data
-                }
-            });*/
-        }
-
+        ElMessage.success('新增成功')
+        router.replace('/article-list');
+        
+     
     } catch (error) {
         ElMessage.error('新增失败,请重试')
     } finally {
