@@ -14,6 +14,7 @@
                     @update:current-page="handlePageChange"
                     @update:page-size="handlePageSizeChange"
                     @selection-change="handleSelectionChange"
+                    @switch-change="onStatusChange"
             >
                 <template #toolbarBtn>
                     <el-button type="warning" :icon="CirclePlusFilled" @click="handleAdd">新增文章</el-button>
@@ -69,9 +70,9 @@ const tableColumns = ref([
 const handleView = (row: { id: string | number }) => {
     console.log(row.id)
     router.push({
-        path: '/score-list',
+        path: '/article-edit',
         query: {
-            taskId: row.id
+            id: row.id
         }
     });
 };
@@ -152,5 +153,17 @@ const handleSelectionChange = (selection:any) => {
     selectedData.value = selection;
 };
 
+const onStatusChange = async ({ id, status }) => {
+    debugger
+  try {
+    ElMessage.success('发布状态更新成功')
+  } catch (err) {
+    ElMessage.error('更新失败，请刷新重试')
+    // 注意：失败时需要手动回滚数据（因为我们没传 row 对象）
+    // 推荐方式：在 tableData 中找到对应项并回滚
+    const row = tableData.value.find(item => item.id === id)
+    if (row) row.status = status === 1 ? 0 : 1
+  }
+}
 
 </script>
