@@ -37,7 +37,7 @@ import {ElMessage, ElMessageBox} from "element-plus";
 const route = useRoute();
 // 2. 定义点击事件处理函数
 const handleAdd = () => {
-    router.push('/task-add');
+    router.push('/article-edit');
 }
 const id = ref();
 const tableData = ref([]);
