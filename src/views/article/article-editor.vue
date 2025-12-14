@@ -53,8 +53,6 @@
     const title = ref('')
     // const coverUrl = ref('') // 封面图地址
     const content = ref('')
-    const indexImage = ref('')
-
     const loading = ref(false)
     const submitAll = async () => {
         loading.value = true
@@ -62,7 +60,7 @@
             let articleForm = {
                 title: title.value,
                 content: content.value,
-                indexImage: indexImage.value
+                articleCover: articleCover.value
             }
             await addArticle(articleForm);
             ElMessage.success('新增成功')
