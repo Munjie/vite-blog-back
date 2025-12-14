@@ -30,3 +30,9 @@ export const updateArticleStatus = (data?: object) => {
         data
     );
 };
+
+
+
+export function deleteCoverImage(coverUrl: string) {
+    return http.delete<void>('/api/article/delete-cover-image', { coverUrl: coverUrl });
+}
