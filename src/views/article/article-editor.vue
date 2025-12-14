@@ -13,12 +13,7 @@
                     </el-button>
                 </div>
             </el-form-item>
-            <!-- <el-form-item style="width: 65%" label-width="80" label="文章封面" prop="article_cover">
-                <el-upload class="upload-demo" action="https://jsonplaceholder.typicode.com/posts/"
-                    :on-preview="handlePreview" :on-remove="handleRemove" :file-list="fileList" list-type="picture">
-                    <el-button size="small" type="primary">点击上传</el-button>
-                </el-upload>
-            </el-form-item> -->
+        
             <el-form-item style="width: 65%" label-width="80" label="文章封面" prop="articleCover">
                 <el-upload class="upload-demo" list-type="picture-card" :limit="1" :file-list="fileList"
                     :on-preview="handlePreview" :on-remove="handleRemove" :on-exceed="handleExceed"
@@ -48,10 +43,10 @@
 
     import { ElDialog, ElIcon } from 'element-plus'
     import { Plus } from '@element-plus/icons-vue'
-    import axios from 'axios'  // 假设你使用 axios 发请求
+    import axios from 'axios' 
     // 文章数据
     const title = ref('')
-    // const coverUrl = ref('') // 封面图地址
+
     const content = ref('')
     const loading = ref(false)
     const submitAll = async () => {
@@ -89,12 +84,6 @@
         previewUrl.value = file.url
         previewVisible.value = true
     }
-
-    // // 处理移除
-    // const handleRemove = (file: any, uploadFiles: any[]) => {
-    //     articleCover.value = ''  // 移除后清空封面 URL
-    //     ElMessage.success('封面已移除')
-    // }
 
     // 处理移除（关键修改）
     const handleRemove = async () => {
