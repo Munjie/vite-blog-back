@@ -13,6 +13,26 @@
                     </el-button>
                 </div>
             </el-form-item>
+
+            <el-form-item style="width: 65%" label-width="80" label="文章标签" prop="tags">
+                <el-select
+                    v-model="selectedTags"
+                    multiple
+                    filterable
+                    allow-create
+                    default-first-option
+                    :reserve-keyword="false"
+                    placeholder="请选择或输入新标签"
+                    style="width: 100%"
+                >
+                    <el-option
+                        v-for="item in tagOptions"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value"
+                    />
+                </el-select>
+            </el-form-item>
         
             <el-form-item style="width: 65%" label-width="80" label="文章封面" prop="articleCover">
                 <el-upload class="upload-demo" list-type="picture-card" :limit="1" :file-list="fileList"
@@ -34,11 +54,11 @@
     </el-card>
 </template>
 <script setup lang="ts">
-    import { ref } from 'vue'
+    import { ref,onMounted } from 'vue'
     import MdEditor from "md-editor-v3";
     import "md-editor-v3/lib/style.css";
     import { ElMessage } from "element-plus";
-    import { addArticle, deleteCoverImage } from "../../api/article.ts";
+    import { addArticle, deleteCoverImage ,getAllTags} from "../../api/article.ts";
     import router from "../../router";
 
     import { ElDialog, ElIcon } from 'element-plus'
@@ -49,13 +69,19 @@
 
     const content = ref('')
     const loading = ref(false)
+
+    // --- 标签相关 (新增) ---
+    const selectedTags = ref()// 选中的标签数组
+    const tagOptions = ref()
+    
     const submitAll = async () => {
         loading.value = true
         try {
             let articleForm = {
                 title: title.value,
                 content: content.value,
-                articleCover: articleCover.value
+                articleCover: articleCover.value,
+                tags: selectedTags.value // 将选中的标签数组发送给后端
             }
             await addArticle(articleForm);
             ElMessage.success('新增成功')
@@ -140,6 +166,14 @@
     //     articleCover.value = props.article.articleCover
     //   }
     // })
+    onMounted(async () => {
+        const res = await getAllTags()
+        // tagOptions.value = res.data.map(tag => ({ value: tag.id, label: tag.name }))
+         tagOptions.value = (res as any).data.map((item: any) => ({
+            label: item.name,
+            value: item.id
+        }))
+    })
 </script>
 
 

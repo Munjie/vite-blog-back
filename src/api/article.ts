@@ -36,3 +36,13 @@ export const updateArticleStatus = (data?: object) => {
 export function deleteCoverImage(coverUrl: string) {
     return http.delete<void>('/api/article/delete-cover-image', { coverUrl: coverUrl });
 }
+
+
+export const getAllTags  = async () => {
+    try {
+        return await http.get('/api/article/all-tags')  ;
+    } catch (error) {
+        console.error('获取数据失败:', error);
+        return [];
+    }
+};
