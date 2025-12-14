@@ -20,3 +20,13 @@ export const getArticleList = (data?: object) => {
 export function deleteArticle(id: number) {
     return http.delete<void>('/api/article/delete-article', { id: id });
 }
+
+
+
+
+export const updateArticleStatus = (data?: object) => {
+    return http.post(
+        '/api/article/update-article-status',
+        data
+    );
+};

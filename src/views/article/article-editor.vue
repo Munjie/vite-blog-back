@@ -64,7 +64,7 @@ const submitAll = async () => {
             content: content.value,
             indexImage: indexImage.value
         }
-        const res = await addArticle(articleForm);
+         await addArticle(articleForm);
         ElMessage.success('新增成功')
         router.replace('/article-list');
         

@@ -27,7 +27,7 @@
 <script setup lang="ts">
 import {onMounted, ref, watch} from 'vue';
 import CustomTable from '@/components/ActionTableCont.vue';
-import {getArticleList,deleteArticle} from "../../api/article";
+import {getArticleList,deleteArticle,updateArticleStatus} from "../../api/article";
 import {CirclePlusFilled} from '@element-plus/icons-vue';
 import {useRouter} from "vue-router";
 
@@ -153,16 +153,20 @@ const handleSelectionChange = (selection:any) => {
     selectedData.value = selection;
 };
 
-const onStatusChange = async ({ id, status }) => {
-    debugger
+
+
+const onStatusChange = async ({ id, status }: { id: number | string, status: number }) => {
   try {
+     let articleForm = {
+            id: id,
+            status: status
+        }
+    await updateArticleStatus(articleForm);
     ElMessage.success('发布状态更新成功')
   } catch (err) {
-    ElMessage.error('更新失败，请刷新重试')
-    // 注意：失败时需要手动回滚数据（因为我们没传 row 对象）
-    // 推荐方式：在 tableData 中找到对应项并回滚
-    const row = tableData.value.find(item => item.id === id)
-    if (row) row.status = status === 1 ? 0 : 1
+    ElMessage.error('更新失败，请重试')
+  }finally {
+    await fetchList();
   }
 }
 
