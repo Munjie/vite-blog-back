@@ -15,25 +15,18 @@
             </el-form-item>
 
             <el-form-item style="width: 65%" label-width="80" label="文章标签" prop="tags">
-                <el-select
-                    v-model="selectedTags"
-                    multiple
-                    filterable
-                    allow-create
-                    default-first-option
-                    :reserve-keyword="false"
-                    placeholder="请选择或输入新标签"
-                    style="width: 100%"
-                >
-                    <el-option
-                        v-for="item in tagOptions"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value"
-                    />
+                <el-select v-model="selectedTags" multiple filterable allow-create default-first-option
+                    :reserve-keyword="false" placeholder="请选择或输入新标签" style="width: 100%">
+                    <el-option v-for="item in tagOptions" :key="item.value" :label="item.label" :value="item.value" />
                 </el-select>
             </el-form-item>
-        
+            <el-form-item style="width: 65%" label-width="80" label="文章分类" prop="category">
+                <el-select v-model="selectedCategory" placeholder="请选择文章分类" style="width: 100%">
+                    <el-option v-for="item in categoryOptions" :key="item.value" :label="item.label"
+                        :value="item.label" />
+                </el-select>
+            </el-form-item>
+
             <el-form-item style="width: 65%" label-width="80" label="文章封面" prop="articleCover">
                 <el-upload class="upload-demo" list-type="picture-card" :limit="1" :file-list="fileList"
                     :on-preview="handlePreview" :on-remove="handleRemove" :on-exceed="handleExceed"
@@ -54,16 +47,16 @@
     </el-card>
 </template>
 <script setup lang="ts">
-    import { ref,onMounted } from 'vue'
+    import { ref, onMounted } from 'vue'
     import MdEditor from "md-editor-v3";
     import "md-editor-v3/lib/style.css";
     import { ElMessage } from "element-plus";
-    import { addArticle, deleteCoverImage ,getAllTags} from "../../api/article.ts";
+    import { addArticle, deleteCoverImage, getAllTags, getAllCategory } from "../../api/article.ts";
     import router from "../../router";
 
     import { ElDialog, ElIcon } from 'element-plus'
     import { Plus } from '@element-plus/icons-vue'
-    import axios from 'axios' 
+    import axios from 'axios'
     // 文章数据
     const title = ref('')
 
@@ -72,8 +65,9 @@
 
     // --- 标签相关 (新增) ---
     const selectedTags = ref()// 选中的标签数组
+    const selectedCategory = ref < string | number > ('') // 选中的分类
     const tagOptions = ref()
-    
+    const categoryOptions = ref()
     const submitAll = async () => {
         loading.value = true
         try {
@@ -81,7 +75,8 @@
                 title: title.value,
                 content: content.value,
                 articleCover: articleCover.value,
-                tags: selectedTags.value // 将选中的标签数组发送给后端
+                tags: selectedTags.value,
+                category: selectedCategory.value 
             }
             await addArticle(articleForm);
             ElMessage.success('新增成功')
@@ -169,7 +164,12 @@
     onMounted(async () => {
         const res = await getAllTags()
         // tagOptions.value = res.data.map(tag => ({ value: tag.id, label: tag.name }))
-         tagOptions.value = (res as any).data.map((item: any) => ({
+        tagOptions.value = (res as any).data.map((item: any) => ({
+            label: item.name,
+            value: item.id
+        }))
+        const response = await getAllCategory()
+        categoryOptions.value = (response as any).data.map((item: any) => ({
             label: item.name,
             value: item.id
         }))

@@ -46,3 +46,13 @@ export const getAllTags  = async () => {
         return [];
     }
 };
+
+
+export const getAllCategory  = async () => {
+    try {
+        return await http.get('/api/article/all-category')  ;
+    } catch (error) {
+        console.error('获取数据失败:', error);
+        return [];
+    }
+};
