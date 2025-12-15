@@ -17,7 +17,7 @@
             <el-form-item style="width: 65%" label-width="80" label="文章标签" prop="tags">
                 <el-select v-model="selectedTags" multiple filterable allow-create default-first-option
                     :reserve-keyword="false" placeholder="请选择或输入新标签" style="width: 100%">
-                    <el-option v-for="item in tagOptions" :key="item.value" :label="item.label" :value="item.value" />
+                    <el-option v-for="item in tagOptions" :key="item.value" :label="item.label" :value="item.label" />
                 </el-select>
             </el-form-item>
             <el-form-item style="width: 65%" label-width="80" label="文章分类" prop="category">
