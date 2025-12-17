@@ -1,14 +1,22 @@
 <template>
-    <el-dialog
-        v-model="visible"
-        title="AI 助手"
-        width="800px"
-        :close-on-click-modal="false"
-        :destroy-on-close="true"
-        append-to-body
-        top="5vh"
+    <el-button
+        type="primary"
+        circle
+        size="large"
+        class="floating-btn"
+        @click="drawerVisible = true"
     >
-    <div class="chat-container">
+        <el-icon size="24"><ChatDotRound /></el-icon>
+    </el-button>
+    <el-drawer
+        v-model="drawerVisible"
+        title="AI 助手"
+        direction="rtl"
+    size="800px"
+    :with-header="true"
+    :close-on-click-modal="false"
+    >
+    <div class="chat-container" >
         <aside class="chat-sidebar glass-panel" :class="{ 'collapsed': !showSidebar }">
             <el-button class="new-chat-btn" @click="createNewChat" :icon="Plus">新对话</el-button>
 
@@ -65,7 +73,7 @@
             </div>
         </main>
     </div>
-    </el-dialog>
+    </el-drawer>
 </template>
 
 <script setup lang="ts">
@@ -86,7 +94,8 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import {Cpu, User, DocumentCopy, Plus} from '@element-plus/icons-vue'
 import MarkdownPreview from '@/components/MarkdownPreview.vue'
 // --- 状态定义 ---
-const visible = defineModel<boolean>('visible', { required: true })
+const drawerVisible = ref(false)
+// const visible = defineModel<boolean>('visible', { required: true })
 const STORAGE_KEY = 'nocturne_chat_history'
 const sessions = ref<ChatSession[]>([])
 const currentSessionId = ref<string>('')
@@ -433,5 +442,13 @@ const fallbackCopy = (text: string) => {
         border-color: var(--accent-color) !important;
         color: var(--accent-color) !important;
     }
+}
+
+.floating-btn {
+    position: fixed;
+    bottom: 40px;
+    left: 40px;
+    z-index: 999;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 </style>

@@ -84,4 +84,13 @@ i {
 	--header-bg-color: 	#3e59b9;
 	--header-text-color: #fff;
 	--active-color: var(--el-color-primary);
+	--bg-color: #050505;
+	--bg-secondary: #121212;
+	--text-primary: #e5e5e5;
+	--text-secondary: #a1a1aa;
+	--accent-color: #6366f1; /* 靛蓝紫色 */
+	--glass-bg: rgba(30, 30, 30, 0.6);
+	--glass-border: rgba(255, 255, 255, 0.1);
+	--header-height: 70px;
+	--serch-color: #60618e;
 }
