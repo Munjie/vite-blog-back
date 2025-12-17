@@ -12,6 +12,8 @@ import './assets/css/icon.css';
 import * as echarts from 'echarts'
 import Echarts from "vue-echarts";
 import { usePermissStore } from './stores/permiss';
+import 'highlight.js/styles/atom-one-dark.css';
+import 'github-markdown-css/github-markdown-dark.css';
 const pina = createPinia();
 pina.use(piniaPluginPersistedstate);
 
