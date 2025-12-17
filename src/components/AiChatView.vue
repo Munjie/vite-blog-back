@@ -4,7 +4,7 @@
         circle
         size="large"
         class="floating-btn"
-        @click="drawerVisible = true"
+        @click="toggleDrawer"
     >
         <el-icon size="24"><ChatDotRound /></el-icon>
     </el-button>
@@ -14,7 +14,7 @@
         direction="rtl"
     size="800px"
     :with-header="true"
-    :close-on-click-modal="false"
+
     >
     <div class="chat-container" >
         <aside class="chat-sidebar glass-panel" :class="{ 'collapsed': !showSidebar }">
@@ -109,6 +109,12 @@ const currentSession = ref<ChatSession | null>(null)
 
 const baseURL = isDevelopment ? 'http://localhost:8090/blog/chat/completions' : '/api/chat/completions'
 
+
+
+// 切换函数
+const toggleDrawer = () => {
+    drawerVisible.value = !drawerVisible.value
+}
 // --- 核心：初始化加载 ---
 onMounted(() => {
     const saved = localStorage.getItem(STORAGE_KEY)
