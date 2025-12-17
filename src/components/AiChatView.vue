@@ -1,78 +1,93 @@
 <template>
     <el-button
-        type="primary"
-        circle
-        size="large"
-        class="floating-btn"
-        @click="toggleDrawer"
+            type="primary"
+            circle
+            size="large"
+            class="floating-btn"
+            @click="toggleDrawer"
     >
-        <el-icon size="24"><ChatDotRound /></el-icon>
+        <el-icon size="24">
+            <ChatDotRound/>
+        </el-icon>
     </el-button>
     <el-drawer
-        v-model="drawerVisible"
-        title="AI 助手"
-        direction="rtl"
-    size="800px"
-    :with-header="true"
+            v-model="drawerVisible"
+            direction="rtl"
+            size="800px"
+
 
     >
-    <div class="chat-container" >
-        <aside class="chat-sidebar glass-panel" :class="{ 'collapsed': !showSidebar }">
-            <el-button class="new-chat-btn" @click="createNewChat" :icon="Plus">新对话</el-button>
+        <template #header>
+            <h4 style="margin: 0;">AI 助手</h4>
+        </template>
+        <div class="chat-container">
+            <aside class="chat-sidebar glass-panel" :class="{ 'collapsed': !showSidebar }">
+                <el-button class="new-chat-btn" @click="createNewChat" :icon="Plus">新对话</el-button>
 
-            <div class="history-list">
-                <div
-                    v-for="item in sessions"
-                    :key="item.id"
-                    :class="['history-item', { active: currentSessionId === item.id }]"
-                    @click="switchSession(item.id)"
-                >
-                    <el-icon><ChatLineRound /></el-icon>
-                    <span class="title">{{ item.title }}</span>
-                    <el-icon class="del-btn" @click="deleteSession(item.id, $event)"><Delete /></el-icon>
-                </div>
-            </div>
-        </aside>
-        <main class="chat-main" v-if="currentSession">
-            <div class="messages-wrapper" ref="scrollRef">
-                <div v-for="(msg, index) in currentSession.messages" :key="index" :class="['message-row', msg.role]">
-                    <div class="avatar">
-                        <el-icon v-if="msg.role === 'assistant'"><Cpu /></el-icon>
-                        <el-icon v-else><User /></el-icon>
-                    </div>
-                    <div class="message-content glass-panel">
-                        <div class="text">
-                            <MarkdownPreview :content="msg.content" />
-                        </div>
-                        <div class="message-actions" v-if="msg.role === 'assistant' && msg.content">
-                            <el-icon class="copy-icon" @click="copyText(msg.content)"><DocumentCopy /></el-icon>
-                        </div>
+                <div class="history-list">
+                    <div
+                            v-for="item in sessions"
+                            :key="item.id"
+                            :class="['history-item', { active: currentSessionId === item.id }]"
+                            @click="switchSession(item.id)"
+                    >
+                        <el-icon>
+                            <ChatLineRound/>
+                        </el-icon>
+                        <span class="title">{{ item.title }}</span>
+                        <el-icon class="del-btn" @click="deleteSession(item.id, $event)">
+                            <Delete/>
+                        </el-icon>
                     </div>
                 </div>
-                <div v-if="isTyping" class="message-row assistant">
+            </aside>
+            <main class="chat-main" v-if="currentSession">
+                <div class="messages-wrapper" ref="scrollRef">
+                    <div v-for="(msg, index) in currentSession.messages" :key="index"
+                         :class="['message-row', msg.role]">
+                        <div class="avatar">
+                            <el-icon v-if="msg.role === 'assistant'">
+                                <Cpu/>
+                            </el-icon>
+                            <el-icon v-else>
+                                <User/>
+                            </el-icon>
+                        </div>
+                        <div class="message-content glass-panel">
+                            <div class="text">
+                                <MarkdownPreview :content="msg.content"/>
+                            </div>
+                            <div class="message-actions" v-if="msg.role === 'assistant' && msg.content">
+                                <el-icon class="copy-icon" @click="copyText(msg.content)">
+                                    <DocumentCopy/>
+                                </el-icon>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-if="isTyping" class="message-row assistant">
                         AI 正在思考
-                    <div class="typing-indicator"><span>.</span><span>.</span><span>.</span></div>
+                        <div class="typing-indicator"><span>.</span><span>.</span><span>.</span></div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="input-area glass-panel">
-                <el-input
-                        v-model="userInput"
-                        type="textarea"
-                        :autosize="{ minRows: 1, maxRows: 5 }"
-                        placeholder="给 DeepSeek 发送消息..."
-                        @keyup.enter.prevent="sendMessage"
-                />
-                <el-button
-                        class="send-btn"
-                        type="primary"
-                        :disabled="!userInput || isTyping"
-                        @click="sendMessage"
-                        icon="Promotion"
-                />
-            </div>
-        </main>
-    </div>
+                <div class="input-area glass-panel">
+                    <el-input
+                            v-model="userInput"
+                            type="textarea"
+                            :autosize="{ minRows: 1, maxRows: 5 }"
+                            placeholder="给 DeepSeek 发送消息..."
+                            @keyup.enter.prevent="sendMessage"
+                    />
+                    <el-button
+                            class="send-btn"
+                            type="primary"
+                            :disabled="!userInput || isTyping"
+                            @click="sendMessage"
+                            icon="Promotion"
+                    />
+                </div>
+            </main>
+        </div>
     </el-drawer>
 </template>
 
@@ -89,8 +104,9 @@ interface ChatSession {
     messages: Message[];
     updateTime: number;
 }
-import { ref, onMounted, nextTick } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+
+import {ref, onMounted, nextTick} from 'vue'
+import {ElMessage, ElMessageBox} from 'element-plus'
 import {Cpu, User, DocumentCopy, Plus} from '@element-plus/icons-vue'
 import MarkdownPreview from '@/components/MarkdownPreview.vue'
 // --- 状态定义 ---
@@ -108,7 +124,6 @@ const isDevelopment = import.meta.env.MODE === 'development'
 const currentSession = ref<ChatSession | null>(null)
 
 const baseURL = isDevelopment ? 'http://localhost:8090/blog/chat/completions' : '/api/chat/completions'
-
 
 
 // 切换函数
@@ -142,7 +157,7 @@ const createNewChat = () => {
     const newSession: ChatSession = {
         id: newId,
         title: '新对话',
-        messages: [{ role: 'assistant', content: '你好！我是 AI 助手，今天想聊点什么？' }],
+        messages: [{role: 'assistant', content: '你好！我是 AI 助手，今天想聊点什么？'}],
         updateTime: Date.now()
     }
     sessions.value.unshift(newSession)
@@ -187,20 +202,20 @@ const sendMessage = async () => {
         currentSession.value.title = userContent.substring(0, 15) + (userContent.length > 15 ? '...' : '')
     }
 
-    currentSession.value.messages.push({ role: 'user', content: userContent })
+    currentSession.value.messages.push({role: 'user', content: userContent})
     currentSession.value.updateTime = Date.now()
     userInput.value = ''
     isTyping.value = true
     await scrollToBottom()
 
     // 2. 准备 AI 占位
-    currentSession.value.messages.push({ role: 'assistant', content: '' })
+    currentSession.value.messages.push({role: 'assistant', content: ''})
     const lastIndex = currentSession.value.messages.length - 1
 
     try {
         const response = await fetch(baseURL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 model: "DeepSeek-R1-0528-Qwen3-8B",
                 stream: true,
@@ -213,7 +228,7 @@ const sendMessage = async () => {
         const decoder = new TextDecoder()
 
         while (true) {
-            const { done, value } = await reader.read()
+            const {done, value} = await reader.read()
             if (done) break
 
             const chunk = decoder.decode(value)
@@ -236,7 +251,8 @@ const sendMessage = async () => {
                             }
                         }
 
-                    } catch (e) {}
+                    } catch (e) {
+                    }
                 }
             })
         }
@@ -301,9 +317,12 @@ const fallbackCopy = (text: string) => {
 
 <style scoped lang="scss">
 .chat-container {
+  margin-top: 0;
+  padding-top: 10px;
   display: flex;
   height: calc(100vh - var(--header-height));
   background: var(--bg-color);
+
 }
 
 .chat-sidebar {
@@ -313,7 +332,9 @@ const fallbackCopy = (text: string) => {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  @media (max-width: 768px) { display: none; }
+  @media (max-width: 768px) {
+    display: none;
+  }
 }
 
 .chat-main {
@@ -339,10 +360,15 @@ const fallbackCopy = (text: string) => {
   display: flex;
   gap: 20px;
   max-width: 85%;
+
   &.user {
     align-self: flex-end;
     flex-direction: row-reverse;
-    .message-content { background: var(--accent-color); color: white; }
+
+    .message-content {
+      background: var(--accent-color);
+      color: white;
+    }
   }
 }
 
@@ -360,13 +386,17 @@ const fallbackCopy = (text: string) => {
   padding: 2px 15px;
   border-radius: 12px;
   position: relative;
+
   .message-actions {
     position: absolute;
     bottom: -25px;
     right: 5px;
     cursor: pointer;
     color: var(--text-secondary);
-    &:hover { color: var(--accent-color); }
+
+    &:hover {
+      color: var(--accent-color);
+    }
   }
 }
 
@@ -377,6 +407,7 @@ const fallbackCopy = (text: string) => {
   display: flex;
   align-items: flex-end;
   gap: 10px;
+
   :deep(.el-textarea__inner) {
     background: transparent !important;
     box-shadow: none !important;
@@ -387,74 +418,103 @@ const fallbackCopy = (text: string) => {
 
 .typing-indicator span {
   animation: blink 1.4s infinite;
-  &:nth-child(2) { animation-delay: 0.2s; }
-  &:nth-child(3) { animation-delay: 0.4s; }
+
+  &:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  &:nth-child(3) {
+    animation-delay: 0.4s;
+  }
 }
-@keyframes blink { 0% { opacity: 0.2; } 20% { opacity: 1; } 100% { opacity: 0.2; } }
+
+@keyframes blink {
+  0% {
+    opacity: 0.2;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.2;
+  }
+}
+
 .history-list {
-    flex: 1;
-    overflow-y: auto;
-    margin-top: 10px;
+  flex: 1;
+  overflow-y: auto;
+  margin-top: 10px;
 }
 
 .history-item {
-    display: flex;
-    align-items: center;
-    padding: 12px;
-    margin-bottom: 8px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s;
-    color: var(--text-secondary);
-    position: relative;
-    border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--text-secondary);
+  position: relative;
+  border: 1px solid transparent;
 
-    &:hover {
-        background: rgba(255, 255, 255, 0.05);
-        .del-btn { opacity: 1; }
-    }
-
-    &.active {
-        background: rgba(99, 102, 241, 0.1);
-        border-color: rgba(99, 102, 241, 0.3);
-        color: var(--accent-color);
-    }
-
-    .title {
-        flex: 1;
-        margin-left: 10px;
-        font-size: 14px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        padding-right: 20px;
-    }
+  &:hover {
+    background: rgba(255, 255, 255, 0.05);
 
     .del-btn {
-        position: absolute;
-        right: 10px;
-        opacity: 0;
-        transition: opacity 0.2s;
-        &:hover { color: #f56c6c; }
+      opacity: 1;
     }
+  }
+
+  &.active {
+    background: rgba(99, 102, 241, 0.1);
+    border-color: rgba(99, 102, 241, 0.3);
+    color: var(--accent-color);
+  }
+
+  .title {
+    flex: 1;
+    margin-left: 10px;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 20px;
+  }
+
+  .del-btn {
+    position: absolute;
+    right: 10px;
+    opacity: 0;
+    transition: opacity 0.2s;
+
+    &:hover {
+      color: #f56c6c;
+    }
+  }
 }
 
 .new-chat-btn {
-    width: 100%;
-    background: transparent !important;
-    border: 1px dashed var(--glass-border) !important;
-    color: var(--text-primary) !important;
-    &:hover {
-        border-color: var(--accent-color) !important;
-        color: var(--accent-color) !important;
-    }
+  width: 100%;
+  background: transparent !important;
+  border: 1px dashed var(--glass-border) !important;
+  color: var(--text-primary) !important;
+
+  &:hover {
+    border-color: var(--accent-color) !important;
+    color: var(--accent-color) !important;
+  }
 }
 
 .floating-btn {
-    position: fixed;
-    bottom: 40px;
-    left: 40px;
-    z-index: 999;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  position: fixed;
+  bottom: 40px;
+  left: 40px;
+  z-index: 999;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+:deep(.el-drawer__body) {
+  padding-top: 0; /* 配合自定义头部，进一步压缩间距 */
 }
 </style>
