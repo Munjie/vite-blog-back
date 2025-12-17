@@ -12,6 +12,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     ActionTableCont: typeof import('./../components/ActionTableCont.vue')['default']
+    AiChatView: typeof import('./../components/AiChatView.vue')['default']
     Countup: typeof import('./../components/countup.vue')['default']
     EchartsCommon: typeof import('./../components/echarts-common.vue')['default']
     ElAlert: typeof import('element-plus/es')['ElAlert']
@@ -21,6 +22,7 @@ declare module 'vue' {
     ElCheckbox: typeof import('element-plus/es')['ElCheckbox']
     ElCol: typeof import('element-plus/es')['ElCol']
     ElDatePicker: typeof import('element-plus/es')['ElDatePicker']
+    ElDialog: typeof import('element-plus/es')['ElDialog']
     ElDivider: typeof import('element-plus/es')['ElDivider']
     ElDropdown: typeof import('element-plus/es')['ElDropdown']
     ElDropdownItem: typeof import('element-plus/es')['ElDropdownItem']
@@ -51,6 +53,7 @@ declare module 'vue' {
     MainAsideCont: typeof import('./../components/MainAsideCont.vue')['default']
     MainHdrCont: typeof import('./../components/MainHdrCont.vue')['default']
     MainTagsCont: typeof import('./../components/MainTagsCont.vue')['default']
+    MarkdownPreview: typeof import('./../components/MarkdownPreview.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     ScoreBoxPlot: typeof import('./../components/ScoreBoxPlot.vue')['default']

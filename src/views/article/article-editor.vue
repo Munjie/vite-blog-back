@@ -12,6 +12,12 @@
                 >
                     保存
                 </el-button>
+                <el-button type="primary" @click="aiVisible = true">
+                    <el-icon><ChatDotRound /></el-icon>
+                    AI助手
+                </el-button>
+                <!-- 全局 AI 助手对话框 -->
+                <AiAssistantDialog v-model:visible="aiVisible" />
             </div>
         </template>
 
@@ -75,10 +81,12 @@ import "md-editor-v3/lib/style.css";
 import {ElMessage} from "element-plus";
 import {addArticle, deleteCoverImage, getAllTags, getAllCategory} from "../../api/article.ts";
 import router from "../../router";
-
+import AiAssistantDialog from '@/components/AiChatView.vue';
 import {ElDialog, ElIcon} from 'element-plus'
 import {Plus} from '@element-plus/icons-vue'
 import axios from 'axios'
+
+const aiVisible = ref(false)
 // 文章数据
 const title = ref('')
 const summary = ref('')
