@@ -138,7 +138,7 @@ export const useUserStore = defineStore('useAllData', {
         getLocale: (state) => state.locale,
         getCurrentPagePath: (state) => state.currentPagePath,
         getTabsData: (state) => state.tabs,
-        isCollapse: (state) => state.isCollapse,
+        // isCollapse: (state) => state.isCollapse,
     },
     // 定义 actions
     actions: {
