@@ -217,7 +217,7 @@ const sendMessage = async () => {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
-                model: "DeepSeek-R1-0528-Qwen3-8B",
+                model: "gpt-5-nano",
                 stream: true,
                 messages: currentSession.value.messages.slice(0, -1)
             })
