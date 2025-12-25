@@ -2,106 +2,141 @@
     <div class="login-bg">
         <div class="login-container">
             <div class="login-header">
-                <img class="logo mr10" src="../../assets/img/login-index.svg" alt="" />
+                <img class="logo mr10" src="../../assets/img/login-index.svg" alt=""/>
                 <div class="login-title">AI Cloud System</div>
             </div>
-            <el-form :model="form" :rules="rules" ref="loginFormRef" size="large">
-                <el-form-item prop="username">
-                    <el-input v-model="form.username"    @keyup.enter="handleLogin" placeholder="User">
-                        <template #prepend>
-                            <el-icon>
-                                <User />
-                            </el-icon>
-                        </template>
-                    </el-input>
-                </el-form-item>
-                <el-form-item prop="password">
-                    <el-input
-                        type="password"
-                        placeholder="Password"
-                        v-model="form.password"
-                        @keyup.enter="handleLogin"
-                    >
-                        <template #prepend>
-                            <el-icon>
-                                <Lock />
-                            </el-icon>
-                        </template>
-                    </el-input>
-                </el-form-item>
-                <div class="pwd-tips">
-                    <el-checkbox class="pwd-checkbox" v-model="checked" label="Remember" />
-                    <el-link type="primary" @click="router.push('/reset-pwd')">Forgot</el-link>
+
+            <div class="qr-login-box">
+                <h3 style="text-align: center; margin-bottom: 20px; color: #333;">
+                    微信扫码登录
+                </h3>
+
+                <div class="qr-code-wrapper">
+                    <img v-if="qrImg" :src="qrImg" alt="小程序码" class="qr-img"/>
+                    <div v-else class="loading">
+                        <el-icon class="is-loading">
+                            <Loading/>
+                        </el-icon>
+                        <span>加载中...</span>
+                    </div>
                 </div>
-                <el-button class="login-btn" type="primary" size="large" @click="handleLogin">Login</el-button>
-            </el-form>
+
+                <p class="qr-tip">
+                    请使用 <span class="wechat-icon">微信</span> 扫一扫登录
+                </p>
+
+                <el-button type="text" @click="refreshQr" style="margin-top: 15px;">
+                    看不清？点击刷新
+                </el-button>
+            </div>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import {ref, reactive} from 'vue';
-import {useRouter} from 'vue-router';
-import type {FormRules} from 'element-plus';
-import {login} from '../../api/login.ts'
+import {ref, onMounted, onUnmounted} from 'vue'
+import {useRouter} from 'vue-router'
+import axios from 'axios'
+import {ElMessage, ElIcon} from 'element-plus'
+import {Loading} from '@element-plus/icons-vue'
 
-const lgStr = localStorage.getItem('login-param');
-const checked = ref(lgStr ? true : false);
-import { useUserStore } from '../../stores';
-import {getUserMenu} from "../../api/menu.ts";
+import {useUserStore} from '../../stores'
+import {usePermissStore} from '../../stores/permiss'
+import {useTabsStore} from '../../stores/tabs'
+import {getUserMenu} from '../../api/menu.ts'
+import type {Menus} from '../../types/menu.ts'
 
-import { useTabsStore } from '../../stores/tabs';
-import { usePermissStore } from '../../stores/permiss';
-import type {Menus} from "../../types/menu.ts";
-const router = useRouter();
-const loading = ref(false);
-const form = reactive({
-    username: '',
-    password: ''
-});
-const menus = ref<Menus[]>([]);
-const rules: FormRules = {
-    username: [
-        {required: true, message: '请输入用户名', trigger: 'blur'}
-    ],
-    password: [
-        {required: true, message: '请输入密码', trigger: 'blur'}
-    ]
-};
-const store = useUserStore();
-const permiss = usePermissStore();
-const handleLogin = async () => {
-    if (!form.username || !form.password) return;
+const router = useRouter()
+const userStore = useUserStore()
+const permissStore = usePermissStore()
+const tabsStore = useTabsStore()
 
+const qrImg = ref<string>('')
+const scene = ref<string>('')
+let ws: WebSocket | null = null
+let currentObjectUrl = ''
+
+const loadQrCode = async () => {
     try {
-        loading.value = true;
-        const res = await login(form);
-        if (res.code === 200) {
-            //
-            localStorage.setItem('vuems_name', form.username);
-            const keys = permiss.defaultList[form.username == 'admin' ? 'admin' : 'user'];
-            permiss.handleSet(keys || []);
-            //
-            store.setUsername(res.data.username);
-            store.setUserid(res.data.id)
-            store.setToken(res.data.token)
-            menus.value  = await getUserMenu(res.data.id);
-            store.setMenus(menus.value);
-            await router.push('/main');
+        const response = await axios.get('/api/wechat/qr', {responseType: 'blob'})
+        scene.value = response.headers['x-scene'] || response.headers['X-Scene']
 
+        if (!scene.value) {
+            ElMessage.error('获取二维码失败')
+            return
         }
-    } catch (error) {
-        console.error(error);
-    } finally {
-        loading.value = false;
-    }
-};
-const tabs = useTabsStore();
-tabs.clearTabs();
 
+        if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl)
+        currentObjectUrl = URL.createObjectURL(response.data)
+        qrImg.value = currentObjectUrl
+
+        connectWebSocket()
+    } catch (err) {
+        ElMessage.error('加载二维码失败，请刷新页面')
+    }
+}
+const isDevelopment = import.meta.env.MODE === 'development'
+const connectWebSocket = () => {
+    if (!scene.value) return
+    if (ws) ws.close()
+    let backendHost = 'localhost:8090'
+    if (!isDevelopment) {
+        backendHost = "www.munjie.com"
+    }
+    const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:'
+    const wsUrl = `${protocol}//${backendHost}/ws/qrlogin?scene=${scene.value}`
+    console.log('WebSocket 连接地址:', wsUrl)
+    ws = new WebSocket(wsUrl)
+    ws.onopen = () => console.log('WebSocket 连接成功！')
+    ws.onerror = (e) => console.error('WebSocket 错误', e)
+    ws.onclose = () => console.log('WebSocket 已关闭')
+    ws.onmessage = (event) => {
+        const msg = event.data
+        console.log('收到后端推送:', msg)
+        if (msg.startsWith('SUCCESS|')) {
+            const parts = msg.split('|')
+            const token = parts[1]
+            const userId = Number(parts[2])
+            const username = parts[3]
+            performLogin(token, userId, username)
+        }
+    }
+}
+
+const performLogin = async (token: string, userId: number, username: string) => {
+    localStorage.setItem('vuems_name', username)
+    userStore.setUsername(username)
+    userStore.setUserid(userId)
+    userStore.setToken(token)
+
+    const keys = permissStore.defaultList[username.includes('admin') ? 'admin' : 'user']
+    permissStore.handleSet(keys || [])
+
+    const menus: Menus[] = await getUserMenu(userId)
+    userStore.setMenus(menus)
+
+    tabsStore.clearTabs()
+    ElMessage.success('登录成功！')
+    await router.push('/main')
+}
+
+const refreshQr = () => {
+    if (ws) {
+        ws.close()
+        ws = null
+    }
+    loadQrCode()
+}
+
+onMounted(() => loadQrCode())
+onUnmounted(() => {
+    if (ws) ws.close()
+    if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl)
+})
 </script>
 
 <style scoped>
+/* 与之前相同，保持美观样式 */
 .login-bg {
     display: flex;
     align-items: center;
@@ -133,37 +168,51 @@ tabs.clearTabs();
     border-radius: 5px;
     background: #fff;
     padding: 40px 50px 50px;
-    box-sizing: border-box;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
-.pwd-tips {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 14px;
-    margin: -10px 0 10px;
-    color: #787878;
+.qr-login-box {
+    text-align: center;
 }
 
-.pwd-checkbox {
-    height: auto;
+.qr-code-wrapper {
+    width: 260px;
+    height: 260px;
+    margin: 0 auto 20px;
+    padding: 10px;
+    background: #fff;
+    border: 1px solid #ebeef5;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-.login-btn {
-    display: block;
+.qr-img {
     width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
 
-.login-tips {
-    font-size: 12px;
+.loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
     color: #999;
 }
 
-.login-text {
-    display: flex;
-    align-items: center;
-    margin-top: 20px;
+.qr-tip {
+    margin: 20px 0 10px;
+    color: #666;
     font-size: 14px;
-    color: #787878;
+}
+
+.wechat-icon {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background: url('https://res.wx.qq.com/a/wx_fed/assets/res/NTI4MWU5.ico') no-repeat center/cover;
+    vertical-align: middle;
+    margin: 0 4px;
 }
 </style>
