@@ -3,14 +3,10 @@
         <div class="login-container">
             <div class="login-header">
                 <img class="logo mr10" src="../../assets/img/login-index.svg" alt=""/>
-                <div class="login-title">AI Cloud System</div>
+                <div class="login-title">JCloud System</div>
             </div>
 
             <div class="qr-login-box">
-                <h3 style="text-align: center; margin-bottom: 20px; color: #333;">
-                    微信扫码登录
-                </h3>
-
                 <div class="qr-code-wrapper">
                     <img v-if="qrImg" :src="qrImg" alt="小程序码" class="qr-img"/>
                     <div v-else class="loading">
@@ -22,11 +18,11 @@
                 </div>
 
                 <p class="qr-tip">
-                    请使用 <span class="wechat-icon">微信</span> 扫一扫登录
+                     <span class="wechat-icon"></span> 扫一扫或长按识别登录
                 </p>
 
                 <el-button type="text" @click="refreshQr" style="margin-top: 15px;">
-                    看不清？点击刷新
+                   点击刷新
                 </el-button>
             </div>
         </div>
