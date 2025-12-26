@@ -7,23 +7,41 @@
             </div>
 
             <div class="qr-login-box">
-                <div class="qr-code-wrapper">
-                    <img v-if="qrImg" :src="qrImg" alt="小程序码" class="qr-img"/>
-                    <div v-else class="loading">
-                        <el-icon class="is-loading">
-                            <Loading/>
-                        </el-icon>
-                        <span>加载中...</span>
+                <h3 style="text-align: center; margin-bottom: 30px; color: #333;">
+                    微信扫码登录
+                </h3>
+
+                <!-- 二维码 + 遮罩层容器 -->
+                <!-- 二维码 + 遮罩层容器 -->
+                <div class="qr-container">
+                    <!-- 二维码图片（始终显示） -->
+                    <img v-if="qrImg" :src="qrImg" class="qr-img" />
+
+                    <!-- 遮罩层：仅在有状态提示时显示（初始 waiting 时也显示，但透明度低，让二维码清晰可见） -->
+                    <div class="qr-overlay" :class="loginStatus">
+                        <!-- 等待扫码：半透明，二维码仍可扫描 -->
+                        <div v-if="loginStatus === 'waiting'" class="status waiting">
+                            <el-icon class="icon"><Scan /></el-icon>
+                        </div>
+
+                        <!-- 已扫码待确认：高不透明度 + 绿色对勾 -->
+                        <div v-if="loginStatus === 'scanned'" class="status scanned">
+                            <el-icon class="icon"><CheckBold /></el-icon>
+                            <p>已扫码，请在手机确认</p>
+                        </div>
+
+                        <!-- 刷新中 -->
+                        <div v-if="loginStatus === 'refreshing'" class="status refreshing">
+                            <el-icon class="is-loading icon"><Loading /></el-icon>
+                            <p>正在刷新...</p>
+                        </div>
+
+                        <!-- 刷新按钮：始终可见 -->
+                        <div class="refresh-btn" @click="refreshQr">
+                            <el-icon><Refresh /></el-icon>
+                        </div>
                     </div>
                 </div>
-
-                <p class="qr-tip">
-                     <span class="wechat-icon"></span> 扫一扫或长按识别登录
-                </p>
-
-                <el-button type="text" @click="refreshQr" style="margin-top: 15px;">
-                   点击刷新
-                </el-button>
             </div>
         </div>
     </div>
@@ -51,7 +69,27 @@ const qrImg = ref<string>('')
 const scene = ref<string>('')
 let ws: WebSocket | null = null
 let currentObjectUrl = ''
+let loginStatus = ref<'waiting' | 'scanned' | 'refreshing'>('waiting')  // 新增 refreshing 状态
 
+
+const refreshQr = () => {
+    if (loginStatus.value === 'refreshing') return // 防止重复点击
+
+    loginStatus.value = 'refreshing'
+
+    if (ws) {
+        ws.close()
+        ws = null
+    }
+
+    // 重新加载二维码
+    loadQrCode().finally(() => {
+        // 加载完成（无论成功失败）恢复等待状态
+        setTimeout(() => {
+            loginStatus.value = 'waiting'
+        }, 800) // 给用户一点加载反馈
+    })
+}
 const loadQrCode = async () => {
     try {
         const response = await axios.get('/api/wechat/qr', {responseType: 'blob'})
@@ -89,6 +127,9 @@ const connectWebSocket = () => {
     ws.onmessage = (event) => {
         const msg = event.data
         console.log('收到后端推送:', msg)
+        if (msg === 'SCANNED') {
+            loginStatus.value = 'scanned'
+        }
         if (msg.startsWith('SUCCESS|')) {
             const parts = msg.split('|')
             const token = parts[1]
@@ -116,13 +157,13 @@ const performLogin = async (token: string, userId: number, username: string) => 
     await router.push('/main')
 }
 
-const refreshQr = () => {
+/*const refreshQr = () => {
     if (ws) {
         ws.close()
         ws = null
     }
     loadQrCode()
-}
+}*/
 
 onMounted(() => loadQrCode())
 onUnmounted(() => {
@@ -132,7 +173,6 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* 与之前相同，保持美观样式 */
 .login-bg {
     display: flex;
     align-items: center;
@@ -142,6 +182,15 @@ onUnmounted(() => {
     background: url(../../assets/img/bg_login.jpg) center/cover no-repeat;
 }
 
+.login-container {
+    width: 450px;
+    border-radius: 12px;
+    background: #fff;
+    padding: 50px 50px 60px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    text-align: center;
+}
+
 .login-header {
     display: flex;
     align-items: center;
@@ -149,37 +198,20 @@ onUnmounted(() => {
     margin-bottom: 40px;
 }
 
-.logo {
-    width: 35px;
-}
+.logo { width: 40px; }
+.login-title { font-size: 24px; font-weight: bold; color: #333; }
 
-.login-title {
-    font-size: 22px;
-    color: #333;
-    font-weight: bold;
-}
-
-.login-container {
-    width: 450px;
-    border-radius: 5px;
-    background: #fff;
-    padding: 40px 50px 50px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-}
-
-.qr-login-box {
-    text-align: center;
-}
-
-.qr-code-wrapper {
+/* 二维码容器 */
+.qr-container {
+    position: relative;
     width: 260px;
     height: 260px;
-    margin: 0 auto 20px;
-    padding: 10px;
-    background: #fff;
+    margin: 0 auto 30px;
     border: 1px solid #ebeef5;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
 }
 
 .qr-img {
@@ -188,27 +220,97 @@ onUnmounted(() => {
     object-fit: contain;
 }
 
-.loading {
+/* 遮罩层 */
+.qr-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100%;
+    pointer-events: none; /* 关键：初始允许点击穿透（刷新按钮除外） */
+    transition: background 0.3s ease;
+}
+
+/* 等待扫码：浅遮罩，二维码清晰可见，能正常扫描 */
+.qr-overlay.waiting {
+    background: rgba(255, 255, 255, 0.4);
+    pointer-events: none;
+}
+.qr-overlay.waiting .status {
     color: #999;
 }
 
-.qr-tip {
-    margin: 20px 0 10px;
-    color: #666;
-    font-size: 14px;
+/* 已扫码：深遮罩，挡住二维码，防止重复扫 */
+.qr-overlay.scanned {
+    background: rgba(255, 255, 255, 0.95);
+    pointer-events: auto; /* 允许点击刷新按钮 */
+}
+.qr-overlay.scanned .status {
+    color: #07c160;
 }
 
-.wechat-icon {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    background: url('https://res.wx.qq.com/a/wx_fed/assets/res/NTI4MWU5.ico') no-repeat center/cover;
-    vertical-align: middle;
-    margin: 0 4px;
+/* 刷新中 */
+.qr-overlay.refreshing {
+    background: rgba(255, 255, 255, 0.8);
+    pointer-events: auto;
+}
+.qr-overlay.refreshing .status {
+    color: #409eff;
+}
+
+/* 刷新按钮：始终可点击 */
+.refresh-btn {
+    pointer-events: auto; /* 强制可点击，覆盖父层的 none */
+    /* 其余样式不变 */
+}
+
+
+
+.status {
+    color: #666;
+    font-size: 16px;
+}
+
+.status .icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.status.waiting .icon { color: #999; }
+.status.scanned .icon { color: #07c160; animation: pulse 1.5s infinite; }
+.status.refreshing .icon { color: #409eff; }
+
+/* 绿色打钩动画 */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* 刷新按钮：右上角小图标 */
+.refresh-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    background: rgba(0,0,0,0.05);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.refresh-btn:hover {
+    background: rgba(0,0,0,0.15);
+    transform: rotate(180deg);
+}
+
+.refresh-btn .el-icon {
+    font-size: 18px;
+    color: #666;
 }
 </style>
