@@ -34,6 +34,28 @@
         <el-card shadow="hover" class="chart-card">
           <template #header>
             <div class="card-header">
+              <span>🗺️ 访客地域分布</span>
+              <el-tag type="success" size="small" effect="dark">实时更新</el-tag>
+            </div>
+          </template>
+          <div ref="mapChartRef" style="height: 450px;"></div>
+        </el-card>
+      </el-col>
+
+      <el-col :xs="24" :lg="8">
+        <el-card shadow="hover" class="chart-card">
+          <template #header>
+            <div class="card-header"><span>🔥 热门搜索词</span></div>
+          </template>
+          <div ref="wordCloudRef" style="height: 450px;"></div>
+        </el-card>
+      </el-col>
+    </el-row>
+    <el-row :gutter="20" class="mb-4">
+      <el-col :xs="24" :lg="16">
+        <el-card shadow="hover" class="chart-card">
+          <template #header>
+            <div class="card-header">
               <span>📊 访问流量趋势</span>
               <el-radio-group v-model="timeRange" size="small">
                 <el-radio-button label="week">本周</el-radio-button>
@@ -44,7 +66,6 @@
           <div ref="lineChartRef" style="height: 350px;"></div>
         </el-card>
       </el-col>
-
       <el-col :xs="24" :lg="8">
         <el-card shadow="hover" class="chart-card">
           <template #header>
@@ -56,7 +77,6 @@
         </el-card>
       </el-col>
     </el-row>
-
     <el-row :gutter="20">
       <el-col :xs="24" :md="12">
         <el-card shadow="hover" class="list-card">
@@ -105,10 +125,10 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, markRaw } from 'vue';
 import * as echarts from 'echarts';
-import {
-  Document, View, ChatLineRound, Monitor,
-} from '@element-plus/icons-vue';
-
+import 'echarts-wordcloud';
+import {Document, View, ChatLineRound, Monitor} from '@element-plus/icons-vue';
+import axios from 'axios';
+import {getVisitMap} from "@/api/home.ts";
 // --- 类型定义 ---
 interface StatCardItem {
   title: string;
@@ -122,6 +142,9 @@ interface StatCardItem {
 const timeRange = ref('week');
 const lineChartRef = ref<HTMLElement | null>(null);
 const pieChartRef = ref<HTMLElement | null>(null);
+const mapChartRef = ref<HTMLElement | null>(null);
+const wordCloudRef = ref<HTMLElement | null>(null);
+let charts: echarts.ECharts[] = [];
 let lineChart: echarts.ECharts | null = null;
 let pieChart: echarts.ECharts | null = null;
 
@@ -134,11 +157,74 @@ const statCards = ref<StatCardItem[]>([
 ]);
 
 const format = (percentage: number) => (percentage === 100 ? 'Full' : `${percentage}%`);
+// --- 初始化地图 (核心难点) ---
 
-// --- 图表初始化 ---
-const initCharts = () => {
-  // 1. 折线图配置
-  if (lineChartRef.value) {
+const mapData = ref();
+const initMap = async () => {
+  if (!mapChartRef.value) return;
+  const myChart = echarts.init(mapChartRef.value);
+
+  try {
+    const response = await getVisitMap()
+    mapData.value = (response as any).data.map((item: any) => ({
+      name: item.name,
+      value: item.value
+    }))
+    const res = await axios.get('https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json');
+    echarts.registerMap('china', res.data as any);
+
+    myChart.setOption({
+      tooltip: { trigger: 'item', formatter: '{b}<br/>访客数: {c}' },
+      visualMap: {
+        min: 0, max: 1000, left: 'left', bottom: '10', text: ['高', '低'],
+        inRange: { color: ['#e0ffff', '#006edd'] },
+        calculable: true
+      },
+      geo: {
+        map: 'china', roam: false, zoom: 1.2,
+        itemStyle: { areaColor: '#f3f4f6', borderColor: '#fff' },
+        emphasis: { itemStyle: { areaColor: '#a18cd1' }, label: { show: true, color: '#fff' } }
+      },
+      series: [{
+        name: '访客地域分布', type: 'map', geoIndex: 0,
+        data: mapData.value
+      }]
+    });
+    charts.push(myChart);
+  } catch (e) {
+    console.error('地图数据加载失败', e);
+  }
+};
+
+// --- 初始化词云 ---
+const initWordCloud = () => {
+  if (!wordCloudRef.value) return;
+  const myChart = echarts.init(wordCloudRef.value);
+  myChart.setOption({
+    series: [{
+      type: 'wordCloud',
+      shape: 'circle',
+      sizeRange: [14, 50],
+      rotationRange: [-45, 90],
+      gridSize: 10,
+      textStyle: {
+        fontFamily: 'sans-serif',
+        fontWeight: 'bold',
+        color: () => `rgb(${Math.round(Math.random()*160)}, ${Math.round(Math.random()*160)}, ${Math.round(Math.random()*160)})`
+      },
+      data: [
+        { name: 'Vue3', value: 100 }, { name: 'TypeScript', value: 80 },
+        { name: 'SpringBoot', value: 95 }, { name: 'ElementPlus', value: 70 },
+        { name: 'Redis', value: 50 }, { name: 'Docker', value: 45 },
+        { name: 'MyBatis', value: 40 }, { name: '算法', value: 30 }
+      ]
+    }]
+  });
+  charts.push(myChart);
+};
+// --- 初始化折线图 ---
+const initLine = () => {
+  if (!lineChartRef.value) return;
     lineChart = echarts.init(lineChartRef.value);
     lineChart.setOption({
       tooltip: { trigger: 'axis' },
@@ -173,10 +259,12 @@ const initCharts = () => {
         }
       ]
     });
-  }
+  charts.push(lineChart);
+};
 
-  // 2. 饼图配置
-  if (pieChartRef.value) {
+// --- 初始化饼图 ---
+const initPie = () => {
+  if (!pieChartRef.value) return;
     pieChart = echarts.init(pieChartRef.value);
     pieChart.setOption({
       tooltip: { trigger: 'item' },
@@ -206,17 +294,15 @@ const initCharts = () => {
         }
       ]
     });
-  }
+  charts.push(pieChart);
 };
-
 // 响应式调整
-const handleResize = () => {
-  lineChart?.resize();
-  pieChart?.resize();
-};
-
-onMounted(() => {
-  initCharts();
+const handleResize = () => charts.forEach(c => c.resize());
+onMounted(async () => {
+  await initMap();
+  initWordCloud();
+  initLine();
+  initPie();
   window.addEventListener('resize', handleResize);
 });
 

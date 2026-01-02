@@ -19,5 +19,15 @@ export const getHomeAllTask  = async () => {
 
 
 
+export const getVisitMap  = async () => {
+    try {
+        return await http.get('/api/home/map-data')  ;
+    } catch (error) {
+        console.error('获取数据失败:', error);
+        return [];
+    }
+};
+
+
 
 
