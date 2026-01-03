@@ -30,4 +30,15 @@ export const getVisitMap  = async () => {
 
 
 
+export const getVisitCount  = async () => {
+    try {
+        return await http.get('/api/dashboard/visit')  ;
+    } catch (error) {
+        console.error('获取数据失败:', error);
+        return [];
+    }
+};
+
+
+
 
