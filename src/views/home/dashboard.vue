@@ -128,15 +128,7 @@ import * as echarts from 'echarts';
 import 'echarts-wordcloud';
 import {Document, View, ChatLineRound, Monitor} from '@element-plus/icons-vue';
 import axios from 'axios';
-import {getVisitMap,getVisitCount} from "../../api/home.ts";
-// --- 类型定义 ---
-interface StatCardItem {
-  title: string;
-  value: string | number;
-  icon: any;
-  color: string;
-  trend: number;
-}
+import {getVisitMap, getVisitCount} from "../../api/home.ts";
 
 // --- 状态数据 ---
 const timeRange = ref('week');
@@ -148,28 +140,30 @@ let charts: echarts.ECharts[] = [];
 let lineChart: echarts.ECharts | null = null;
 let pieChart: echarts.ECharts | null = null;
 
-
-
 const format = (percentage: number) => (percentage === 100 ? 'Full' : `${percentage}%`);
 // --- 初始化地图 (核心难点) ---
-
 const mapData = ref();
-const visitCount = ref<number>(0);
-const visitCountTrend = ref<number>(0);
-const initStatCards = () => {
-  getVisitCount().then(count => {
-    visitCount.value = count.data.totalPageViews;
-    visitCountTrend.value = count.data.pageViewsChangePercentage;
-  })
-
-}
 // 模拟顶部卡片数据
-const statCards = ref<StatCardItem[]>([
-  { title: '总文章数', value: 128, icon: markRaw(Document), color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', trend: 12 },
-  { title: '总访问量', value: visitCount, icon: markRaw(View), color: 'linear-gradient(135deg, #2af598 0%, #009efd 100%)', trend: visitCountTrend },
-  { title: '总评论数', value: 342, icon: markRaw(ChatLineRound), color: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%)', trend: -2.1 },
-  { title: '系统负载', value: '24%', icon: markRaw(Monitor), color: 'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)', trend: 0.5 },
-]);
+const statCards = ref();
+const icons = [markRaw(Document), markRaw(View), markRaw(ChatLineRound), markRaw(Monitor)];
+const colors = [
+  'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  'linear-gradient(135deg, #2af598 0%, #009efd 100%)',
+  'linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%)',
+  'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)'
+];
+
+
+
+const initStatCards = async () => {
+
+  const response = await getVisitCount();
+  statCards.value = response.map((item: any, index: any) => ({
+    ...item,
+    icon: icons[index],
+    color: colors[index]
+  }));
+}
 const initMap = async () => {
   if (!mapChartRef.value) return;
   const myChart = echarts.init(mapChartRef.value);
@@ -309,11 +303,11 @@ const initPie = () => {
 // 响应式调整
 const handleResize = () => charts.forEach(c => c.resize());
 onMounted(async () => {
-  await initMap();
+  initStatCards();
   initWordCloud();
   initLine();
   initPie();
-  initStatCards();
+  await initMap();
   window.addEventListener('resize', handleResize);
 });
 
