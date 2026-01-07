@@ -82,13 +82,10 @@ import axios from 'axios'
 // 文章数据
 const title = ref('')
 const summary = ref('')
-
 const content = ref('')
 const loading = ref(false)
-
-// --- 标签相关 (新增) ---
-const selectedTags = ref()// 选中的标签数组
-const selectedCategory = ref<string | number>('') // 选中的分类
+const selectedTags = ref()
+const selectedCategory = ref<string | number>('')
 const tagOptions = ref()
 const categoryOptions = ref()
 const submitAll = async () => {
@@ -114,10 +111,9 @@ const submitAll = async () => {
     }
 }
 // 封面图上传处理
-// 表单数据（假设你的文章表单 ref 为 formRef，字段为 articleCover 存储图片 URL）
-const articleCover = ref<string>('')  // 最终保存到文章的封面 URL
+const articleCover = ref<string>('')
 
-// 文件列表（用于显示已上传的图片，编辑时可回显）
+// 文件列表
 const fileList = ref<Array<{ name: string; url: string }>>([])
 
 // 预览相关
@@ -130,7 +126,7 @@ const handlePreview = (file: any) => {
     previewVisible.value = true
 }
 
-// 处理移除（关键修改）
+// 处理移除
 const handleRemove = async () => {
     // 如果当前有封面 URL，才需要删除服务器文件
     if (articleCover.value) {
@@ -156,9 +152,9 @@ const handleExceed = () => {
 // 自定义上传（覆盖默认行为）
 const customUpload = async (options: any) => {
     const formData = new FormData()
-    formData.append('file', options.file)  // 后端接收参数名为 file
+    formData.append('file', options.file)
     try {
-        const res = await axios.post('/api/article/upload-cover', formData, {
+        const res = await axios.post('/api/back/upload-cover', formData, {
             headers: {'Content-Type': 'multipart/form-data'}
         })
         return res.data.data
@@ -178,7 +174,7 @@ const handleUploadError = (err: any) => {
     ElMessage.error('封面上传失败：' + err.message)
 }
 
-// 如果是编辑文章，回显已有封面时可以这样初始化 fileList
+// 如果是编辑文章，回显已有封面时
 // onMounted(() => {
 //   if (props.article?.articleCover) {
 //     fileList.value = [{ name: 'cover', url: props.article.articleCover }]
@@ -187,7 +183,6 @@ const handleUploadError = (err: any) => {
 // })
 onMounted(async () => {
     const res = await getAllTags()
-    // tagOptions.value = res.data.map(tag => ({ value: tag.id, label: tag.name }))
     tagOptions.value = (res as any).data.map((item: any) => ({
         label: item.name,
         value: item.id
@@ -207,13 +202,7 @@ onMounted(async () => {
   overflow: hidden;
 }
 
-/*.publish-btn {
-  !*  display: flex;
-    align-items: center;
-    flex-wrap: nowrap;*!
-  padding-right: 10px;
-  margin-bottom: 20px;
-}*/
+
 
 .flex_r {
   display: flex;

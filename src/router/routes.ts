@@ -81,6 +81,16 @@ export const routes = [
                 },
                 component: () => import('@/views/article/article-list.vue'),
             },
+
+            {
+                path: '/comment-list',
+                name: '/comment-list',
+                meta: {
+                    title: '评论列表',
+                    permiss: '13',
+                },
+                component: () => import('@/views/comment/comment-list.vue'),
+            },
         ],
     },
     {

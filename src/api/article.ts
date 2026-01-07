@@ -3,7 +3,7 @@ import http from "./http.ts";
 
 export const addArticle = (data?: object) => {
     return http.post(
-        '/api/article/add-article',
+        '/api/back/add-article',
         data
     );
 };
@@ -11,14 +11,14 @@ export const addArticle = (data?: object) => {
 
 export const getArticleList = (data?: object) => {
     return http.post(
-        '/api/article/page-all-article',
+        '/api/back/page-all-article',
         data
     );
 };
 
 
 export function deleteArticle(id: number) {
-    return http.delete<void>('/api/article/delete-article', { id: id });
+    return http.delete<void>('/api/back/delete-article', { id: id });
 }
 
 
@@ -26,7 +26,7 @@ export function deleteArticle(id: number) {
 
 export const updateArticleStatus = (data?: object) => {
     return http.post(
-        '/api/article/update-article-status',
+        '/api/back/update-article-status',
         data
     );
 };
@@ -34,7 +34,7 @@ export const updateArticleStatus = (data?: object) => {
 
 
 export function deleteCoverImage(coverUrl: string) {
-    return http.delete<void>('/api/article/delete-cover-image', { coverUrl: coverUrl });
+    return http.delete<void>('/api/back/delete-cover-image', { coverUrl: coverUrl });
 }
 
 
