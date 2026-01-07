@@ -101,9 +101,7 @@ const submitAll = async () => {
         }
         await addArticle(articleForm);
         ElMessage.success('新增成功')
-        router.replace('/article-list');
-
-
+        await router.push('/article-list');
     } catch (error) {
         ElMessage.error('新增失败,请重试')
     } finally {
@@ -120,7 +118,7 @@ const fileList = ref<Array<{ name: string; url: string }>>([])
 const previewVisible = ref(false)
 const previewUrl = ref('')
 
-// 处理预览（点击已上传图片）
+// 处理预览
 const handlePreview = (file: any) => {
     previewUrl.value = file.url
     previewVisible.value = true
@@ -128,7 +126,6 @@ const handlePreview = (file: any) => {
 
 // 处理移除
 const handleRemove = async () => {
-    // 如果当前有封面 URL，才需要删除服务器文件
     if (articleCover.value) {
         try {
             await deleteCoverImage(articleCover.value)
@@ -136,10 +133,8 @@ const handleRemove = async () => {
         } catch (err) {
             ElMessage.error('删除服务器图片失败，可手动清理')
             console.error(err)
-            // 即使删除失败，也继续清除前端显示（避免用户卡住）
         }
     }
-    // 清空表单字段和文件列表
     articleCover.value = ''
     fileList.value = []
 }

@@ -6,4 +6,13 @@ const router = createRouter({
     history: createWebHashHistory(),
     routes: routes,
 })
+
+router.beforeEach((to, _from, next) => {
+    if (to.path === '/article-list') {
+        next();
+    } else {
+        next();  // 允许跳转
+    }
+});
+
 export default router
