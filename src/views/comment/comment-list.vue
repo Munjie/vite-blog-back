@@ -22,8 +22,6 @@
 <script setup lang="ts">
 import {onMounted, ref, watch} from 'vue';
 import CustomTable from '@/components/ActionTableCont.vue';
-import {useRouter} from "vue-router";
-const router = useRouter()
 import {useRoute} from 'vue-router';
 import {ElMessage, ElMessageBox} from "element-plus";
 import {deleteComment, getAllComment} from "../../api/comment.ts";
@@ -51,10 +49,6 @@ const tableColumns = ref([
     },
     {prop: 'operator', label: '操作', width: 260},
 ]);
-
-// 查询相关
-
-
 
 
 const deleteFun = async (row: { id: string | number }) => {
@@ -100,26 +94,25 @@ onMounted(() => {
     fetchList()
 })
 
-// 分页变化处理（替换原 @update 事件，避免直接赋值导致 watch 延迟）
+// 分页变化处理
 const handlePageChange = (page:any) => {
     currentPage.value = page;
-    fetchList();  // 立即加载新页
+    fetchList();
 };
 
 const handlePageSizeChange = (size:any) => {
     pageSize.value = size;
-    fetchList();  // 页大小变化也重新加载
+    fetchList();
 };
 
 watch(
-    () => route.path, // 监听路由路径
+    () => route.path,
     () => {
-        // 确保只有在当前组件是活跃状态时才重新查询
         if (route.path === '/comment-list') {
             fetchList();
         }
     },
-    {immediate: false} // 初始时不执行，onMounted已经执行过了
+    {immediate: false}
 );
 
 // 用于存储选中的数据

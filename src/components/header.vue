@@ -3,7 +3,7 @@
         <!-- 折叠按钮 -->
         <div class="header-left">
             <img class="logo" src="../assets/img/login-index.svg" alt="" />
-            <div class="web-title">AI Cloud System</div>
+            <div class="web-title">JCloud System</div>
             <div class="collapse-btn" @click="collapseChage">
                 <el-icon v-if="sidebar.collapse">
                     <Expand />

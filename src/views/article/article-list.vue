@@ -22,6 +22,7 @@
             </CustomTable>
         </div>
     </div>
+    <AiAssistantDialog />
 </template>
 
 <script setup lang="ts">
@@ -34,6 +35,7 @@ import {useRouter} from "vue-router";
 const router = useRouter()
 import {useRoute} from 'vue-router';
 import {ElMessage, ElMessageBox} from "element-plus";
+import AiAssistantDialog from "../../App.vue";
 
 const route = useRoute();
 // 2. 定义点击事件处理函数
@@ -123,26 +125,25 @@ onMounted(() => {
     fetchList()
 })
 
-// 分页变化处理（替换原 @update 事件，避免直接赋值导致 watch 延迟）
+// 分页变化处理
 const handlePageChange = (page:any) => {
     currentPage.value = page;
-    fetchList();  // 立即加载新页
+    fetchList();
 };
 
 const handlePageSizeChange = (size:any) => {
     pageSize.value = size;
-    fetchList();  // 页大小变化也重新加载
+    fetchList();
 };
 
 watch(
     () => route.path, // 监听路由路径
     () => {
-        // 确保只有在当前组件是活跃状态时才重新查询
         if (route.path === '/article-list') {
             fetchList();
         }
     },
-    {immediate: false} // 初始时不执行，onMounted已经执行过了
+    {immediate: false} // 初始时不执行
 );
 
 // 用于存储选中的数据

@@ -48,6 +48,7 @@ import { useSidebarStore } from '../stores/sidebar';
 import { useRoute } from 'vue-router';
 import {useUserStore} from '../stores';
 import type {Menus} from "../types/menu.ts";
+import {getUserMenu} from "../api/menu.ts";
 
 
 const store = useUserStore();
@@ -59,8 +60,10 @@ const onRoutes = computed(() => {
 
 const sidebar = useSidebarStore();
 const menuData = ref<Menus[]>([]);
-onMounted(() => {
-    menuData.value = store.getMenus;
+onMounted(async () => {
+    const menus: Menus[] = await getUserMenu(store.getUserid)
+    store.setMenus(menus)
+    menuData.value = menus;
 });
 const noChilden = computed(() => {
     return menuData.value.filter(item => !item.children || item.children.length === 0);

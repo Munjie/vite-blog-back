@@ -1,4 +1,4 @@
-// src/stores/allData.ts
+
 import { defineStore } from 'pinia'
 import router from '../../router'
 import type { Component } from 'vue'
@@ -29,14 +29,11 @@ interface AllDataState {
     menuData: MenuItem[]
     menus: Menus[]
     tabs: TabItem[]
-    currentMenu: any // 可优化为 MenuItem | null
-    permissions: any[] // 可定义具体 Permission 类型
+    currentMenu: any
+    permissions: any[]
     currentPagePath: string
     locale: string
 }
-
-// 动态模块导入类型
-type Modules = Record<string, () => Promise<{ default: Component }>>
 
 // 初始化状态函数
 function stateIni(): AllDataState {
@@ -62,68 +59,6 @@ function stateIni(): AllDataState {
     }
 }
 
-// addRouter 函数（保持不变）
-function addRouter(menuData: MenuItem[]) {
-    const routerList = router.getRoutes()
-    const modules: Modules = import.meta.glob('../views/**/*.vue') as Modules
-    const routerArr: any[] = []
-
-    menuData.forEach((item) => {
-        if (item.children && item.children.length > 0) {
-            item.children.forEach((child) => {
-                const componentPath = `../${child.path}.vue`
-                const module = modules[componentPath as keyof Modules]
-                if (module) {
-                    child.component = module
-                    routerArr.push({
-                        path: child.index,
-                        name: child.label,
-                        component: child.component
-                    })
-                }
-            })
-        } else {
-            const componentPath = `../${item.path}.vue`
-            const module = modules[componentPath as keyof Modules]
-            if (module) {
-                item.component = module
-                routerArr.push({
-                    path: item.index,
-                    name: item.label,
-                    component: item.component
-                })
-            }
-        }
-    })
-
-    // 删除动态路由（保留基础路由）
-    // 增加删除路由
-    routerList.forEach((item: any) => {
-        if (item.name === 'main'
-            || item.name === 'home'
-            || item.name === '404'
-            || item.name === 'login'
-            || item.name === 'error'
-            || item.name === 'undefined'
-            || item.path === '/'
-            || item.path === '/main')
-            return
-        router.removeRoute(item.name)
-    });
-
-    // 添加新路由
-    routerArr.forEach((item) => {
-        router.addRoute('main', {
-            path: item.path,
-            name: item.name,
-            component: item.component
-        })
-    })
-
-    const routerListLast = router.getRoutes()
-    console.log(routerListLast)
-}
-
 export const useUserStore = defineStore('useAllData', {
     // 定义状态
     state: stateIni,
@@ -132,7 +67,6 @@ export const useUserStore = defineStore('useAllData', {
         getUsername: (state) => state.username,
         getUserid: (state) => state.userid,
         getToken: (state) => state.token,
-        getMenuData: (state) => state.menuData,
         getMenus: (state) => state.menus,
         getPermissions: (state) => state.permissions,
         getLocale: (state) => state.locale,
@@ -153,11 +87,6 @@ export const useUserStore = defineStore('useAllData', {
         // 设置 token
         setToken(token: string) {
             this.token = token
-        },
-        // 设置菜单数据
-        setMenuData(menuData: MenuItem[]) {
-            addRouter(menuData)
-            this.menuData = menuData
         },
         setMenus(menus: Menus[]) {
             this.menus = menus
@@ -205,16 +134,10 @@ export const useUserStore = defineStore('useAllData', {
             router.push({ name: 'login' })
         },
     },
-    // Persist 配置（修正：移除 enabled 和 strategies，使用 pick）
+    // Persist 配置
     persist: {
         key: 'user-store',
         storage: localStorage,
-        pick: ['token', 'menuData','menus', 'username', 'userid'] // 使用 pick 指定持久化字段
+        pick: ['token', 'menuData','menus', 'username', 'userid']
     }
 })
-
-// ReloadData 函数
-export function ReloadData() {
-    const store = useUserStore()
-    addRouter(store.getMenuData)
-}

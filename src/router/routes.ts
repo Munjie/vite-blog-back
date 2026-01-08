@@ -91,6 +91,36 @@ export const routes = [
                 },
                 component: () => import('@/views/comment/comment-list.vue'),
             },
+
+            {
+                path: '/menu-list',
+                name: '/menu-list',
+                meta: {
+                    title: '菜单列表',
+                    permiss: '13',
+                },
+                component: () => import('@/views/menu/index.vue'),
+            },
+
+            {
+                path: '/role-list',
+                name: '/role-list',
+                meta: {
+                    title: '角色列表',
+                    permiss: '13',
+                },
+                component: () => import('@/views/role/index.vue'),
+            },
+
+            {
+                path: '/user-list',
+                name: '/user-list',
+                meta: {
+                    title: '用户列表',
+                    permiss: '13',
+                },
+                component: () => import('@/views/user/index.vue'),
+            },
         ],
     },
     {
