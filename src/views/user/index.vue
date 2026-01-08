@@ -18,9 +18,9 @@
             </div>
 
             <el-table v-loading="loading" :data="userList" border stripe>
-                <el-table-column label="ID" prop="id" width="80" align="center" />
+                <el-table-column label="ID" prop="id" min-width="100"   align="center" show-overflow-tooltip />
 
-                <el-table-column label="头像" width="100" align="center">
+                <el-table-column label="头像" min-width="100"   align="center" show-overflow-tooltip>
                     <template #default="scope">
                         <el-avatar :size="40" :src="scope.row.avatar">
                             {{ scope.row.userName.charAt(0).toUpperCase() }}
@@ -28,9 +28,9 @@
                     </template>
                 </el-table-column>
 
-                <el-table-column label="用户名" prop="userName" min-width="120" />
+                <el-table-column label="用户名" prop="userName" min-width="100"   align="center" show-overflow-tooltip />
 
-                <el-table-column label="所属角色" min-width="200">
+                <el-table-column label="所属角色" min-width="100"  align="center" show-overflow-tooltip>
                     <template #default="scope">
                         <div class="flex gap-1 flex-wrap">
                             <el-tag
@@ -45,9 +45,9 @@
                     </template>
                 </el-table-column>
 
-                <el-table-column label="创建时间" prop="createTime" width="180" />
+                <el-table-column label="创建时间" prop="createTime" min-width="100"   align="center" show-overflow-tooltip />
 
-                <el-table-column label="操作" width="220" align="center" fixed="right">
+                <el-table-column label="操作" min-width="100"   align="center" show-overflow-tooltip>
                     <template #default="scope">
                         <el-button link type="primary" icon="Edit" @click="handleEdit(scope.row)">编辑</el-button>
                         <el-button link type="warning" icon="Key" @click="handleResetPwd(scope.row)">重置密码</el-button>

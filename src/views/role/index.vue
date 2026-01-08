@@ -6,14 +6,14 @@
                     <el-input v-model="queryParams.roleName" placeholder="输入角色名称搜索" style="width: 200px;"
                               class="mr-2" @keyup.enter="handleQuery"/>
                     <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
+                    <el-button type="primary" icon="Plus" @click="handleAdd">新增角色</el-button>
                 </div>
-                <el-button type="primary" icon="Plus" @click="handleAdd">新增角色</el-button>
             </div>
 
             <el-table v-loading="loading" :data="roleList" border stripe highlight-current-row>
-                <el-table-column label="ID" prop="id" width="80" align="center"/>
-                <el-table-column label="角色名称" prop="roleName" min-width="120"/>
-                <el-table-column label="状态" prop="status" width="100" align="center">
+                <el-table-column label="ID" prop="id" min-width="100"   align="center" show-overflow-tooltip/>
+                <el-table-column label="角色名称" prop="roleName" min-width="100"   align="center" show-overflow-tooltip/>
+                <el-table-column label="状态" prop="status"min-width="100"   align="center" show-overflow-tooltip>
                     <template #default="scope">
                         <el-switch
                                 v-model="scope.row.status"
@@ -23,9 +23,9 @@
                         />
                     </template>
                 </el-table-column>
-                <el-table-column label="创建时间" prop="createTime" width="180"/>
-                <el-table-column label="更新时间" prop="updateTime" width="180"/>
-                <el-table-column label="操作" width="260" align="center" fixed="right">
+                <el-table-column label="创建时间" prop="createTime" min-width="100"   align="center" show-overflow-tooltip/>
+                <el-table-column label="更新时间" prop="updateTime" min-width="100"   align="center" show-overflow-tooltip/>
+                <el-table-column label="操作" min-width="100"   align="center" show-overflow-tooltip>
                     <template #default="scope">
                         <el-button link type="primary" icon="Key" @click="handleMenuScope(scope.row)">菜单权限
                         </el-button>

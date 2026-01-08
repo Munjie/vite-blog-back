@@ -14,16 +14,16 @@
                 default-expand-all
                 :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
             >
-                <el-table-column prop="title" label="菜单名称" min-width="150" />
-                <el-table-column prop="icon" label="图标" width="80" align="center">
+                <el-table-column prop="title" label="菜单名称" min-width="100"   align="center" show-overflow-tooltip />
+                <el-table-column prop="icon" label="图标" min-width="100"   align="center" show-overflow-tooltip >
                     <template #default="scope">
                         <el-icon v-if="scope.row.icon"><component :is="scope.row.icon" /></el-icon>
                     </template>
                 </el-table-column>
-                <el-table-column prop="index" label="路由路径" min-width="150" />
-                <el-table-column prop="sort" label="排序" width="80" />
-                <el-table-column prop="createTime" label="创建时间" width="160" />
-                <el-table-column label="操作" width="220" fixed="right">
+                <el-table-column prop="index" label="路由路径" min-width="100"   align="center" show-overflow-tooltip  />
+                <el-table-column prop="sort" label="排序" min-width="100"   align="center" show-overflow-tooltip  />
+                <el-table-column prop="createTime" label="创建时间" min-width="100"   align="center" show-overflow-tooltip  />
+                <el-table-column label="操作" min-width="100"   align="center" show-overflow-tooltip >
                     <template #default="scope">
                         <el-button type="primary" link icon="Plus" @click="handleOpenDialog(scope.row.id)">新增子项</el-button>
                         <el-button type="primary" link icon="Edit" @click="handleEdit(scope.row)">编辑</el-button>
