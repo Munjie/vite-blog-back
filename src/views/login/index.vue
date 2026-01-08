@@ -135,16 +135,17 @@ const connectWebSocket = () => {
             const token = parts[1]
             const userId = Number(parts[2])
             const username = parts[3]
-            performLogin(token, userId, username)
+            const avatar = parts[4]
+            performLogin(token, userId, username,avatar)
         }
     }
 }
 
-const performLogin = async (token: string, userId: number, username: string) => {
-    localStorage.setItem('vuems_name', username)
+const performLogin = async (token: string, userId: number, username: string,avatar: string) => {
     userStore.setUsername(username)
     userStore.setUserid(userId)
     userStore.setToken(token)
+    userStore.setAvatar(avatar)
     const keys = permissStore.defaultList[username.includes('admin') ? 'admin' : 'user']
     permissStore.handleSet(keys || [])
     const menus: Menus[] = await getUserMenu(userId)

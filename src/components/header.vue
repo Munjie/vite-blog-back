@@ -36,11 +36,11 @@
                     </el-tooltip>
                 </div>-->
                 <!-- 用户头像 -->
-                <el-avatar class="user-avator" :size="30" :src="imgurl" />
+                <el-avatar class="user-avator" :size="30" :src="store.getAvatar" />
                 <!-- 用户名下拉菜单 -->
                 <el-dropdown class="user-name" trigger="click" @command="handleCommand">
                     <span class="el-dropdown-link">
-                        {{ username }}
+                        {{ store.getUsername }}
                         <el-icon class="el-icon--right">
                             <arrow-down />
                         </el-icon>
@@ -60,13 +60,8 @@
 import { onMounted } from 'vue';
 import { useSidebarStore } from '../stores/sidebar';
 import { useRouter } from 'vue-router';
-// import imgurl from '../assets/img/img.jpg';
-import imgurl from '../assets/img/user-head.svg';
 import {useUserStore} from '../stores';
 import {logout} from '../api/login.ts'
-const username: string | null = localStorage.getItem('vuems_name');
-// const message: number = 2;
-
 const sidebar = useSidebarStore();
 const store = useUserStore();
 // 侧边栏折叠

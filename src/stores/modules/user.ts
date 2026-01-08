@@ -24,6 +24,7 @@ interface MenuItem {
 interface AllDataState {
     isCollapse: boolean
     username: string
+    avatar: string
     userid: number
     token: string
     menuData: MenuItem[]
@@ -40,6 +41,7 @@ function stateIni(): AllDataState {
     return {
         isCollapse: false,
         username: '',
+        avatar: '',
         userid: 0,
         token: '',
         menuData: [],
@@ -65,6 +67,7 @@ export const useUserStore = defineStore('useAllData', {
     // 定义 getters
     getters: {
         getUsername: (state) => state.username,
+        getAvatar: (state) => state.avatar,
         getUserid: (state) => state.userid,
         getToken: (state) => state.token,
         getMenus: (state) => state.menus,
@@ -79,6 +82,9 @@ export const useUserStore = defineStore('useAllData', {
         // 设置用户名
         setUsername(username: string) {
             this.username = username
+        },
+        setAvatar(avatar: string) {
+            this.avatar = avatar
         },
         // 设置 userid
         setUserid(userid: number) {
