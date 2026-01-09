@@ -1,25 +1,7 @@
 
 import { defineStore } from 'pinia'
 import router from '../../router'
-import type { Component } from 'vue'
 import type { Menus } from '../../types/menu.ts';
-
-// 类型定义
-interface TabItem {
-    path: string
-    index: string
-    label: string
-    icon: string
-}
-
-interface MenuItem {
-    path: string
-    index: string
-    label: string
-    icon?: string
-    children?: MenuItem[]
-    component?: () => Promise<{ default: Component }>
-}
 
 interface AllDataState {
     isCollapse: boolean
@@ -27,9 +9,7 @@ interface AllDataState {
     avatar: string
     userid: number
     token: string
-    menuData: MenuItem[]
     menus: Menus[]
-    tabs: TabItem[]
     currentMenu: any
     permissions: any[]
     currentPagePath: string
@@ -44,16 +24,7 @@ function stateIni(): AllDataState {
         avatar: '',
         userid: 0,
         token: '',
-        menuData: [],
         menus: [],
-        tabs: [
-            {
-                path: "/home",
-                index: "Home",
-                label: "home",
-                icon: "home"
-            }
-        ],
         currentMenu: null,
         permissions: [],
         currentPagePath: '/',
@@ -74,7 +45,6 @@ export const useUserStore = defineStore('useAllData', {
         getPermissions: (state) => state.permissions,
         getLocale: (state) => state.locale,
         getCurrentPagePath: (state) => state.currentPagePath,
-        getTabsData: (state) => state.tabs,
         // isCollapse: (state) => state.isCollapse,
     },
     // 定义 actions
@@ -114,26 +84,6 @@ export const useUserStore = defineStore('useAllData', {
             Object.assign(this.$state, stateIni())
             localStorage.removeItem('user-store')
         },
-        // tabs
-        setTabsData(val: any) {
-            console.log('val', val)
-            if (val.name === 'home') {
-                this.currentMenu = null
-            } else {
-                const index = this.tabs.findIndex((item: any) => item.index === val.index)
-                console.log(index)
-                if (index === -1) {
-                    this.tabs.push(val)
-                }
-                console.log('tabs:', this.tabs)
-            }
-        },
-        removeTagsData(val: any) {
-            const index = this.tabs.findIndex((item: any) => item.index === val.index)
-            if (index > -1) {
-                this.tabs.splice(index, 1)
-            }
-        },
         // 登出方法
         logout() {
             this.resetStore()
@@ -144,6 +94,6 @@ export const useUserStore = defineStore('useAllData', {
     persist: {
         key: 'user-store',
         storage: localStorage,
-        pick: ['token', 'menuData','menus', 'username', 'userid']
+        pick: ['token','menus', 'username', 'userid','avatar']
     }
 })
