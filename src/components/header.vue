@@ -15,26 +15,6 @@
         </div>
         <div class="header-right">
             <div class="header-user-con">
-<!--                <div class="btn-icon" @click="router.push('/theme')">
-                    <el-tooltip effect="dark" content="设置主题" placement="bottom">
-                        <i class="el-icon-lx-skin"></i>
-                    </el-tooltip>
-                </div>
-                <div class="btn-icon" @click="router.push('/ucenter')">
-                    <el-tooltip
-                        effect="dark"
-                        :content="message ? `有${message}条未读消息` : `消息中心`"
-                        placement="bottom"
-                    >
-                        <i class="el-icon-lx-notice"></i>
-                    </el-tooltip>
-                    <span class="btn-bell-badge" v-if="message"></span>
-                </div>
-                <div class="btn-icon" @click="setFullScreen">
-                    <el-tooltip effect="dark" content="全屏" placement="bottom">
-                        <i class="el-icon-lx-full"></i>
-                    </el-tooltip>
-                </div>-->
                 <!-- 用户头像 -->
                 <el-avatar class="user-avator" :size="30" :src="store.getAvatar" />
                 <!-- 用户名下拉菜单 -->
@@ -86,7 +66,7 @@ const handleCommand = (command: string) => {
       store.logout()
     })
     } else if (command == 'user') {
-        router.push('/ucenter');
+        router.push('/home');
     }
 };
 
@@ -153,36 +133,6 @@ const handleCommand = (command: string) => {
     align-items: center;
 }
 
-.btn-fullscreen {
-    transform: rotate(45deg);
-    margin-right: 5px;
-    font-size: 24px;
-}
-
-.btn-icon {
-    position: relative;
-    width: 30px;
-    height: 30px;
-    text-align: center;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    color: var(--header-text-color);
-    margin: 0 5px;
-    font-size: 20px;
-}
-
-.btn-bell-badge {
-    position: absolute;
-    right: 4px;
-    top: 0px;
-    width: 8px;
-    height: 8px;
-    border-radius: 4px;
-    background: #f56c6c;
-    color: var(--header-text-color);
-}
-
 .user-avator {
     margin: 0 10px 0 20px;
 }
@@ -194,7 +144,4 @@ const handleCommand = (command: string) => {
     align-items: center;
 }
 
-.el-dropdown-menu__item {
-    text-align: center;
-}
 </style>

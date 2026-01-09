@@ -29,7 +29,7 @@
                         <!-- 已扫码待确认状态：只显示大绿色打钩 -->
                         <div v-if="loginStatus === 'scanned'" class="status scanned">
                             <el-icon class="success-icon"><Check /></el-icon>
-                            <!-- <p style="margin-top: 20px; font-size: 14px; color: #666;">请在手机上确认登录</p> -->
+                             <p style="margin-top: 20px; font-size: 14px; color: #666;">请在手机上确认登录</p>
                         </div>
 
                         <!-- 刷新中 -->
@@ -56,22 +56,18 @@ import axios from 'axios'
 import {ElMessage, ElIcon} from 'element-plus'
 import {Check, Loading} from '@element-plus/icons-vue'
 import {useUserStore} from '../../stores'
-import {usePermissStore} from '../../stores/permiss'
 import {getUserMenu} from '../../api/menu.ts'
 import type {Menus} from '../../types/menu.ts'
 import { useTagsViewStore } from '../../stores/tagsView.ts';
 const tagsViewStore = useTagsViewStore();
 const router = useRouter()
 const userStore = useUserStore()
-const permissStore = usePermissStore()
-
-
 const qrImg = ref<string>('')
 const scene = ref<string>('')
 let ws: WebSocket | null = null
 let currentObjectUrl = ''
 
-let loginStatus = ref<'loading' | 'waiting' | 'scanned' | 'refreshing'>('loading')  // 初始为 loading
+let loginStatus = ref<'loading' | 'waiting' | 'scanned' | 'refreshing'>('loading')
 
 const refreshQr = () => {
     if (loginStatus.value === 'loading' || loginStatus.value === 'refreshing') return // 防止重复点击
@@ -85,7 +81,7 @@ const refreshQr = () => {
         // 加载完成（无论成功失败）恢复等待状态
         setTimeout(() => {
             loginStatus.value = 'waiting'
-        }, 800) // 给用户一点加载反馈
+        }, 800)
     })
 }
 const loadQrCode = async () => {
@@ -145,8 +141,6 @@ const performLogin = async (token: string, userId: number, username: string,avat
     userStore.setUserid(userId)
     userStore.setToken(token)
     userStore.setAvatar(avatar)
-    const keys = permissStore.defaultList[username.includes('admin') ? 'admin' : 'user']
-    permissStore.handleSet(keys || [])
     const menus: Menus[] = await getUserMenu(userId)
     userStore.setMenus(menus)
     tagsViewStore.delAllViews(true)
@@ -264,11 +258,11 @@ onUnmounted(() => {
 }
 
 /* 可选：如果保留小文字提示的样式 */
-/* .qr-overlay.scanned p {
+.qr-overlay.scanned p {
   margin-top: 20px;
   font-size: 14px;
   color: #666;
-} */
+}
 
 /* 刷新中 */
 .qr-overlay.refreshing {
