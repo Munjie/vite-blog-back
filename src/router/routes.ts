@@ -13,8 +13,7 @@ export const routes = [
                 name: 'home',
                 component: () => import('@/views/home/index.vue'),
                 meta: {
-                    title: '首页',
-                    permiss: '13',
+                    title: '首页'
                 }
 
             },
@@ -22,8 +21,7 @@ export const routes = [
                 path: '/system-menu',
                 name: 'system-menu',
                 meta: {
-                    title: '菜单管理',
-                    permiss: '13',
+                    title: '菜单管理'
                 },
                 component: () => import('@/views/system/menu.vue'),
             },
@@ -31,8 +29,7 @@ export const routes = [
                 path: '/task-list',
                 name: 'task-list',
                 meta: {
-                    title: '任务列表',
-                    permiss: '13',
+                    title: '任务列表'
                 },
                 component: () => import('@/views/task/task-list.vue'),
             },
@@ -40,8 +37,7 @@ export const routes = [
                 path: '/task-add',
                 name: 'task-add',
                 meta: {
-                    title: '新增任务',
-                    permiss: '13',
+                    title: '新增任务'
                 },
                 component: () => import('@/views/task/task-add.vue'),
             },
@@ -49,8 +45,7 @@ export const routes = [
                 path: '/score-list',
                 name: 'score-list',
                 meta: {
-                    title: '成绩列表',
-                    permiss: '13',
+                    title: '成绩列表'
                 },
                 component: () => import('@/views/student/score-list.vue'),
             },
@@ -59,7 +54,6 @@ export const routes = [
                 name: '/article-edit',
                 meta: {
                     title: '文章编辑',
-                    permiss: '13',
                 },
                 component: () => import('@/views/article/article-editor.vue'),
             },
@@ -67,8 +61,7 @@ export const routes = [
                 path: '/article-view',
                 name: '/article-view',
                 meta: {
-                    title: '文章详情',
-                    permiss: '13',
+                    title: '文章详情'
                 },
                 component: () => import('@/views/article/article-view.vue'),
             },
@@ -76,8 +69,7 @@ export const routes = [
                 path: '/article-list',
                 name: '/article-list',
                 meta: {
-                    title: '文章列表',
-                    permiss: '13',
+                    title: '文章列表'
                 },
                 component: () => import('@/views/article/article-list.vue'),
             },
@@ -86,8 +78,7 @@ export const routes = [
                 path: '/comment-list',
                 name: '/comment-list',
                 meta: {
-                    title: '评论列表',
-                    permiss: '13',
+                    title: '评论列表'
                 },
                 component: () => import('@/views/comment/comment-list.vue'),
             },
@@ -96,8 +87,7 @@ export const routes = [
                 path: '/menu-list',
                 name: '/menu-list',
                 meta: {
-                    title: '菜单列表',
-                    permiss: '13',
+                    title: '菜单列表'
                 },
                 component: () => import('@/views/menu/index.vue'),
             },
@@ -106,8 +96,7 @@ export const routes = [
                 path: '/role-list',
                 name: '/role-list',
                 meta: {
-                    title: '角色列表',
-                    permiss: '13',
+                    title: '角色列表'
                 },
                 component: () => import('@/views/role/index.vue'),
             },
@@ -116,8 +105,7 @@ export const routes = [
                 path: '/user-list',
                 name: '/user-list',
                 meta: {
-                    title: '用户列表',
-                    permiss: '13',
+                    title: '用户列表'
                 },
                 component: () => import('@/views/user/index.vue'),
             },
