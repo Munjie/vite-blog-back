@@ -65,6 +65,8 @@ import {logout} from '../api/login.ts'
 const sidebar = useSidebarStore();
 const store = useUserStore();
 // 侧边栏折叠
+import { useTagsViewStore } from '../stores/tagsView.ts';
+const tagsViewStore = useTagsViewStore();
 const collapseChage = () => {
     sidebar.handleCollapse();
 };
@@ -80,6 +82,7 @@ const router = useRouter();
 const handleCommand = (command: string) => {
     if (command == 'loginout') {
     logout().then(() => {
+        tagsViewStore.delAllViews(true)
       store.logout()
     })
     } else if (command == 'user') {

@@ -62,7 +62,6 @@ declare module 'vue' {
     Sidebar: typeof import('./../components/sidebar.vue')['default']
     Svgicon: typeof import('./../components/svgicon/index.vue')['default']
     TableSearch: typeof import('./../components/table-search.vue')['default']
-    Tabs: typeof import('./../components/tabs.vue')['default']
     TagsView: typeof import('./../components/TagsView.vue')['default']
   }
   export interface GlobalDirectives {

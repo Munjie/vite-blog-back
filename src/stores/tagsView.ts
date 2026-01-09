@@ -20,6 +20,13 @@ export const useTagsViewStore = defineStore('tagsView', {
         // 关闭其他
         delOthersViews(path: string) {
             this.visitedViews = this.visitedViews.filter(v => v.path === path || v.meta?.affix);
+        },
+        delAllViews(force = false) {
+            if (force) {
+                this.visitedViews = [];
+            } else {
+                this.visitedViews = this.visitedViews.filter(tag => tag.meta?.affix);
+            }
         }
     }
 });

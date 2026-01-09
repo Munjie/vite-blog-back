@@ -55,17 +55,16 @@ import {useRouter} from 'vue-router'
 import axios from 'axios'
 import {ElMessage, ElIcon} from 'element-plus'
 import {Check, Loading} from '@element-plus/icons-vue'
-
 import {useUserStore} from '../../stores'
 import {usePermissStore} from '../../stores/permiss'
-import {useTabsStore} from '../../stores/tabs'
 import {getUserMenu} from '../../api/menu.ts'
 import type {Menus} from '../../types/menu.ts'
-
+import { useTagsViewStore } from '../../stores/tagsView.ts';
+const tagsViewStore = useTagsViewStore();
 const router = useRouter()
 const userStore = useUserStore()
 const permissStore = usePermissStore()
-const tabsStore = useTabsStore()
+
 
 const qrImg = ref<string>('')
 const scene = ref<string>('')
@@ -150,7 +149,7 @@ const performLogin = async (token: string, userId: number, username: string,avat
     permissStore.handleSet(keys || [])
     const menus: Menus[] = await getUserMenu(userId)
     userStore.setMenus(menus)
-    tabsStore.clearTabs()
+    tagsViewStore.delAllViews(true)
     ElMessage.success('登录成功！')
     await router.push('/main')
 }
