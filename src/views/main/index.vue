@@ -1,30 +1,32 @@
+
 <template>
     <div class="wrapper">
-        <v-header />
-        <v-sidebar />
+        <Header />
+        <Sidebar />
         <div class="content-box" :class="{ 'content-collapse': sidebar.collapse }">
-            <v-tabs></v-tabs>
             <div class="content">
-                <router-view v-slot="{ Component }">
-                    <transition name="move" mode="out-in">
-                        <keep-alive :include="tabs.nameList">
-                            <component :is="Component"></component>
-                        </keep-alive>
-                    </transition>
-                </router-view>
+                <Navbar />
+                <TagsView />
+                <RouterView></RouterView>
             </div>
         </div>
     </div>
 </template>
 <script setup lang="ts">
 import { useSidebarStore } from '../../stores/sidebar';
-import { useTabsStore } from '../../stores/tabs';
-import vHeader from '../../components/header.vue';
-import vSidebar from '../../components/sidebar.vue';
-import vTabs from '../../components/tabs.vue';
-
 const sidebar = useSidebarStore();
-const tabs = useTabsStore();
+import { useTagsViewStore } from '../../stores/tagsView.ts';
+const tagsViewStore = useTagsViewStore();
+import { watch } from 'vue';
+import { useRoute } from 'vue-router';
+const route = useRoute();
+watch(
+    () => route.path,
+    () => {
+        tagsViewStore.addView(route);
+    },
+    { immediate: true }
+);
 </script>
 
 <style>
@@ -61,3 +63,5 @@ const tabs = useTabsStore();
     left: 65px;
 }
 </style>
+
+

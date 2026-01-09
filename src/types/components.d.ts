@@ -47,8 +47,6 @@ declare module 'vue' {
     ElSwitch: typeof import('element-plus/es')['ElSwitch']
     ElTable: typeof import('element-plus/es')['ElTable']
     ElTableColumn: typeof import('element-plus/es')['ElTableColumn']
-    ElTabPane: typeof import('element-plus/es')['ElTabPane']
-    ElTabs: typeof import('element-plus/es')['ElTabs']
     ElTag: typeof import('element-plus/es')['ElTag']
     ElTooltip: typeof import('element-plus/es')['ElTooltip']
     ElTreeSelect: typeof import('element-plus/es')['ElTreeSelect']
@@ -57,7 +55,6 @@ declare module 'vue' {
     Header: typeof import('./../components/header.vue')['default']
     IconSelect: typeof import('./../components/IconSelect.vue')['default']
     MainHdrCont: typeof import('./../components/MainHdrCont.vue')['default']
-    MainTagsCont: typeof import('./../components/MainTagsCont.vue')['default']
     MarkdownPreview: typeof import('./../components/MarkdownPreview.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
@@ -66,6 +63,7 @@ declare module 'vue' {
     Svgicon: typeof import('./../components/svgicon/index.vue')['default']
     TableSearch: typeof import('./../components/table-search.vue')['default']
     Tabs: typeof import('./../components/tabs.vue')['default']
+    TagsView: typeof import('./../components/TagsView.vue')['default']
   }
   export interface GlobalDirectives {
     vLoading: typeof import('element-plus/es')['ElLoadingDirective']
