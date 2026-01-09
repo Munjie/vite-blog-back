@@ -11,15 +11,13 @@ import 'element-plus/dist/index.css';
 import './assets/css/icon.css';
 import * as echarts from 'echarts'
 import Echarts from "vue-echarts";
-import { usePermissStore } from './stores/permiss';
 import 'highlight.js/styles/atom-one-dark.css';
 import 'github-markdown-css/github-markdown-dark.css';
+import 'element-plus/theme-chalk/dark/css-vars.css'
 const pina = createPinia();
 pina.use(piniaPluginPersistedstate);
-
 const app = createApp(App)
 app.config.globalProperties.$echarts = echarts
-
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
     app.component(key, component)
 }
@@ -29,14 +27,5 @@ setupStore(app)
 app.use(pina)
 app.use(router)
 app.use(ElementPlus)
-// 自定义权限指令
-const permiss = usePermissStore();
-app.directive('permiss', {
-    mounted(el, binding) {
-        if (binding.value && !permiss.key.includes(String(binding.value))) {
-            el['hidden'] = true;
-        }
-    },
-});
 app.component("v-chart", Echarts);
 app.mount('#app')

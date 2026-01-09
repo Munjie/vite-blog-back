@@ -11,7 +11,7 @@ export const routes = [
             {
                 path: 'home',
                 name: 'home',
-                component: () => import('@/views/home/main.vue'),
+                component: () => import('@/views/home/welcome.vue'),
                 meta: {
                     title: '首页'
                 }
@@ -24,6 +24,14 @@ export const routes = [
                     title: '菜单管理'
                 },
                 component: () => import('@/views/system/menu.vue'),
+            },
+            {
+                path: '/task-index',
+                name: 'task-index',
+                meta: {
+                    title: '数据汇总'
+                },
+                component: () => import('@/views/task/index.vue'),
             },
             {
                 path: '/task-list',
@@ -48,6 +56,14 @@ export const routes = [
                     title: '成绩列表'
                 },
                 component: () => import('@/views/student/score-list.vue'),
+            },
+            {
+                path: '/article-dashboard',
+                name: '/article-dashboard',
+                meta: {
+                    title: '数据汇总',
+                },
+                component: () => import('@/views/article/dashboard.vue'),
             },
             {
                 path: '/article-edit',

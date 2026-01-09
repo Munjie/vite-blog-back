@@ -142,7 +142,7 @@ import {CanvasRenderer} from 'echarts/renderers';
 ;
 // 引入 echarts 库
 import VChart from 'vue-echarts'
-import chinaMap from '../../utils/china';
+import chinaMap from '../../utils/china.ts';
 import {nextTick, onMounted, ref} from "vue";
 import {getHomeAllTask, getHomeData} from "../../api/home.ts";
 import type {FormOptionList} from "../../types/form-option.ts";
