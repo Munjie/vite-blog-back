@@ -130,8 +130,8 @@ import {ElMessage, ElIcon} from 'element-plus'
 import {Check, Loading, Monitor, Refresh} from '@element-plus/icons-vue'
 import {useUserStore} from '../../stores'
 import {login} from "../../api/user.ts";
-import type {Menus} from "@/types/menu.ts";
-import {getUserMenu} from "@/api/menu.ts";
+import type {Menus} from "../../types/menu.ts";
+import {getUserMenu} from "../../api/menu.ts";
 import {useTagsViewStore} from '../../stores/tagsView.ts';
 
 const tagsViewStore = useTagsViewStore();
