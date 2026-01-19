@@ -10,7 +10,6 @@ import { useUserStore } from '../stores';
 
 
 // 1. 定义后端返回的标准数据结构
-// 这里的结构根据你们后端的实际返回修改，通常包含 code, data, message
 export interface Result<T = any> {
     code: number;
     message: string;
@@ -27,14 +26,11 @@ const service: AxiosInstance = axios.create({
     },
 });
 
-// 3. 请求拦截器 (Request Interceptor)
-// 请求拦截器（完美版）
+// 3. 请求拦截器
 service.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
         const userStore = useUserStore();
-        // 优先从 Pinia 拿 token（推荐），没有再 fallback 到 localStorage
-        let token = userStore.getToken || localStorage.getItem('token') || ''
-        // 如果还是没有，说明真的没登录 → 拦截请求 + 跳转登录
+        let token = userStore.getExpireToken()
         if (!token) {
             // 避免在登录页重复跳转
             if (router.currentRoute.value.name !== 'login') {
@@ -50,12 +46,11 @@ service.interceptors.request.use(
                 }));
             }
         }
-        // 有 token 就塞进 header（标准 Bearer 格式）
         config.headers.Authorization = `Bearer ${token}`
         return config
     },
     (error: AxiosError) => {
-        // 请求配置出错（比如没网、timeout）
+        // 请求配置出错
         ElMessage.error('请求出错，请检查网络')
         return Promise.reject(error)
     }
@@ -64,7 +59,6 @@ service.interceptors.request.use(
 // 4. 响应拦截器 (Response Interceptor)
 service.interceptors.response.use(
     (response: AxiosResponse) => {
-        // 这里的 response.data 是后端返回的原始数据
         if (response.status === 200) {
             const code = response.data.code;
             const message = response.data.message;
@@ -72,7 +66,6 @@ service.interceptors.response.use(
                 return response;
             }else {
                 if (code === 200) {
-                    // 直接返回其中的 data，这样前端调用时就不用多解构一层
                     return response.data;
                 } else {
                     ElMessage.error(message || '系统错误')
@@ -128,7 +121,6 @@ service.interceptors.response.use(
 
 
 // 5. 导出封装好的请求方法
-// 这里我们通过泛型 T 指定返回数据的类型，Result<T> 对应上面定义的接口
 const http = {
     get<T = any>(url: string, params?: object): Promise<Result<T>> {
         return service.get(url, {params});

@@ -114,7 +114,7 @@
 
             <div class="login-footer">
                 <p v-if="loginMode === 'pwd'">还没有账号？<!--<span class="link">立即注册</span>--><span class="link"
-                                                                                                 @click="loginMode = 'qr'">扫码注册登录</span>
+                                                                                                        @click="loginMode = 'qr'">扫码注册登录</span>
                 </p>
                 <p v-else @click="loginMode = 'pwd'" class="link-switch">使用账号密码登录</p>
             </div>
@@ -132,7 +132,8 @@ import {useUserStore} from '../../stores'
 import {login} from "../../api/user.ts";
 import type {Menus} from "@/types/menu.ts";
 import {getUserMenu} from "@/api/menu.ts";
-import { useTagsViewStore } from '../../stores/tagsView.ts';
+import {useTagsViewStore} from '../../stores/tagsView.ts';
+
 const tagsViewStore = useTagsViewStore();
 const router = useRouter()
 const userStore = useUserStore()
@@ -166,7 +167,7 @@ const handlePwdLogin = async () => {
     isSubmitting.value = true
     try {
         const res = (await login(loginForm)).data;
-        await performLogin(res.token, res.userId, res.userName, res.avatar)
+        await performLogin(res.token, res.userId, res.userName, res.avatar, res.expire)
     } finally {
         isSubmitting.value = false
     }
@@ -241,21 +242,23 @@ const connectWebSocket = () => {
             const userId = Number(parts[2])
             const username = parts[3]
             const avatar = parts[4]
-            performLogin(token, userId, username, avatar)
+            const expire = parts[5]
+            performLogin(token, userId, username, avatar, expire)
         }
     }
 }
 
-const performLogin = async (token: string, userId: number, username: string, avatar: string) => {
-  userStore.setUsername(username)
-  userStore.setUserid(userId)
-  userStore.setToken(token)
-  userStore.setAvatar(avatar)
-  const menus: Menus[] = await getUserMenu(userId)
-  userStore.setMenus(menus)
-  tagsViewStore.delAllViews(true)
-  ElMessage.success('登录成功！')
-  await router.push('/main')
+const performLogin = async (token: string, userId: number, username: string, avatar: string, expire: number) => {
+    userStore.setUsername(username)
+    userStore.setUserid(userId)
+    userStore.setToken(token)
+    userStore.setAvatar(avatar)
+    userStore.setExpire(expire)
+    const menus: Menus[] = await getUserMenu(userId)
+    userStore.setMenus(menus)
+    tagsViewStore.delAllViews(true)
+    ElMessage.success('登录成功！')
+    await router.push('/main')
 }
 
 
@@ -277,6 +280,7 @@ onUnmounted(() => {
   background: url(../../assets/img/bg_login.jpg) center/cover no-repeat;
   position: relative;
   overflow: hidden;
+
   &::before {
     content: "";
     position: absolute;

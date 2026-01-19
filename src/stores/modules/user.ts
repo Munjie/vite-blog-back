@@ -14,6 +14,7 @@ interface AllDataState {
     permissions: any[]
     currentPagePath: string
     locale: string
+    expireAt: number | null
 }
 
 // 初始化状态函数
@@ -28,7 +29,8 @@ function stateIni(): AllDataState {
         currentMenu: null,
         permissions: [],
         currentPagePath: '/',
-        locale: 'en'
+        locale: 'en',
+        expireAt: null,
     }
 }
 
@@ -88,6 +90,20 @@ export const useUserStore = defineStore('useAllData', {
         logout() {
             this.resetStore()
             router.push({ name: 'login' })
+        },
+        getExpireToken() {
+            if (!this.token) return ''
+            if (this.expireAt && Date.now() > this.expireAt) {
+                this.resetStore()
+                return ''
+            }
+            return this.token
+        },
+        setExpire(expireIn?: number) {
+            if (expireIn) {
+                // 保存过期时间戳（毫秒）
+                this.expireAt = new Date().getTime() + expireIn * 1000
+            }
         },
     },
     // Persist 配置
