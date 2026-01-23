@@ -34,7 +34,7 @@ function stateIni(): AllDataState {
     }
 }
 
-export const useUserStore = defineStore('useAllData', {
+export const useUserStore = defineStore('sysUserData', {
     // 定义状态
     state: stateIni,
     // 定义 getters
@@ -84,7 +84,7 @@ export const useUserStore = defineStore('useAllData', {
         resetStore() {
             // 重置为初始状态
             Object.assign(this.$state, stateIni())
-            localStorage.removeItem('user-store')
+            localStorage.removeItem('sys-user-store')
         },
         // 登出方法
         logout() {
@@ -108,7 +108,7 @@ export const useUserStore = defineStore('useAllData', {
     },
     // Persist 配置
     persist: {
-        key: 'user-store',
+        key: 'sys-user-store',
         storage: localStorage,
         pick: ['token','menus', 'username', 'userid','avatar']
     }
