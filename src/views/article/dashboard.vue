@@ -174,8 +174,12 @@ const initMap = async () => {
       name: item.name,
       value: item.value
     }))
-    const res = await axios.get('https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json');
-    echarts.registerMap('china', res.data as any);
+
+    // 假设文件放在 public/geojson/china.json
+    const res = await axios.get('/maps/china_all.json');
+    echarts.registerMap('china', res.data);
+    // const res = await axios.get('https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json');
+    // echarts.registerMap('china', res.data as any);
 
     myChart.setOption({
       tooltip: { trigger: 'item', formatter: '{b}<br/>访客数: {c}' },
