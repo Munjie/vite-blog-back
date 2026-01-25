@@ -127,8 +127,8 @@ import { ref, onMounted, onUnmounted, markRaw } from 'vue';
 import * as echarts from 'echarts';
 import 'echarts-wordcloud';
 import {Document, View, ChatLineRound, Monitor} from '@element-plus/icons-vue';
-import axios from 'axios';
 import {getVisitMap, getVisitCount} from "../../api/home.ts";
+import  geoJSONSample from "../../utils/china_all.ts"
 
 // --- 状态数据 ---
 const timeRange = ref('week');
@@ -141,9 +141,7 @@ let lineChart: echarts.ECharts | null = null;
 let pieChart: echarts.ECharts | null = null;
 
 const format = (percentage: number) => (percentage === 100 ? 'Full' : `${percentage}%`);
-// --- 初始化地图 (核心难点) ---
 const mapData = ref();
-// 模拟顶部卡片数据
 const statCards = ref();
 const icons = [markRaw(Document), markRaw(View), markRaw(ChatLineRound), markRaw(Monitor)];
 const colors = [
@@ -174,13 +172,7 @@ const initMap = async () => {
       name: item.name,
       value: item.value
     }))
-
-    // 假设文件放在 public/geojson/china.json
-    const res = await axios.get('/maps/china_all.json');
-    echarts.registerMap('china', res.data);
-    // const res = await axios.get('https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json');
-    // echarts.registerMap('china', res.data as any);
-
+    echarts.registerMap('china', geoJSONSample as any);
     myChart.setOption({
       tooltip: { trigger: 'item', formatter: '{b}<br/>访客数: {c}' },
       visualMap: {
