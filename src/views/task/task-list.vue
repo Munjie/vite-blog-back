@@ -118,7 +118,7 @@ const exportFun = async (row: { id: string | number, title: string }) => {
         taskId: taskId.value,
         title: title.value,
     }
-    const response = await axios.post('/api/task/export-report', info, {
+    const response = await axios.post('/api/score-manage/export-report', info, {
         headers: {'Content-Type': 'application/json; application/octet-stream'},
         responseType: "blob"
     })
@@ -159,7 +159,7 @@ const fetchList = async () => {
             pageNum: currentPage.value
         }
         const res = await getTaskList(taskForm);
-        tableData.value = res.data.records,
+        tableData.value = res.data.records
             total.value = res.data.total
         console.log('API数据:', tableData.value);
 

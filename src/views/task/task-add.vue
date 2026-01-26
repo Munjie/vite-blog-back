@@ -174,7 +174,7 @@ const submitAll = async () => {
         })
         // const res = await uploadTask(formData);
         // 3. 发送请求 (模拟 axios)
-        const res = await axios.post('/api/task/create-score-task', formData, {
+        const res = await axios.post('/api/score-manage/create-score-task', formData, {
           headers: {
             'Content-Type': 'multipart/form-data' // 必须指定
           }
