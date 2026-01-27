@@ -1,6 +1,8 @@
 import http from './http.ts';
 
 
+
+
 export const getHomeData = (data?: object) => {
     return http.post(
         '/api/home/home-data',
@@ -27,6 +29,26 @@ export const getVisitMap  = async () => {
         return [];
     }
 };
+
+export const getVisitLine  = async () => {
+    try {
+        return await http.get('/api/home/line-data')  ;
+    } catch (error) {
+        console.error('获取数据失败:', error);
+        return [];
+    }
+};
+
+
+export const getComments  = async () => {
+    try {
+        return await http.get('/api/home/latest-comments')  ;
+    } catch (error) {
+        console.error('获取数据失败:', error);
+        return [];
+    }
+};
+
 
 
 
