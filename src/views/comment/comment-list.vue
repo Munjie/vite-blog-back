@@ -26,10 +26,8 @@ import CustomTable from '@/components/ActionTableCont.vue';
 import {useRoute} from 'vue-router';
 import {ElMessage, ElMessageBox} from "element-plus";
 import {deleteComment, getAllComment, updateCommentStatus} from "../../api/comment.ts";
-import {updateArticleStatus} from "../../api/article.ts";
 
 const route = useRoute();
-// 2. 定义点击事件处理函数
 const id = ref();
 const tableData = ref([]);
 const total = ref(0);
