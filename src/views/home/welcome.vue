@@ -136,12 +136,16 @@ import welcomeImg from '../../assets/img/welcome.svg'
 import {useUserStore} from '../../stores';
 import {useDark, useToggle} from '@vueuse/core';
 import {ElMessage} from "element-plus";
+import {sendEmail} from "../../api/home.ts";
 
 const isDark = useDark();
 const toggleDark = useToggle(isDark);
 const handleToolClick = (tool: any) => {
     if (tool.name === '系统设置') {
         executeToggleTheme();
+    }
+    else if (tool.name === '发送邮件') {
+        sendEmail();
     } else {
         ElMessage(`点击了 ${tool.name}`);
     }
@@ -213,6 +217,7 @@ const tools = [
     {name: '日程安排', icon: Calendar, color: '#E6A23C', bgColor: '#fdf6ec'},
     {name: '帮助文档', icon: Document, color: '#67C23A', bgColor: '#f0f9eb'},
     {name: '联系管理员', icon: Service, color: '#8e44ad', bgColor: '#f9f0ff'},
+    {name: '发送邮件', icon: Service, color: '#8e44ad', bgColor: '#f9f0ff'},
 ];
 
 // 在 script setup 中找到 notices 的定义，并为其指定类型

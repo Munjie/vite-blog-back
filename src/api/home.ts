@@ -51,16 +51,14 @@ export const getComments  = async () => {
 
 
 
-
-// export const getVisitCount  = async () => {
-//     try {
-//         return await http.get('/api/dashboard/stat-cards')  ;
-//     } catch (error) {
-//         console.error('获取数据失败:', error);
-//         return [];
-//     }
-// };
-
+export const sendEmail  = async () => {
+    try {
+        return await http.get('/api/back/send-email')  ;
+    } catch (error) {
+        console.error('失败:', error);
+        return null;
+    }
+};
 
 
 export const getVisitCount = async () => {
