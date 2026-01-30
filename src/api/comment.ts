@@ -16,5 +16,11 @@ export function deleteComment(id: number) {
 }
 
 
+export const updateCommentStatus = (data?: object) => {
+    return http.post(
+        '/api/back/update-comment-status',
+        data
+    );
+};
 
 

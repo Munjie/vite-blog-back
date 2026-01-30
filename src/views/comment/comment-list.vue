@@ -13,6 +13,7 @@
                     @update:current-page="handlePageChange"
                     @update:page-size="handlePageSizeChange"
                     @selection-change="handleSelectionChange"
+                    @switch-change="onStatusChange"
             >
             </CustomTable>
         </div>
@@ -24,7 +25,8 @@ import {onMounted, ref, watch} from 'vue';
 import CustomTable from '@/components/ActionTableCont.vue';
 import {useRoute} from 'vue-router';
 import {ElMessage, ElMessageBox} from "element-plus";
-import {deleteComment, getAllComment} from "../../api/comment.ts";
+import {deleteComment, getAllComment, updateCommentStatus} from "../../api/comment.ts";
+import {updateArticleStatus} from "../../api/article.ts";
 
 const route = useRoute();
 // 2. 定义点击事件处理函数
@@ -42,6 +44,10 @@ const tableColumns = ref([
     {
         prop: 'likes',
         label: '点赞',
+    },
+    {
+        prop: 'status',
+        label: '是否发布',
     },
     {
         prop: 'createTime',
@@ -69,6 +75,21 @@ const deleteFun = async (row: { id: string | number }) => {
         await fetchList()
     } catch (error) {
         console.log('用户取消操作')
+    }
+}
+
+const onStatusChange = async ({ id, status }: { id: number | string, status: number }) => {
+    try {
+        let comment = {
+            id: id,
+            status: status
+        }
+        await updateCommentStatus(comment);
+        ElMessage.success('评论状态更新成功')
+    } catch (err) {
+        ElMessage.error('更新失败，请重试')
+    }finally {
+        await fetchList();
     }
 }
 
