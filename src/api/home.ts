@@ -5,14 +5,14 @@ import http from './http.ts';
 
 export const getHomeData = (data?: object) => {
     return http.post(
-        '/api/home/home-data',
+        '/api/dashboard/home-data',
         data
     );
 };
 
 export const getHomeAllTask  = async () => {
     try {
-        return await http.get('/api/home/all-task')  ;
+        return await http.get('/api/dashboard/all-task')  ;
     } catch (error) {
         console.error('获取数据失败:', error);
         return [];
@@ -23,7 +23,7 @@ export const getHomeAllTask  = async () => {
 
 export const getVisitMap  = async () => {
     try {
-        return await http.get('/api/home/map-data')  ;
+        return await http.get('/api/dashboard/map-data')  ;
     } catch (error) {
         console.error('获取数据失败:', error);
         return [];
@@ -32,7 +32,7 @@ export const getVisitMap  = async () => {
 
 export const getVisitLine  = async () => {
     try {
-        return await http.get('/api/home/line-data')  ;
+        return await http.get('/api/dashboard/line-data')  ;
     } catch (error) {
         console.error('获取数据失败:', error);
         return [];
@@ -42,7 +42,7 @@ export const getVisitLine  = async () => {
 
 export const getComments  = async () => {
     try {
-        return await http.get('/api/home/latest-comments')  ;
+        return await http.get('/api/dashboard/latest-comments')  ;
     } catch (error) {
         console.error('获取数据失败:', error);
         return [];

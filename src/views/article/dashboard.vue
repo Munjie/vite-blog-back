@@ -10,7 +10,7 @@
                             </el-icon>
                         </div>
                         <div class="stat-info">
-                            <div class="stat-title">{{ item.title }}</div>
+<!--                            <div class="stat-title">{{ item.title }}</div>-->
                             <div class="stat-value">
                                 {{ item.value }}
                             </div>
