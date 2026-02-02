@@ -74,7 +74,7 @@ const handleView = (row: { id: string | number }) => {
     router.push({
         path: '/article-edit',
         query: {
-            id: row.id
+            articleId: row.id
         }
     });
 };

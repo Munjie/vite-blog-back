@@ -4,11 +4,11 @@
             <div class="card-header-wrapper">
                 <div class="card-header-title">新增文章</div>
                 <el-button
-                    class="publish-btn"
-                    type="primary"
-                    size="small"
-                    :loading="loading"
-                    @click="submitAll"
+                        class="publish-btn"
+                        type="primary"
+                        size="small"
+                        :loading="loading"
+                        @click="submitAll"
                 >
                     保存
                 </el-button>
@@ -63,7 +63,7 @@
                 </el-dialog>
             </el-form-item>
             <el-form-item style="width: 100%; height: auto" prop="article_content">
-                <MdEditor v-model="content"/>
+                <MdEditor v-model="content" :on-upload-img="onUploadImg"/>
             </el-form-item>
         </el-form>
     </el-card>
@@ -73,16 +73,20 @@ import {ref, onMounted} from 'vue'
 import MdEditor from "md-editor-v3";
 import "md-editor-v3/lib/style.css";
 import {ElMessage} from "element-plus";
-import {addArticle, deleteCoverImage, getAllTags, getAllCategory} from "../../api/article.ts";
+import {addArticle, deleteCoverImage, getAllTags, getAllCategory, getArticle} from "../../api/article.ts";
 import router from "../../router";
 import {ElDialog, ElIcon} from 'element-plus'
 import {Plus} from '@element-plus/icons-vue'
 import axios from 'axios'
+import {useRoute} from 'vue-router'
 
+const route = useRoute()
 // 文章数据
+const id = ref(null)
 const title = ref('')
 const summary = ref('')
 const content = ref('')
+const articleId = ref()
 const loading = ref(false)
 const selectedTags = ref()
 const selectedCategory = ref<string | number>('')
@@ -92,6 +96,7 @@ const submitAll = async () => {
     loading.value = true
     try {
         let articleForm = {
+            id: route.query.articleId,
             title: title.value,
             content: content.value,
             articleCover: articleCover.value,
@@ -117,6 +122,40 @@ const fileList = ref<Array<{ name: string; url: string }>>([])
 // 预览相关
 const previewVisible = ref(false)
 const previewUrl = ref('')
+
+
+// 新增：图片上传处理函数（支持多图、拖拽、粘贴）
+const onUploadImg = async (files: File[], callback: (urls: string[]) => void) => {
+    // 并行上传，提高速度
+    const uploadPromises = files.map(async (file) => {
+        try {
+            const formData = new FormData()
+            formData.append('file', file)
+            const res = await axios.post('/api/back/upload-cover', formData, {
+                headers: {'Content-Type': 'multipart/form-data'}
+            })
+            if (!res.data.data) {
+                throw new Error('上传成功但未返回有效 URL')
+            }
+            return res.data.data;
+        } catch (err) {
+            console.error('图片上传失败:', err)
+            ElMessage.error(`图片 "${file.name}" 上传失败`)
+            return ''
+        }
+    })
+    try {
+        const urls = await Promise.all(uploadPromises)
+        const validUrls = urls.filter(url => url)
+        if (validUrls.length > 0) {
+            ElMessage.success('图片上传成功')
+        }
+        // 回调插入图片 Markdown 语法（会自动加上 alt 文本，通常是文件名）
+        callback(validUrls)
+    } catch {
+        ElMessage.error('批量上传图片出错')
+    }
+}
 
 // 处理预览
 const handlePreview = (file: any) => {
@@ -169,24 +208,31 @@ const handleUploadError = (err: any) => {
     ElMessage.error('封面上传失败：' + err.message)
 }
 
-// 如果是编辑文章，回显已有封面时
-// onMounted(() => {
-//   if (props.article?.articleCover) {
-//     fileList.value = [{ name: 'cover', url: props.article.articleCover }]
-//     articleCover.value = props.article.articleCover
-//   }
-// })
+
 onMounted(async () => {
-    const res = await getAllTags()
-    tagOptions.value = (res as any).data.map((item: any) => ({
-        label: item.name,
-        value: item.id
-    }))
-    const response = await getAllCategory()
-    categoryOptions.value = (response as any).data.map((item: any) => ({
-        label: item.name,
-        value: item.id
-    }))
+    articleId.value = route.query.articleId
+    if (articleId.value) {
+        const article = getArticle(articleId.value);
+        let data = (await article).data;
+        title.value = data.title;
+        summary.value = data.introduction;
+        content.value = data.content;
+        if (data.image) {
+            fileList.value = [{name: 'cover', url: data.image}]
+            articleCover.value = data.image
+        }
+    } else {
+        const res = await getAllTags();
+        tagOptions.value = (res as any).data.map((item: any) => ({
+            label: item.name,
+            value: item.id
+        }))
+        const response = await getAllCategory()
+        categoryOptions.value = (response as any).data.map((item: any) => ({
+            label: item.name,
+            value: item.id
+        }))
+    }
 })
 </script>
 
@@ -196,7 +242,6 @@ onMounted(async () => {
   height: calc(100vh - 110px);
   overflow: hidden;
 }
-
 
 
 .flex_r {
@@ -280,19 +325,19 @@ onMounted(async () => {
 }
 
 .card-header-wrapper {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .card-header-title {
-    font-size: 16px;
-    font-weight: 600;
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .publish-btn {
-    /* 可选：保证按钮不被压缩 */
-    flex-shrink: 0;
+  /* 可选：保证按钮不被压缩 */
+  flex-shrink: 0;
 }
 
 </style>

@@ -9,6 +9,10 @@ export const addArticle = (data?: object) => {
 };
 
 
+export const getArticle  = async (id: any) => {
+    return await http.get(`/api/back/get-article/${id}`);
+};
+
 export const getArticleList = (data?: object) => {
     return http.post(
         '/api/back/page-all-article',
