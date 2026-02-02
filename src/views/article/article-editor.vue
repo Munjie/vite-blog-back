@@ -82,7 +82,6 @@ import {useRoute} from 'vue-router'
 
 const route = useRoute()
 // 文章数据
-const id = ref(null)
 const title = ref('')
 const summary = ref('')
 const content = ref('')
