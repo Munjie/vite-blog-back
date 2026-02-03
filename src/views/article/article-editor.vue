@@ -87,10 +87,13 @@ const summary = ref('')
 const content = ref('')
 const articleId = ref()
 const loading = ref(false)
-const selectedTags = ref()
-const selectedCategory = ref<string | number>('')
-const tagOptions = ref()
-const categoryOptions = ref()
+// 分类
+const selectedCategory = ref<number | null>(null)
+const categoryOptions = ref<{ label: string; value: number }[]>([])
+
+// 标签
+const selectedTags = ref<number[]>([])
+const tagOptions = ref<{ label: string; value: number }[]>([])
 const submitAll = async () => {
     loading.value = true
     try {
@@ -114,16 +117,14 @@ const submitAll = async () => {
 }
 // 封面图上传处理
 const articleCover = ref<string>('')
-
 // 文件列表
 const fileList = ref<Array<{ name: string; url: string }>>([])
-
 // 预览相关
 const previewVisible = ref(false)
 const previewUrl = ref('')
 
 
-// 新增：图片上传处理函数（支持多图、拖拽、粘贴）
+// 新增：图片上传处理函数
 const onUploadImg = async (files: File[], callback: (urls: string[]) => void) => {
     // 并行上传，提高速度
     const uploadPromises = files.map(async (file) => {
@@ -149,7 +150,7 @@ const onUploadImg = async (files: File[], callback: (urls: string[]) => void) =>
         if (validUrls.length > 0) {
             ElMessage.success('图片上传成功')
         }
-        // 回调插入图片 Markdown 语法（会自动加上 alt 文本，通常是文件名）
+        // 回调插入图片 Markdown 语法
         callback(validUrls)
     } catch {
         ElMessage.error('批量上传图片出错')
@@ -182,7 +183,7 @@ const handleExceed = () => {
     ElMessage.warning('只能上传一张封面图片')
 }
 
-// 自定义上传（覆盖默认行为）
+// 自定义上传
 const customUpload = async (options: any) => {
     const formData = new FormData()
     formData.append('file', options.file)
@@ -198,7 +199,7 @@ const customUpload = async (options: any) => {
 
 // 上传成功
 const handleUploadSuccess = (response: any) => {
-    articleCover.value = response  // 保存返回的图片访问 URL 到表单
+    articleCover.value = response
     ElMessage.success('封面上传成功')
 }
 
@@ -209,29 +210,44 @@ const handleUploadError = (err: any) => {
 
 
 onMounted(async () => {
-    articleId.value = route.query.articleId
+    articleId.value = route.query.articleId ? Number(route.query.articleId) : null
+    const allTags = async () => await getAllTags();
+    const allCategory = async () => await  getAllCategory()
+    const [tagRes, categoryRes] = await Promise.all([
+        allTags(),
+        allCategory()
+    ])
+    tagOptions.value = (tagRes as any).data.map((item: any) => ({
+        label: item.name,
+        value: item.id
+    }))
+
+    categoryOptions.value = (categoryRes as any).data.map((item: any) => ({
+        label: item.name,
+        value: item.id
+    }))
+
     if (articleId.value) {
-        const article = getArticle(articleId.value);
-        let data = (await article).data;
-        title.value = data.title;
-        summary.value = data.introduction;
-        content.value = data.content;
+        const article = await getArticle(articleId.value)
+        const data = article.data
+        title.value = data.title || ''
+        summary.value = data.introduction || ''
+        content.value = data.content || ''
+
         if (data.image) {
-            fileList.value = [{name: 'cover', url: data.image}]
+            fileList.value = [{ name: 'cover', url: data.image }]
             articleCover.value = data.image
         }
-    } else {
-        const res = await getAllTags();
-        tagOptions.value = (res as any).data.map((item: any) => ({
-            label: item.name,
-            value: item.id
-        }))
-        const response = await getAllCategory()
-        categoryOptions.value = (response as any).data.map((item: any) => ({
-            label: item.name,
-            value: item.id
-        }))
+        if (data.category !== undefined && data.category !== null) {
+            selectedCategory.value = data.category
+        } else if (data.category) {
+            selectedCategory.value = data.category
+        }
+        if (data.tagList && Array.isArray(data.tagList)) {
+            selectedTags.value = data.tagList
+        }
     }
+
 })
 </script>
 
