@@ -125,6 +125,23 @@ export const routes = [
                 },
                 component: () => import('@/views/user/index.vue'),
             },
+
+            {
+                path: '/lets-list',
+                name: '/lets-list',
+                meta: {
+                    title: '证书列表'
+                },
+                component: () => import('@/views/lets/lets-list.vue'),
+            },
+            {
+                path: '/lets-add',
+                name: 'lets-add',
+                meta: {
+                    title: '新增证书'
+                },
+                component: () => import('@/views/lets/lets-add.vue'),
+            },
         ],
     },
     {
