@@ -1,159 +1,240 @@
 <template>
-    <el-card class="upload-card">
-        <template #header>
-            <div class="card-header">
-                <span>新增上传</span>
-            </div>
-        </template>
-        <el-form :model="form" label-width="100px">
-            <div class="section-title">1.任务名称</div>
-            <el-form-item label="任务名称">
-                <el-input
-                    v-model="form.taskName"
-                    placeholder="随便填"
-                    clearable
-                />
-            </el-form-item>
-            <el-form-item>
-                <el-button
-                    type="primary"
-                    :loading="loading"
-                    @click="submitAll"
-                >
-                    确定
-                </el-button>
-                <el-button @click="resetForm"    type="warning" >重置</el-button>
-            </el-form-item>
+    <div class="cert-container">
+        <el-card class="dark-card">
+            <template #header>
+                <div class="card-header">
+                    <span>SSL 证书自动化申请</span>
+                    <el-tag type="info" effect="dark">Let's Encrypt 生产环境</el-tag>
+                </div>
+            </template>
 
-        </el-form>
-    </el-card>
+            <el-steps :active="activeStep" finish-status="success" align-center>
+                <el-step title="输入域名" />
+                <el-step title="配置 DNS" />
+                <el-step title="系统验证" />
+                <el-step title="签发成功" />
+            </el-steps>
+
+            <div class="step-content">
+                <div v-if="activeStep === 0" class="input-area">
+                    <el-input
+                        v-model="domain"
+                        placeholder="请输入域名，如 www.munjie.com"
+                        class="domain-input"
+                        @keyup.enter="handleCreateOrder"
+                    >
+                        <template #prepend>https://</template>
+                    </el-input>
+                    <el-button type="primary" :loading="loading" @click="handleCreateOrder">
+                        获取解析记录
+                    </el-button>
+                </div>
+
+                <div v-if="activeStep === 1" class="dns-guide">
+                    <el-alert
+                        title="请登录阿里云/腾讯云后台，添加以下 TXT 解析记录"
+                        type="warning"
+                        :closable="false"
+                        show-icon
+                    />
+
+                    <el-descriptions :column="1" border class="dns-table">
+                        <el-descriptions-item label="记录类型">TXT</el-descriptions-item>
+                        <el-descriptions-item label="主机记录">
+                            <code class="code-box">{{ challengeInfo.hostRecord }}</code>
+                            <el-button link type="primary" @click="copyText(challengeInfo.hostRecord)">复制</el-button>
+                        </el-descriptions-item>
+                        <el-descriptions-item label="记录值">
+                            <code class="code-box">{{ challengeInfo.recordValue }}</code>
+                            <el-button link type="primary" @click="copyText(challengeInfo.recordValue)">复制</el-button>
+                        </el-descriptions-item>
+                    </el-descriptions>
+
+                    <div class="tip">
+                        <el-icon><InfoFilled /></el-icon>
+                        注意：主机记录不要包含域名后缀，系统会自动拼接。
+                    </div>
+
+                    <div class="actions">
+                        <el-button @click="activeStep = 0">返回修改</el-button>
+                        <el-button type="success" :loading="loading" @click="handleVerify">
+                            我已配置，开始验证
+                        </el-button>
+                    </div>
+                </div>
+
+                <div v-if="activeStep === 2" class="verifying">
+                    <el-result icon="info" title="正在预检 DNS 生效情况">
+                        <template #sub-title>
+                            正在同步全球 DNS 节点，请耐心等待...
+                        </template>
+                    </el-result>
+                </div>
+
+                <div v-if="activeStep === 3" class="success-result">
+                    <el-result icon="success" title="证书签发成功" sub-title="Nginx 已准备就绪">
+                        <template #extra>
+                            <el-button type="primary" @click="activeStep = 0">继续申请</el-button>
+                        </template>
+                    </el-result>
+                </div>
+            </div>
+        </el-card>
+    </div>
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, computed } from 'vue'
-import { ElMessage, type UploadUserFile, type UploadInstance, type UploadProps } from 'element-plus'
-import axios from 'axios'
+import { ref } from 'vue'
+import { ElMessage } from 'element-plus'
+import { InfoFilled } from '@element-plus/icons-vue'
 
-import router from "../../router";
-const uploadRef = ref<UploadInstance>()
-// 文件列表
-const fileList = ref<UploadUserFile[]>([])
-// Loading 状态
-const loading = ref(false)
-
-// 表单数据
-const form = reactive({
-    taskName: '',
-    startYear: new Date().getFullYear().toString(),
-    semester: '第一学期',
-    examType: '期末'
-});
-
-// --- 2. 核心计算逻辑 (标题生成) ---
-const fullTitle = computed(() => {
-    if (!form.startYear) return ''
-    const endYear = Number(form.startYear) + 1
-    return `${form.startYear}-${endYear}学年度${form.semester}${form.examType}考试成绩质量分析表`
-})
-
-// --- 3. 文件处理逻辑 ---
-// 当文件超出限制时的回调
-const handleExceed: UploadProps['onExceed'] = (files) => {
-    ElMessage.warning(`最多只能选择50个文件，你当前选择了 ${files.length} 个文件。`)
+// 接口定义
+interface ChallengeDTO {
+    domain: string
+    hostRecord: string
+    recordValue: string
 }
 
-// --- 4. 提交逻辑 (FormData) ---
-const submitAll = async () => {
+const activeStep = ref(0)
+const domain = ref('')
+const loading = ref(false)
+const challengeInfo = ref<ChallengeDTO>({
+    domain: '',
+    hostRecord: '',
+    recordValue: ''
+})
+
+// 1. 创建订单 (对应后端 createOrder)
+const handleCreateOrder = async () => {
+    if (!domain.value) return ElMessage.error('请输入域名')
     loading.value = true
     try {
-        const formData = new FormData()
-        let infoForm = {
-            taskName: form.taskName,
-            title: fullTitle.value
-        }
-        formData.append('info', new Blob([JSON.stringify(infoForm)], {type: "application/json"}));
+        // 模拟后端调用
+        // const res = await axios.post('/api/cert/create', { domain: domain.value })
+        // challengeInfo.value = res.data
 
-
-        fileList.value.forEach((file) => {
-            if (file.raw) {
-                formData.append('files', file.raw)
+        // 模拟数据
+        setTimeout(() => {
+            challengeInfo.value = {
+                domain: domain.value,
+                hostRecord: '_acme-challenge.' + domain.value.split('.')[0],
+                recordValue: 'R-8_h_your_token_here_xxxx'
             }
-        })
-        const res = await axios.post('/api/score-manage/create-score-task', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data' // 必须指定
-          }
-        })
-        if (res.data.code === 200) {
-            ElMessage.success(res.data.data)
-            try {
-                resetForm();
-            } catch (e) {
-                console.error("重置表单失败", e);
-            }
-            await router.replace('/task-list');
-        }else {
-            ElMessage.error(res.data.message)
-        }
+            activeStep.value = 1
+            loading.value = false
+        }, 1000)
     } catch (error) {
-        console.error(error)
-        ElMessage.error('上传失败，请重试')
-    } finally {
         loading.value = false
     }
 }
 
-// 重置表单
-const resetForm = () => {
-    form.startYear = new Date().getFullYear().toString()
-    form.semester = '第一学期'
-    form.examType = '期末'
-    fileList.value = [] // 清空文件数组
-    uploadRef.value?.clearFiles() // 清空 UI 显示的文件
+// 2. 触发验证 (对应后端 verifyAndIssue)
+const handleVerify = async () => {
+    loading.value = true
+    try {
+        // 模拟后端验证逻辑
+        setTimeout(() => {
+            loading.value = false
+            activeStep.value = 3
+            ElMessage.success('证书已部署到 Nginx')
+        }, 3000)
+    } catch (error: any) {
+        loading.value = false
+        ElMessage.error(error.message || 'DNS 尚未生效')
+    }
+}
+
+// 复制功能
+const copyText = (text: string) => {
+    navigator.clipboard.writeText(text)
+    ElMessage.success('复制成功')
 }
 </script>
 
 <style scoped>
-.upload-card {
-    max-width: 900px;
-    margin: 20px auto;
+.cert-container {
+    max-width: 800px;
+    margin: 40px auto;
+    background-color: #1a1a1a; /* 暗黑背景 */
 }
 
-.section-title {
-    font-size: 16px;
+.dark-card {
+    background-color: #242424;
+    border: 1px solid #333;
+    color: #eee;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     font-weight: bold;
-    margin-bottom: 20px;
-    border-left: 4px solid #409eff;
-    padding-left: 10px;
-    line-height: 1;
+    color: #409eff;
 }
 
-.year-hint {
-    font-size: 12px;
-    color: #909399;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    line-height: 1.2;
-    margin-top: 4px;
+.step-content {
+    margin-top: 40px;
+    padding: 20px;
 }
 
-.section-title {
-    font-size: 16px;
-    font-weight: bold;
-    margin-bottom: 20px;
-    border-left: 4px solid #409eff;
-    padding-left: 10px;
-    line-height: 1;
+.input-area {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
 }
 
-/* 新增或替换之前的 year-hint 样式 */
-.year-suffix-inline {
-    /* 确保文本靠在输入框右侧 */
-    margin-left: 8px;
-    /* 调整字体，使其看起来清晰 */
-    color: #606266;
-    font-weight: bold;
-    white-space: nowrap; /* 确保不自动换行 */
+.domain-input {
+    width: 400px;
+}
+
+.dns-guide {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.dns-table {
+    margin-top: 10px;
+    background-color: #2d2d2d;
+}
+
+.code-box {
+    background: #111;
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: #67c23a;
+    margin-right: 10px;
+    font-family: monospace;
+}
+
+.tip {
+    font-size: 13px;
+    color: #999;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.actions {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+/* 深度选择器修改 Element Plus 原生样式以匹配暗黑感 */
+:deep(.el-step__title) {
+    color: #888 !important;
+}
+:deep(.el-step__title.is-success) {
+    color: #409eff !important;
+}
+:deep(.el-descriptions__label) {
+    background-color: #1d1d1d !important;
+    color: #aaa;
+}
+:deep(.el-descriptions__content) {
+    background-color: #242424 !important;
+    color: #fff;
 }
 </style>

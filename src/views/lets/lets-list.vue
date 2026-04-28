@@ -40,7 +40,7 @@ import axios from "axios";
 const route = useRoute();
 // 2. 定义点击事件处理函数
 const handleAdd = () => {
-    router.push('/task-add');
+    router.push('/lets-add');
 }
 const id = ref();
 const title = ref();
