@@ -1,6 +1,11 @@
 import http from './http.ts';
 
-
+export const create = (data?: object) => {
+    return http.post(
+        '/api/lets/create',
+        data
+    );
+};
 
 export const pageLets = (data?: object) => {
     return http.post(

@@ -1,80 +1,95 @@
 <template>
-    <div class="cert-container">
-        <el-card class="dark-card">
-            <template #header>
-                <div class="card-header">
-                    <span>SSL 证书自动化申请</span>
-                    <el-tag type="info" effect="dark">Let's Encrypt 生产环境</el-tag>
-                </div>
-            </template>
+    <div class="jcloud-container">
+        <div class="header-section">
+            <h2 class="title">SSL 证书自动化中心</h2>
+            <p class="subtitle">基于 ACME 协议的自动化证书签发与部署</p>
+        </div>
 
-            <el-steps :active="activeStep" finish-status="success" align-center>
-                <el-step title="输入域名" />
-                <el-step title="配置 DNS" />
-                <el-step title="系统验证" />
-                <el-step title="签发成功" />
+        <el-card class="jcloud-card">
+            <el-steps :active="activeStep" align-center class="custom-steps">
+                <el-step title="域名提交" />
+                <el-step title="DNS 解析配置" />
+                <el-step title="系统校验" />
+                <el-step title="部署完成" />
             </el-steps>
 
-            <div class="step-content">
-                <div v-if="activeStep === 0" class="input-area">
-                    <el-input
-                        v-model="domain"
-                        placeholder="请输入域名，如 www.munjie.com"
-                        class="domain-input"
-                        @keyup.enter="handleCreateOrder"
-                    >
-                        <template #prepend>https://</template>
-                    </el-input>
-                    <el-button type="primary" :loading="loading" @click="handleCreateOrder">
-                        获取解析记录
-                    </el-button>
+            <div class="content-body">
+                <div v-if="activeStep === 0" class="step-box">
+                    <div class="input-group">
+                        <el-input
+                            v-model="certForm.domain"
+                            placeholder="请输入您要保护的域名 (例: www.xxx.com)"
+                            size="large"
+                            class="dark-input"
+                        >
+                            <template #prepend>https://</template>
+                        </el-input>
+                        <el-button
+                            type="primary"
+                            size="large"
+                            :loading="submitting"
+                            @click="submitOrder"
+                        >
+                            提交申请
+                        </el-button>
+                    </div>
+                    <div class="form-tip">支持普通域名、子域名及 *.xxx.com 泛域名</div>
                 </div>
 
-                <div v-if="activeStep === 1" class="dns-guide">
+                <div v-if="activeStep === 1" class="step-box">
                     <el-alert
-                        title="请登录阿里云/腾讯云后台，添加以下 TXT 解析记录"
+                        title="请前往您的域名服务商（阿里云/腾讯云）添加以下 TXT 记录"
                         type="warning"
                         :closable="false"
                         show-icon
+                        class="mb-20"
                     />
 
-                    <el-descriptions :column="1" border class="dns-table">
-                        <el-descriptions-item label="记录类型">TXT</el-descriptions-item>
-                        <el-descriptions-item label="主机记录">
-                            <code class="code-box">{{ challengeInfo.hostRecord }}</code>
-                            <el-button link type="primary" @click="copyText(challengeInfo.hostRecord)">复制</el-button>
-                        </el-descriptions-item>
-                        <el-descriptions-item label="记录值">
-                            <code class="code-box">{{ challengeInfo.recordValue }}</code>
-                            <el-button link type="primary" @click="copyText(challengeInfo.recordValue)">复制</el-button>
-                        </el-descriptions-item>
-                    </el-descriptions>
+                    <table class="dns-table">
+                        <thead>
+                        <tr>
+                            <th>记录类型</th>
+                            <th>主机记录 (Host)</th>
+                            <th>记录值 (Value)</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td><el-tag effect="plain">TXT</el-tag></td>
+                            <td>
+                                <span class="code-text">{{ challengeData.hostRecord }}</span>
+                                <el-button link type="primary" @click="copy(challengeData.hostRecord)">复制</el-button>
+                            </td>
+                            <td>
+                                <span class="code-text">{{ challengeData.recordValue }}</span>
+                                <el-button link type="primary" @click="copy(challengeData.recordValue)">复制</el-button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
 
-                    <div class="tip">
-                        <el-icon><InfoFilled /></el-icon>
-                        注意：主机记录不要包含域名后缀，系统会自动拼接。
+                    <div class="warning-text">
+                        <i class="el-icon-info"></i>
+                        提示：主机记录通常不包含主域名后缀，请直接复制上方内容。
                     </div>
 
-                    <div class="actions">
-                        <el-button @click="activeStep = 0">返回修改</el-button>
-                        <el-button type="success" :loading="loading" @click="handleVerify">
-                            我已配置，开始验证
+                    <div class="action-footer">
+                        <el-button @click="activeStep = 0">重新填写</el-button>
+                        <el-button type="success" :loading="verifying" @click="triggerVerify">
+                            我已完成配置，开始验证
                         </el-button>
                     </div>
                 </div>
 
-                <div v-if="activeStep === 2" class="verifying">
-                    <el-result icon="info" title="正在预检 DNS 生效情况">
-                        <template #sub-title>
-                            正在同步全球 DNS 节点，请耐心等待...
-                        </template>
-                    </el-result>
-                </div>
-
-                <div v-if="activeStep === 3" class="success-result">
-                    <el-result icon="success" title="证书签发成功" sub-title="Nginx 已准备就绪">
+                <div v-if="activeStep === 2 || activeStep === 3" class="step-box result-box">
+                    <el-result
+                        :icon="activeStep === 3 ? 'success' : 'info'"
+                        :title="activeStep === 3 ? '证书申请成功' : '正在全力预检中'"
+                        :sub-title="activeStep === 3 ? '证书已自动部署至 Nginx 并生效' : '正在扫描全球 DNS 节点，请稍候...'"
+                    >
                         <template #extra>
-                            <el-button type="primary" @click="activeStep = 0">继续申请</el-button>
+                            <el-button v-if="activeStep === 3" type="primary" @click="reset">申请新证书</el-button>
+                            <el-button v-else loading text>验证中...</el-button>
                         </template>
                     </el-result>
                 </div>
@@ -84,157 +99,197 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { ElMessage } from 'element-plus'
-import { InfoFilled } from '@element-plus/icons-vue'
-
-// 接口定义
-interface ChallengeDTO {
-    domain: string
-    hostRecord: string
-    recordValue: string
+import { ref, reactive } from 'vue';
+import { ElMessage } from 'element-plus';
+import axios from 'axios';
+import {create} from "../../api/lets.ts";
+// --- 类型定义 ---
+interface ChallengeResponse {
+    domain: string;
+    hostRecord: string;
+    recordValue: string;
 }
 
-const activeStep = ref(0)
-const domain = ref('')
-const loading = ref(false)
-const challengeInfo = ref<ChallengeDTO>({
+// --- 响应式数据 ---
+const activeStep = ref(0);
+const submitting = ref(false);
+const verifying = ref(false);
+const certForm = reactive({
+    domain: ''
+});
+const challengeData = ref<ChallengeResponse>({
     domain: '',
     hostRecord: '',
     recordValue: ''
-})
+});
 
-// 1. 创建订单 (对应后端 createOrder)
-const handleCreateOrder = async () => {
-    if (!domain.value) return ElMessage.error('请输入域名')
-    loading.value = true
-    try {
-        // 模拟后端调用
-        // const res = await axios.post('/api/cert/create', { domain: domain.value })
-        // challengeInfo.value = res.data
+// --- 业务逻辑 ---
 
-        // 模拟数据
-        setTimeout(() => {
-            challengeInfo.value = {
-                domain: domain.value,
-                hostRecord: '_acme-challenge.' + domain.value.split('.')[0],
-                recordValue: 'R-8_h_your_token_here_xxxx'
-            }
-            activeStep.value = 1
-            loading.value = false
-        }, 1000)
-    } catch (error) {
-        loading.value = false
+// 1. 提交订单：对应后端 createOrder
+const submitOrder = async () => {
+    if (!certForm.domain) {
+        ElMessage.warning('请输入有效域名');
+        return;
     }
-}
-
-// 2. 触发验证 (对应后端 verifyAndIssue)
-const handleVerify = async () => {
-    loading.value = true
+    submitting.value = true;
     try {
-        // 模拟后端验证逻辑
-        setTimeout(() => {
-            loading.value = false
-            activeStep.value = 3
-            ElMessage.success('证书已部署到 Nginx')
-        }, 3000)
-    } catch (error: any) {
-        loading.value = false
-        ElMessage.error(error.message || 'DNS 尚未生效')
+        let domainForm = {
+            domain: certForm.domain
+        }
+        const res =  await create(domainForm);
+        debugger
+        if (res.code === 200) {
+            challengeData.value = res.data;
+            activeStep.value = 1;
+        } else {
+            ElMessage.error(res.message || '申请单创建失败');
+        }
+    } catch (err) {
+        ElMessage.error('网络异常，请检查后端服务');
+    } finally {
+        submitting.value = false;
     }
-}
+};
 
-// 复制功能
-const copyText = (text: string) => {
-    navigator.clipboard.writeText(text)
-    ElMessage.success('复制成功')
-}
+// 2. 触发验证：对应后端 verifyAndIssue
+const triggerVerify = async () => {
+    verifying.value = true;
+    activeStep.value = 2;
+
+    try {
+        const res = await axios.post('/api/cert/verify', { domain: certForm.domain });
+        if (res.data.code === 200) {
+            activeStep.value = 3;
+            ElMessage.success('证书已下发');
+        } else {
+            ElMessage.error(res.data.msg || '验证失败，请确保解析已生效');
+            activeStep.value = 1; // 失败则退回解析配置页面
+        }
+    } catch (err) {
+        ElMessage.error('验证过程发生异常');
+        activeStep.value = 1;
+    } finally {
+        verifying.value = false;
+    }
+};
+
+// 工具函数
+const copy = (text: string) => {
+    navigator.clipboard.writeText(text);
+    ElMessage.success('已复制到剪贴板');
+};
+
+const reset = () => {
+    activeStep.value = 0;
+    certForm.domain = '';
+};
 </script>
 
 <style scoped>
-.cert-container {
-    max-width: 800px;
-    margin: 40px auto;
-    background-color: #1a1a1a; /* 暗黑背景 */
+/* 界云暗黑科技感 UI 样式 */
+.jcloud-container {
+    padding: 40px;
+    min-height: 100vh;
+    background-color: #0d1117; /* 深色背景 */
+    color: #c9d1d9;
 }
 
-.dark-card {
-    background-color: #242424;
-    border: 1px solid #333;
-    color: #eee;
+.header-section {
+    text-align: center;
+    margin-bottom: 40px;
 }
 
-.card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-weight: bold;
-    color: #409eff;
+.title {
+    font-size: 28px;
+    color: #58a6ff;
+    letter-spacing: 1px;
 }
 
-.step-content {
-    margin-top: 40px;
-    padding: 20px;
+.subtitle {
+    color: #8b949e;
+    margin-top: 10px;
 }
 
-.input-area {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
+.jcloud-card {
+    max-width: 900px;
+    margin: 0 auto;
+    background-color: #161b22 !important;
+    border: 1px solid #30363d !important;
+    border-radius: 8px;
 }
 
-.domain-input {
-    width: 400px;
+.custom-steps {
+    margin-bottom: 50px;
+    --el-text-color-placeholder: #484f58;
 }
 
-.dns-guide {
+.step-box {
+    padding: 20px 0;
     display: flex;
     flex-direction: column;
-    gap: 20px;
-}
-
-.dns-table {
-    margin-top: 10px;
-    background-color: #2d2d2d;
-}
-
-.code-box {
-    background: #111;
-    padding: 4px 8px;
-    border-radius: 4px;
-    color: #67c23a;
-    margin-right: 10px;
-    font-family: monospace;
-}
-
-.tip {
-    font-size: 13px;
-    color: #999;
-    display: flex;
     align-items: center;
-    gap: 5px;
 }
 
-.actions {
+.input-group {
     display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-top: 20px;
+    gap: 12px;
+    width: 100%;
+    max-width: 600px;
 }
 
-/* 深度选择器修改 Element Plus 原生样式以匹配暗黑感 */
-:deep(.el-step__title) {
-    color: #888 !important;
+.dark-input :deep(.el-input__wrapper) {
+    background-color: #0d1117;
+    box-shadow: 0 0 0 1px #30363d inset;
 }
-:deep(.el-step__title.is-success) {
-    color: #409eff !important;
+
+.form-tip {
+    margin-top: 15px;
+    font-size: 13px;
+    color: #8b949e;
 }
-:deep(.el-descriptions__label) {
-    background-color: #1d1d1d !important;
-    color: #aaa;
+
+/* DNS 表格样式 */
+.dns-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    background: #0d1117;
+    border-radius: 4px;
+    overflow: hidden;
 }
-:deep(.el-descriptions__content) {
-    background-color: #242424 !important;
-    color: #fff;
+
+.dns-table th, .dns-table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #30363d;
 }
+
+.dns-table th {
+    background: #21262d;
+    color: #8b949e;
+    font-weight: 500;
+}
+
+.code-text {
+    font-family: 'JetBrains Mono', monospace;
+    color: #7ee787;
+    background: rgba(126, 231, 135, 0.1);
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-right: 10px;
+}
+
+.warning-text {
+    font-size: 13px;
+    color: #f85149;
+    margin-top: 10px;
+}
+
+.action-footer {
+    margin-top: 30px;
+    display: flex;
+    gap: 20px;
+}
+
+.mb-20 { margin-bottom: 20px; }
 </style>
