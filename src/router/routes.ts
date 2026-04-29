@@ -134,6 +134,16 @@ export const routes = [
                 },
                 component: () => import('@/views/lets/lets-list.vue'),
             },
+
+
+            {
+                path: '/cert-list',
+                name: '/cert-list',
+                meta: {
+                    title: '我的证书'
+                },
+                component: () => import('@/views/lets/cert-list.vue'),
+            },
             {
                 path: '/lets-add',
                 name: 'lets-add',
