@@ -158,7 +158,7 @@ const triggerVerify = async () => {
 
     try {
         const res = await axios.post('/api/cert/verify', { domain: certForm.domain });
-        if (res.data.code === 200) {
+        if (res.code === 200) {
             activeStep.value = 3;
             ElMessage.success('证书已下发');
         } else {

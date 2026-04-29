@@ -89,7 +89,7 @@ const router = useRouter()
 interface Certificate {
     id: number;
     domain: string;
-    status: 'VALID' | 'PENDING' | 'EXPIRED';
+    status: 'VALID' | 'PENDING_CONFIG' | 'EXPIRED';
     issuer: string;
     expiryDate: string;
     isWildcard: boolean;
@@ -120,12 +120,12 @@ const filteredList = computed(() => {
 // --- 功能方法 ---
 
 const getStatusType = (status: string) => {
-    const map: any = { VALID: 'success', PENDING: 'warning', EXPIRED: 'danger' };
+    const map: any = { VALID: 'success', PENDING_CONFIG: 'warning', EXPIRED: 'danger' };
     return map[status] || 'info';
 };
 
 const getStatusText = (status: string) => {
-    const map: any = { VALID: '已生效', PENDING: '审核中', EXPIRED: '已过期' };
+    const map: any = { VALID: '已生效', PENDING_CONFIG: '待配置', EXPIRED: '已过期' };
     return map[status] || status;
 };
 
