@@ -84,6 +84,7 @@ import { ElMessage, ElMessageBox } from 'element-plus';
 import { Plus, Search, ArrowDown } from '@element-plus/icons-vue';
 import {deleteDomain, listCert} from "../../api/lets.ts";
 import {useRouter} from "vue-router";
+import axios from "axios";
 const router = useRouter()
 // --- 类型定义 ---
 interface Certificate {
@@ -142,7 +143,7 @@ const handleDownload = (row: Certificate, type: string) => {
         ElMessage.error('当前证书状态不可下载');
         return;
     }
-    // 实际集成时：window.open(`/api/cert/download?id=${row.id}&type=${type}`)
+    exportFun(row)
     ElMessage.success(`开始下载 ${row.domain} 的 ${type} 文件`);
 };
 
@@ -167,6 +168,39 @@ const handleDetail = (row: Certificate) => {
         confirmButtonText: '确定',
         dangerouslyUseHTMLString: true,
     });
+};
+const exportFun = async (row: Certificate) => {
+  let info = {
+    id: row.id,
+  }
+  const response = await axios.post('/api/lets/download', info, {
+    headers: {'Content-Type': 'application/json; application/octet-stream'},
+    responseType: "blob"
+  })
+  const disposition = response.headers['content-disposition'] ?? response.headers['Content-Disposition'];
+  let fileName = '下载文件';
+
+  if (disposition) {
+    // 匹配 filename*="UTF-8''xxx" 或 filename="xxx" 或 filename=xxx
+    const match = disposition.match(/filename[*]?=(?:UTF-8'')?([^;]+)/i);
+    if (match?.[1]) {
+      fileName = decodeURIComponent(match[1].replace(/"/g, ''));
+    }
+  }
+  console.log(fileName)
+  const blob = new Blob([response.data], {type: 'application/zip'});
+  // 创建下载链接
+  const url = URL.createObjectURL(blob);
+  // 创建虚拟a标签进行下载
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  link.click();
+  // 释放URL对象
+  URL.revokeObjectURL(url);
+  link.remove();
+  ElMessage.success('下载完成')
+
 };
 
 onMounted(() => {
