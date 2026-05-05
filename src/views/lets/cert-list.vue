@@ -20,14 +20,14 @@
         </el-card>
 
         <el-table :data="filteredList" class="jcloud-table" v-loading="loading">
-            <el-table-column prop="domain" label="绑定域名" min-width="200">
+            <el-table-column prop="domain" label="绑定域名" >
                 <template #default="{ row }">
                     <span class="domain-name">{{ row.domain }}</span>
                     <el-tag v-if="row.isWildcard" size="small" effect="plain" class="ml-10">泛域名</el-tag>
                 </template>
             </el-table-column>
 
-            <el-table-column prop="status" label="状态" width="120">
+            <el-table-column prop="status" label="状态" >
                 <template #default="{ row }">
                     <el-tag :type="getStatusType(row.status)" effect="dark">
                         {{ getStatusText(row.status) }}
@@ -35,9 +35,9 @@
                 </template>
             </el-table-column>
 
-            <el-table-column prop="issuer" label="签发者" width="150" />
+            <el-table-column prop="issuer" label="签发者" />
 
-            <el-table-column prop="expiryDate" label="到期时间" width="180">
+            <el-table-column prop="expiryDate" label="到期时间" >
                 <template #default="{ row }">
           <span :class="{ 'text-danger': isNearExpiry(row.expiryDate) }">
             {{ row.expiryDate }}
@@ -45,22 +45,19 @@
                 </template>
             </el-table-column>
 
-            <el-table-column label="操作" width="240" fixed="right">
+            <el-table-column label="操作"  fixed="right">
                 <template #default="{ row }">
-                    <el-dropdown trigger="click" @command="(cmd: string) => handleDownload(row, cmd)">
-                        <el-button type="primary" link>
-                            下载 <el-icon class="el-icon--right"><arrow-down /></el-icon>
-                        </el-button>
-                        <template #dropdown>
-                            <el-dropdown-menu>
-                                <el-dropdown-item command="cert">证书文件 (PEM)</el-dropdown-item>
-                                <el-dropdown-item command="key">私钥文件 (KEY)</el-dropdown-item>
-                                <el-dropdown-item command="all">完整压缩包 (ZIP)</el-dropdown-item>
-                            </el-dropdown-menu>
-                        </template>
-                    </el-dropdown>
+                  <el-button
+                      v-if="row.status === 'PENDING_CONFIG'"
+                      type="warning"
+                      link
+                      @click="handleContinue(row)"
+                  >
+                    继续配置
+                  </el-button>
+                  <el-button type="primary" link @click="handleDetail(row)">详情</el-button>
+                  <el-button v-if="row.status === 'VALID'" type="primary" link @click="handleDownload(row)">下载</el-button>
 
-                    <el-button type="primary" link @click="handleDetail(row)">详情</el-button>
 
                     <el-popconfirm
                             title="确定要删除该证书吗？此操作不可恢复"
@@ -81,7 +78,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { Plus, Search, ArrowDown } from '@element-plus/icons-vue';
+import { Plus, Search } from '@element-plus/icons-vue';
 import {deleteDomain, listCert} from "../../api/lets.ts";
 import {useRouter} from "vue-router";
 import axios from "axios";
@@ -90,7 +87,7 @@ const router = useRouter()
 interface Certificate {
     id: number;
     domain: string;
-    status: 'VALID' | 'PENDING_CONFIG' | 'EXPIRED';
+    status: 'VALID' | 'PENDING_CONFIG' |  'VERIFYING' | 'EXPIRED';
     issuer: string;
     expiryDate: string;
     isWildcard: boolean;
@@ -121,12 +118,17 @@ const filteredList = computed(() => {
 // --- 功能方法 ---
 
 const getStatusType = (status: string) => {
-    const map: any = { VALID: 'success', PENDING_CONFIG: 'warning', EXPIRED: 'danger' };
+    const map: any = {
+      VALID: 'success',
+      PENDING_CONFIG: 'warning',
+      VERIFYING: 'info',
+      EXPIRED: 'danger'
+    };
     return map[status] || 'info';
 };
 
 const getStatusText = (status: string) => {
-    const map: any = { VALID: '已生效', PENDING_CONFIG: '待配置', EXPIRED: '已过期' };
+    const map: any = { VALID: '已生效', PENDING_CONFIG: '待配置', VERIFYING: '验证中', EXPIRED: '已过期' };
     return map[status] || status;
 };
 
@@ -138,13 +140,13 @@ const isNearExpiry = (dateStr: string) => {
 };
 
 // 下载逻辑
-const handleDownload = (row: Certificate, type: string) => {
+const handleDownload = (row: Certificate) => {
     if (row.status !== 'VALID') {
         ElMessage.error('当前证书状态不可下载');
         return;
     }
-    exportFun(row)
-    ElMessage.success(`开始下载 ${row.domain} 的 ${type} 文件`);
+   exportFun(row)
+   ElMessage.success('下载完成')
 };
 
 // 删除逻辑
@@ -158,6 +160,14 @@ const confirmDelete = async (row: Certificate) => {
     }
 };
 
+
+const handleContinue = (row: Certificate) => {
+  // 跳转到申请页面，并携带域名参数
+  router.push({
+    path: '/lets-add',
+    query: { id: row.id, resume: 'true' }
+  });
+};
 const goToApply = () => {
     router.push('/lets-add');
     ElMessage.info('跳转至申请页面');
@@ -199,8 +209,6 @@ const exportFun = async (row: Certificate) => {
   // 释放URL对象
   URL.revokeObjectURL(url);
   link.remove();
-  ElMessage.success('下载完成')
-
 };
 
 onMounted(() => {

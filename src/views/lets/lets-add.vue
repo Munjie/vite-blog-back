@@ -76,7 +76,7 @@
                     <div class="action-footer">
                         <el-button @click="activeStep = 0">重新填写</el-button>
                         <el-button type="success" :loading="verifying" @click="triggerVerify">
-                            我已完成配置，开始验证
+                            我已完成配置，开始验证DNS
                         </el-button>
                     </div>
                 </div>
@@ -99,12 +99,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
+import {ref, reactive, onMounted} from 'vue';
 import { ElMessage } from 'element-plus';
 import axios from 'axios';
-import {create} from "../../api/lets.ts";
+import {create, getLetsById} from "../../api/lets.ts";
+import { useRoute } from 'vue-router';
+
+const route = useRoute();
 // --- 类型定义 ---
 interface ChallengeResponse {
+    id: number;
     domain: string;
     hostRecord: string;
     recordValue: string;
@@ -112,12 +116,14 @@ interface ChallengeResponse {
 
 // --- 响应式数据 ---
 const activeStep = ref(0);
+const loading = ref(false);
 const submitting = ref(false);
 const verifying = ref(false);
 const certForm = reactive({
     domain: ''
 });
 const challengeData = ref<ChallengeResponse>({
+    id: 0,
     domain: '',
     hostRecord: '',
     recordValue: ''
@@ -125,7 +131,33 @@ const challengeData = ref<ChallengeResponse>({
 
 // --- 业务逻辑 ---
 
-// 1. 提交订单：对应后端 createOrder
+onMounted(async () => {
+  const { id: id, resume } = route.query;
+
+  if (resume === 'true' && id) {
+    await resumeOrder(id as string);
+  }
+});
+
+// 恢复订单状态的方法
+const resumeOrder = async (id: string) => {
+  loading.value = true;
+  try {
+    const res = await  getLetsById(id);
+    if (res.code === 200) {
+      challengeData.value = res.data;
+      activeStep.value = 1; // 直接跳到第二步：DNS 配置指引
+      ElMessage.success('已恢复申请进度');
+    } else {
+      ElMessage.error('无法获取挑战信息，请重新申请');
+      activeStep.value = 0;
+    }
+  } catch (err) {
+    ElMessage.error('恢复状态失败');
+  } finally {
+    loading.value = false;
+  }
+};
 const submitOrder = async () => {
     if (!certForm.domain) {
         ElMessage.warning('请输入有效域名');
