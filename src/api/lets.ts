@@ -7,6 +7,13 @@ export const getLetsById  = async (id: any) => {
     return await http.get(`/api/lets/get/${id}`);
 };
 
+export const checkDns  = async (id: any) => {
+    return await http.get(`/api/lets/check-dns/${id}`);
+};
+
+export const confirmData  = async (id: any) => {
+    return await http.get(`/api/lets/confirm/${id}`);
+};
 
 export const listCert  = async () => {
     try {

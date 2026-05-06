@@ -6,11 +6,15 @@
         </div>
 
         <el-card class="jcloud-card">
-            <el-steps :active="activeStep" align-center class="custom-steps">
+            <el-steps :active="activeStep"
+                      finish-status="success"
+                      process-status="finish"
+                      align-center class="custom-steps">
                 <el-step title="域名提交" />
-                <el-step title="DNS 解析配置" />
+                <el-step title="解析配置" />
+                <el-step title="DNS校验" />
                 <el-step title="系统校验" />
-                <el-step title="部署完成" />
+                <el-step title="证书颁发" />
             </el-steps>
 
             <div class="content-body">
@@ -75,7 +79,7 @@
 
                     <div class="action-footer">
                         <el-button @click="activeStep = 0">重新填写</el-button>
-                        <el-button type="success" :loading="verifying" @click="triggerVerify">
+                        <el-button type="success" :loading="verifying" @click="verifyDns">
                             我已完成配置，开始验证DNS
                         </el-button>
                     </div>
@@ -84,11 +88,21 @@
                 <div v-if="activeStep === 2 || activeStep === 3" class="step-box result-box">
                     <el-result
                         :icon="activeStep === 3 ? 'success' : 'info'"
-                        :title="activeStep === 3 ? '证书申请成功' : '正在全力预检中'"
-                        :sub-title="activeStep === 3 ? '证书已自动部署至 Nginx 并生效' : '正在扫描全球 DNS 节点，请稍候...'"
+                        :title="activeStep === 3 ? 'DNS生效检测成功' : '正在全力申请中'"
                     >
                         <template #extra>
-                            <el-button v-if="activeStep === 3" type="primary" @click="reset">申请新证书</el-button>
+                            <el-button v-if="activeStep === 3" type="primary" @click="confirmApply">提交申请</el-button>
+                            <el-button v-else loading text>验证中...</el-button>
+                        </template>
+                    </el-result>
+                </div>
+                <div v-if="activeStep === 4" class="step-box result-box">
+                    <el-result
+                        :icon="activeStep === 4 ? 'success' : 'info'"
+                        :title="activeStep === 4 ? '证书申请成功' : '验证中...'"
+                    >
+                        <template #extra>
+                            <el-button v-if="activeStep ===  4" type="primary" @click="listLets">查看证书</el-button>
                             <el-button v-else loading text>验证中...</el-button>
                         </template>
                     </el-result>
@@ -101,10 +115,9 @@
 <script setup lang="ts">
 import {ref, reactive, onMounted} from 'vue';
 import { ElMessage } from 'element-plus';
-import axios from 'axios';
-import {create, getLetsById} from "../../api/lets.ts";
-import { useRoute } from 'vue-router';
-
+import {checkDns, confirmData, create, getLetsById} from "../../api/lets.ts";
+import {useRoute, useRouter} from 'vue-router';
+const router = useRouter()
 const route = useRoute();
 // --- 类型定义 ---
 interface ChallengeResponse {
@@ -133,7 +146,6 @@ const challengeData = ref<ChallengeResponse>({
 
 onMounted(async () => {
   const { id: id, resume } = route.query;
-
   if (resume === 'true' && id) {
     await resumeOrder(id as string);
   }
@@ -146,8 +158,8 @@ const resumeOrder = async (id: string) => {
     const res = await  getLetsById(id);
     if (res.code === 200) {
       challengeData.value = res.data;
-      activeStep.value = 1; // 直接跳到第二步：DNS 配置指引
-      ElMessage.success('已恢复申请进度');
+      challengeData.value.id = id;
+      activeStep.value = 1;
     } else {
       ElMessage.error('无法获取挑战信息，请重新申请');
       activeStep.value = 0;
@@ -183,23 +195,41 @@ const submitOrder = async () => {
     }
 };
 
-// 2. 触发验证：对应后端 verifyAndIssue
-const triggerVerify = async () => {
+const verifyDns = async () => {
     verifying.value = true;
     activeStep.value = 2;
-
     try {
-        const res = await axios.post('/api/cert/verify', { domain: certForm.domain });
-        if (res.code === 200) {
+        const res = await  checkDns(challengeData.value.id);
+        if (res.code === 200 && res.data === true) {
             activeStep.value = 3;
-            ElMessage.success('证书已下发');
+            ElMessage.success('DNS已生效');
         } else {
-            ElMessage.error(res.data.msg || '验证失败，请确保解析已生效');
-            activeStep.value = 1; // 失败则退回解析配置页面
+            ElMessage.error(res.message || '验证失败，请确保解析已生效');
+            activeStep.value = 1;
         }
     } catch (err) {
         ElMessage.error('验证过程发生异常');
         activeStep.value = 1;
+    } finally {
+        verifying.value = false;
+    }
+};
+
+const confirmApply = async () => {
+    verifying.value = true;
+    activeStep.value = 3;
+    try {
+        const res = await  confirmData(challengeData.value.id);
+        if (res.code === 200 && res.data === true) {
+            activeStep.value = 4;
+            ElMessage.success('证书已生效');
+        } else {
+            ElMessage.error(res.message || '申请失败');
+            activeStep.value = 3;
+        }
+    } catch (err) {
+        ElMessage.error('验证过程发生异常');
+        activeStep.value = 2;
     } finally {
         verifying.value = false;
     }
@@ -211,14 +241,12 @@ const copy = (text: string) => {
     ElMessage.success('已复制到剪贴板');
 };
 
-const reset = () => {
-    activeStep.value = 0;
-    certForm.domain = '';
+const listLets = () => {
+    router.push('/lets-add');
 };
 </script>
 
 <style scoped>
-/* 界云暗黑科技感 UI 样式 */
 .jcloud-container {
     padding: 40px;
     min-height: 100vh;
