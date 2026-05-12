@@ -139,7 +139,6 @@ interface ChallengeResponse {
 
 // --- 响应式数据 ---
 const activeStep = ref(0);
-const loading = ref(false);
 const submitting = ref(false);
 const verifying = ref(false);
 const issuing = ref(false);

@@ -98,11 +98,14 @@ const loading = ref(false);
 const searchQuery = ref('');
 const certList = ref<Certificate[]>([]);
 
+
 const fetchCertList = async () => {
     loading.value = true;
     try {
-         const res = await listCert();
-         certList.value = res.data;
+        const res = await listCert();
+        certList.value = res?.data || [];
+    } catch (error) {
+        console.error("获取列表失败:", error);
     } finally {
         loading.value = false;
     }
@@ -191,7 +194,6 @@ const exportFun = async (row: Certificate) => {
   let fileName = '下载文件';
 
   if (disposition) {
-    // 匹配 filename*="UTF-8''xxx" 或 filename="xxx" 或 filename=xxx
     const match = disposition.match(/filename[*]?=(?:UTF-8'')?([^;]+)/i);
     if (match?.[1]) {
       fileName = decodeURIComponent(match[1].replace(/"/g, ''));
@@ -266,7 +268,7 @@ onMounted(() => {
 
 .ml-10 { margin-left: 10px; }
 
-/* 适配 Element Plus 暗黑样式 */
+
 :deep(.el-input__wrapper) {
     background-color: #0d1117 !important;
     box-shadow: 0 0 0 1px #30363d inset !important;
