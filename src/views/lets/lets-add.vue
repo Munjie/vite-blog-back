@@ -13,8 +13,8 @@
                 <el-step title="域名提交" />
                 <el-step title="解析配置" />
                 <el-step title="DNS校验" />
-                <el-step title="系统校验" />
-                <el-step title="证书颁发" />
+                <el-step title="证书签发" />
+                <el-step title="完成" />
             </el-steps>
 
             <div class="content-body">
@@ -88,22 +88,31 @@
                 <div v-if="activeStep === 2 || activeStep === 3" class="step-box result-box">
                     <el-result
                         :icon="activeStep === 3 ? 'success' : 'info'"
-                        :title="activeStep === 3 ? 'DNS生效检测成功' : '正在全力申请中'"
+                        :title="activeStep === 3 ? 'DNS 生效检测成功' : '正在检测 DNS 解析...'"
+                        :sub-title="activeStep === 3 ? '系统已准备就绪，可以开始签发证书' : '这可能需要几十秒，请稍后'"
                     >
                         <template #extra>
-                            <el-button v-if="activeStep === 3" type="primary" @click="confirmApply">提交申请</el-button>
-                            <el-button v-else loading text>验证中...</el-button>
+                            <el-button v-if="activeStep === 3" type="primary" :loading="issuing" @click="confirmApply">
+                                立即签发证书
+                            </el-button>
+                            <el-button v-else loading text>系统正在努力验证中...</el-button>
                         </template>
                     </el-result>
                 </div>
-                <div v-if="activeStep === 4" class="step-box result-box">
+                <div v-if="activeStep === 4 || activeStep === 5" class="step-box result-box">
                     <el-result
-                        :icon="activeStep === 4 ? 'success' : 'info'"
-                        :title="activeStep === 4 ? '证书申请成功' : '验证中...'"
+                        :icon="activeStep === 5 ? 'success' : 'info'"
+                        :title="activeStep === 5 ? '证书颁发成功' : '证书正在颁发中...'"
+                        :sub-title="activeStep === 5 ? '您的 SSL 证书已成功签发并存储' : '正在与 CA 机构通信并下载证书链，请勿刷新页面'"
                     >
                         <template #extra>
-                            <el-button v-if="activeStep ===  4" type="primary" @click="listLets">查看证书</el-button>
-                            <el-button v-else loading text>验证中...</el-button>
+                            <el-button v-if="activeStep === 5" type="primary" @click="listLets">进入证书列表</el-button>
+                            <div v-else class="issuing-loading">
+                                <el-icon class="is-loading" :size="24"><Loading /></el-icon>
+                                <p>正在与 Let's Encrypt 建立安全连接...</p>
+                                <p>正在执行 Finalize 流程，请稍候...</p>
+                                <p>正在下载全链证书文件...</p>
+                            </div>
                         </template>
                     </el-result>
                 </div>
@@ -113,10 +122,11 @@
 </template>
 
 <script setup lang="ts">
-import {ref, reactive, onMounted} from 'vue';
+import {ref, reactive, onMounted, onUnmounted} from 'vue';
 import { ElMessage } from 'element-plus';
 import {checkDns, confirmData, create, getLetsById} from "../../api/lets.ts";
 import {useRoute, useRouter} from 'vue-router';
+import {Loading} from "@element-plus/icons-vue";
 const router = useRouter()
 const route = useRoute();
 // --- 类型定义 ---
@@ -132,6 +142,8 @@ const activeStep = ref(0);
 const loading = ref(false);
 const submitting = ref(false);
 const verifying = ref(false);
+const issuing = ref(false);
+let pollTimer: number | null = null; // 轮询定时器
 const certForm = reactive({
     domain: ''
 });
@@ -143,54 +155,55 @@ const challengeData = ref<ChallengeResponse>({
 });
 
 // --- 业务逻辑 ---
-
 onMounted(async () => {
   const { id: id, resume } = route.query;
   if (resume === 'true' && id) {
     await resumeOrder(id as string);
   }
 });
+onUnmounted(() => {
+    stopPolling();
+});
 
+// --- 业务方法 ---
+
+const stopPolling = () => {
+    if (pollTimer) {
+        clearInterval(pollTimer);
+        pollTimer = null;
+    }
+};
 // 恢复订单状态的方法
 const resumeOrder = async (id: string) => {
-  loading.value = true;
-  try {
-    const res = await  getLetsById(id);
-    if (res.code === 200) {
-      challengeData.value = res.data;
-      challengeData.value.id = id;
-      activeStep.value = 1;
-    } else {
-      ElMessage.error('无法获取挑战信息，请重新申请');
-      activeStep.value = 0;
+    try {
+        const res = await getLetsById(id);
+        if (res.code === 200) {
+            challengeData.value = res.data;
+            challengeData.value.id = Number(id);
+            // 根据后端状态自动跳转步骤
+            if (res.data.status === 'PENDING_CONFIG') activeStep.value = 1;
+            if (res.data.status === 'DNS_SUCCESS') activeStep.value = 3;
+            if (res.data.status === 'VALID') activeStep.value = 5;
+        }
+    } catch (err) {
+        ElMessage.error('恢复状态失败');
     }
-  } catch (err) {
-    ElMessage.error('恢复状态失败');
-  } finally {
-    loading.value = false;
-  }
 };
 const submitOrder = async () => {
-    if (!certForm.domain) {
-        ElMessage.warning('请输入有效域名');
-        return;
-    }
+    if (!certForm.domain) return ElMessage.warning('请输入有效域名');
     submitting.value = true;
     try {
         let domainForm = {
             domain: certForm.domain
         }
         const res =  await create(domainForm);
-        debugger
         if (res.code === 200) {
             challengeData.value = res.data;
             activeStep.value = 1;
         } else {
             ElMessage.error(res.message || '申请单创建失败');
         }
-    } catch (err) {
-        ElMessage.error('网络异常，请检查后端服务');
-    } finally {
+    }  finally {
         submitting.value = false;
     }
 };
@@ -208,31 +221,61 @@ const verifyDns = async () => {
             activeStep.value = 1;
         }
     } catch (err) {
-        ElMessage.error('验证过程发生异常');
         activeStep.value = 1;
     } finally {
         verifying.value = false;
     }
 };
 
+
 const confirmApply = async () => {
-    verifying.value = true;
-    activeStep.value = 3;
+    issuing.value = true;
+    activeStep.value = 4;
     try {
-        const res = await  confirmData(challengeData.value.id);
-        if (res.code === 200 && res.data === true) {
-            activeStep.value = 4;
-            ElMessage.success('证书已生效');
+        const res = await confirmData(challengeData.value.id);
+        if (res.code === 200) {
+            startPollingStatus(challengeData.value.id);
         } else {
-            ElMessage.error(res.message || '申请失败');
+            ElMessage.error(res.message || '发起签发请求失败');
             activeStep.value = 3;
+            issuing.value = false;
         }
     } catch (err) {
-        ElMessage.error('验证过程发生异常');
-        activeStep.value = 2;
-    } finally {
-        verifying.value = false;
+        console.warn("触发接口异常，进入补偿轮询模式");
+        startPollingStatus(challengeData.value.id);
     }
+};
+
+// 核心轮询逻辑
+const startPollingStatus = (id: number) => {
+    stopPolling();
+    pollTimer = window.setInterval(async () => {
+        try {
+            const res = await getLetsById(id);
+            if (res.code === 200) {
+                if (res.data.status === 'VALID') {
+                    activeStep.value = 5;
+                    issuing.value = false;
+                    stopPolling();
+                    ElMessage.success('证书签发成功！');
+                }
+                 if (res.data.status === 'INVALID') {
+                    activeStep.value = 3;
+                    issuing.value = false;
+                    stopPolling();
+                    ElMessage.error('证书签发失败：' + (res.data.status || '未知原因'));
+                }
+                if (res.data.status === 'ERROR') {
+                    activeStep.value = 3;
+                    issuing.value = false;
+                    stopPolling();
+                    ElMessage.error('证书签发失败：' + (res.data.errorMessage || '未知原因'));
+                }
+            }
+        } catch (e) {
+            console.error("轮询异常", e);
+        }
+    }, 3000); // 每 3 秒检查一次
 };
 
 // 工具函数
@@ -242,7 +285,7 @@ const copy = (text: string) => {
 };
 
 const listLets = () => {
-    router.push('/lets-add');
+    router.push('/cert-list');
 };
 </script>
 

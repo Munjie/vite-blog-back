@@ -59,9 +59,9 @@ service.interceptors.request.use(
 // 4. 响应拦截器 (Response Interceptor)
 service.interceptors.response.use(
     (response: AxiosResponse) => {
+        const code = response.data.code;
+        const message = response.data.message;
         if (response.status === 200) {
-            const code = response.data.code;
-            const message = response.data.message;
             if (code === undefined) {
                 return response;
             }else {
@@ -69,12 +69,12 @@ service.interceptors.response.use(
                     return response.data;
                 } else {
                     ElMessage.error(message || '系统错误')
-                    return Promise.reject(new Error(message || 'Error'));
+                    return Promise.reject();
                 }
             }
         }else {
-            ElMessage.error( '系统错误')
-            return Promise.reject(new Error('Error'));
+            ElMessage.error( message || '系统错误')
+            return Promise.reject();
         }
     },
     (error: AxiosError) => {
