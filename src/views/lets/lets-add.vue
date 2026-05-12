@@ -216,7 +216,7 @@ const verifyDns = async () => {
             activeStep.value = 3;
             ElMessage.success('DNS已生效');
         } else {
-            ElMessage.error(res.message || '验证失败，请确保解析已生效');
+            ElMessage.error( '验证失败，请确保解析已生效');
             activeStep.value = 1;
         }
     } catch (err) {
