@@ -1,8 +1,7 @@
 <template>
     <div class="jcloud-container">
         <div class="header-section">
-            <h2 class="title">SSL 证书自动化中心</h2>
-            <p class="subtitle">基于 ACME 协议的自动化证书签发与部署</p>
+            <h2 class="title">HTTPS证书申请</h2>
         </div>
 
         <el-card class="jcloud-card">
@@ -22,7 +21,7 @@
                     <div class="input-group">
                         <el-input
                             v-model="certForm.domain"
-                            placeholder="请输入您要保护的域名 (例: www.xxx.com)"
+                            placeholder="请输入域名 (例: www.xxx.com)"
                             size="large"
                             class="dark-input"
                         >
@@ -42,7 +41,7 @@
 
                 <div v-if="activeStep === 1" class="step-box">
                     <el-alert
-                        title="请前往您的域名服务商（阿里云/腾讯云）添加以下 TXT 记录"
+                        title="请前往您的域名服务商添加以下 TXT 记录"
                         type="warning"
                         :closable="false"
                         show-icon
@@ -103,15 +102,13 @@
                     <el-result
                         :icon="activeStep === 5 ? 'success' : 'info'"
                         :title="activeStep === 5 ? '证书颁发成功' : '证书正在颁发中...'"
-                        :sub-title="activeStep === 5 ? '您的 SSL 证书已成功签发并存储' : '正在与 CA 机构通信并下载证书链，请勿刷新页面'"
+                        :sub-title="activeStep === 5 ? '证书已成功颁发' : '正在与 CA 机构通信并下载证书链，请勿刷新页面'"
                     >
                         <template #extra>
                             <el-button v-if="activeStep === 5" type="primary" @click="listLets">进入证书列表</el-button>
                             <div v-else class="issuing-loading">
                                 <el-icon class="is-loading" :size="24"><Loading /></el-icon>
-                                <p>正在与 Let's Encrypt 建立安全连接...</p>
-                                <p>正在执行 Finalize 流程，请稍候...</p>
-                                <p>正在下载全链证书文件...</p>
+                                <p>正在执行，请稍候...</p>
                             </div>
                         </template>
                     </el-result>
@@ -179,7 +176,6 @@ const resumeOrder = async (id: string) => {
         if (res.code === 200) {
             challengeData.value = res.data;
             challengeData.value.id = Number(id);
-            // 根据后端状态自动跳转步骤
             if (res.data.status === 'PENDING_CONFIG') activeStep.value = 1;
             if (res.data.status === 'DNS_SUCCESS') activeStep.value = 3;
             if (res.data.status === 'VALID') activeStep.value = 5;
@@ -200,7 +196,7 @@ const submitOrder = async () => {
             challengeData.value = res.data;
             activeStep.value = 1;
         } else {
-            ElMessage.error(res.message || '申请单创建失败');
+            ElMessage.error(res.message || '申请失败');
         }
     }  finally {
         submitting.value = false;
@@ -274,7 +270,7 @@ const startPollingStatus = (id: number) => {
         } catch (e) {
             console.error("轮询异常", e);
         }
-    }, 3000); // 每 3 秒检查一次
+    }, 2000);
 };
 
 // 工具函数
