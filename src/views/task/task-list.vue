@@ -49,7 +49,6 @@ const handleAdd = () => {
     router.push('/task-add');
 }
 const taskId = ref();
-const title = ref();
 const tableData = ref([]);
 const total = ref(0);
 const currentPage = ref(1);
@@ -124,15 +123,7 @@ const exportFun = async (row: { id: string | number, title: string }) => {
   }
 };
 
-const downloadFile = async (fileId: string, title: string) => {
-  const res = await axios.get(`/api/score-manage/download-excel/${fileId}`, { responseType: 'blob' });
-  const url = window.URL.createObjectURL(new Blob([res.data]));
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `${title}_质量分析报告.xlsx`;
-  link.click();
-  window.URL.revokeObjectURL(url);
-};
+
 // 查询相关
 const handleView = (row: { id: string | number }) => {
     console.log(row.id)
@@ -201,47 +192,6 @@ const allDownload = async (title: string ,filePath: string) => {
   ElMessage.success('下载完成')
 
 };
-const exportFun1 = async (row: { id: string | number, title: string }) => {
-    // GET 方法不设置header  解压报错，使用post
-    taskId.value = row.id;
-    title.value = row.title;
-    debugger
-    let info = {
-        taskId: taskId.value,
-        title: title.value,
-    }
-    const response = await axios.post('/api/score-manage/export-report', info, {
-        headers: {'Content-Type': 'application/json; application/octet-stream'},
-        responseType: "blob"
-    })
-   /* const fileName = name || (response.headers['content-disposition'] &&
-        decodeURI(response.headers['content-disposition'])
-            .split('filename=')[1]);*/
-    const disposition = response.headers['content-disposition'] ?? response.headers['Content-Disposition'];
-    let fileName = '下载文件';
-
-    if (disposition) {
-        // 匹配 filename*="UTF-8''xxx" 或 filename="xxx" 或 filename=xxx
-        const match = disposition.match(/filename[*]?=(?:UTF-8'')?([^;]+)/i);
-        if (match?.[1]) {
-            fileName = decodeURIComponent(match[1].replace(/"/g, ''));
-        }
-    }
-    console.log(fileName)
-    const blob = new Blob([response.data], {type: 'application/zip'});
-    // 创建下载链接
-    const url = URL.createObjectURL(blob);
-    // 创建虚拟a标签进行下载
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = fileName;
-    link.click();
-    // 释放URL对象
-    URL.revokeObjectURL(url);
-    link.remove();
-    ElMessage.success('下载完成')
-
-};
 
 
 const fetchList = async () => {
@@ -302,17 +252,5 @@ const handleSelectionChange = (selection:any) => {
     selectedData.value = selection;
 };
 
-// 获取选中数据
-/*const handleDelete = () => {
-    console.log('Selected Data:', selectedData.value);
-    console.log('Selected  Data length:', selectedData.value.length);
-    if (selectedData.value.length > 0) {
-        // 删除逻辑
-        console.log('Deleting selected data...');
-        selectedData.value = [];
-    } else {
-        console.log('No selected data to delete.');
-    }
 
-};*/
 </script>
