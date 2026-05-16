@@ -15,3 +15,8 @@ export function deleteTask(taskId: number) {
 
 
 
+export const progress  = async (jobId: any) => {
+    return await http.get(`/api/export/export-progress/${jobId}`);
+};
+
+
