@@ -22,7 +22,7 @@
                 </template>
             </CustomTable>
         </div>
-      <el-dialog v-model="progressVisible" title="地理成绩分析生成中" width="400px" center :close-on-click-modal="false" :show-close="false">
+      <el-dialog v-model="progressVisible" title="分析报告生成中" width="400px" center :close-on-click-modal="false" :show-close="false">
         <div style="text-align: center">
           <el-progress type="circle" :percentage="exportPercentage" />
           <p style="margin-top: 15px; font-size: 14px; color: #666">{{ progressStatusText }}</p>
@@ -100,7 +100,8 @@ const exportFun = async (row: { id: string | number, title: string }) => {
       const { data } = await progress(jobId);
       if (data.status === 'processing') {
         exportPercentage.value = data.percent;
-        progressStatusText.value = `正在生成班级分析表 (${data.percent}%)`;
+        // progressStatusText.value = `正在生成班级分析表 (${data.percent}%)`;
+        progressStatusText.value = data.currentStage || '正在处理数据...';
       }
       else if (data.status === 'completed') {
         clearInterval(timer);
@@ -116,7 +117,7 @@ const exportFun = async (row: { id: string | number, title: string }) => {
         progressVisible.value = false;
         ElMessage.error('生成失败：' + data.errorMsg);
       }
-    }, 2000);
+    }, 1000);
 
   } catch (err) {
     ElMessage.error('导出系统繁忙，请稍后再试');
