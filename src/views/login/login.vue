@@ -194,7 +194,7 @@ const refreshQr = () => {
 const loadQrCode = async () => {
     loginStatus.value = 'loading'
     try {
-        const response = await axios.get('/api/wechat/qr', {responseType: 'blob'})
+        const response = await axios.get('/api/auth/qr', {responseType: 'blob'})
         if (response.status !== 200) {
             ElMessage.error('服务器错误')
             return

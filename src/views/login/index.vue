@@ -87,7 +87,7 @@ const refreshQr = () => {
 const loadQrCode = async () => {
     loginStatus.value = 'loading'
     try {
-        const response = await axios.get('/api/wechat/qr', {responseType: 'blob'})
+        const response = await axios.get('/api/auth/qr', {responseType: 'blob'})
         scene.value = response.headers['x-scene'] || response.headers['X-Scene']
         if (!scene.value) {
             ElMessage.error('获取二维码失败')
