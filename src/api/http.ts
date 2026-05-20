@@ -26,39 +26,49 @@ const service: AxiosInstance = axios.create({
     },
 });
 
-// 3. 请求拦截器
+
+
 service.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
-        const userStore = useUserStore();
-        let token = userStore.getExpireToken()
+        const userStore = useUserStore()
+        const token = userStore.getExpireToken()
+        const whitelist = ['/auth/login', '/login',  '/logout','/wechat', '/qq', '/github', '/gitee']
+        const isWhiteList = config.url && whitelist.some(path => config.url!.includes(path))
+        if (isWhiteList) {
+            return config
+        }
         if (!token) {
-            // 避免在登录页重复跳转
+            // 避免在登录页重复触发跳转
             if (router.currentRoute.value.name !== 'login') {
                 ElMessage.closeAll()
-                // 清除残留的无效状态
+                // 清除本地残留的失效用户信息/缓存
                 userStore.logout?.()
-                // 跳转登录并带上当前页面地址（登录成功后自动跳回来）
-                Promise.reject().then(() =>   router.push({
+
+                // 干净利落地直接跳转，带上回跳地址
+                router.push({
                     name: 'login',
                     query: {
                         redirect: router.currentRoute.value.fullPath,
                     },
-                }));
+                })
             }
+            return Promise.reject(new Error('登录已过期或未登录，请求已被前端成功拦截'))
         }
-        config.headers.Authorization = `Bearer ${token}`
+        if (token && token !== 'undefined' && token !== 'null') {
+            config.headers.Authorization = `Bearer ${token}`
+        }
         return config
     },
     (error: AxiosError) => {
-        // 请求配置出错
-        ElMessage.error('请求出错，请检查网络')
+        ElMessage.error('请求配置出错，请检查网络')
         return Promise.reject(error)
     }
 )
 
-// 4. 响应拦截器 (Response Interceptor)
+/*// 4. 响应拦截器 (Response Interceptor)
 service.interceptors.response.use(
     (response: AxiosResponse) => {
+        debugger
         const code = response.data.code;
         const message = response.data.message;
         if (response.status === 200) {
@@ -78,7 +88,6 @@ service.interceptors.response.use(
         }
     },
     (error: AxiosError) => {
-        // 处理 HTTP 状态码错误 (如 404, 500, Network Error)
         let message = '';
         const status = error.response?.status;
 
@@ -115,6 +124,78 @@ service.interceptors.response.use(
                 message = `连接出错(${status})!`;
         }
         ElMessage.error(message)
+        return Promise.reject(error);
+    }
+);*/
+
+
+
+
+const handleUnauthorized = (backendMessage: string) => {
+    const userStore = useUserStore();
+    if (router.currentRoute.value.name !== 'login') {
+        ElMessage.closeAll();
+        ElMessage.error(backendMessage || '登录状态已过期，请重新登录');
+        userStore.logout?.();
+        router.push({
+            name: 'login',
+            query: {
+                redirect: router.currentRoute.value.fullPath
+            }
+        });
+    }
+};
+
+// 4. 响应拦截器 (Response Interceptor)
+service.interceptors.response.use(
+    (response: AxiosResponse) => {
+        const resData = response.data;
+        const { code, message } = resData;
+        // http.ts 响应拦截器内部
+        if (code === 200) {
+            return resData;
+        } else if (code === 401){
+            handleUnauthorized(message);
+            return Promise.reject(new Error(message || '未授权'));
+        }else {
+            console.warn(`❌ 接口请求业务失败，路径: ${response.config.url}, 原因: ${message}`);
+            ElMessage.error(message || '系统错误');
+            return Promise.reject(resData);
+        }
+        ElMessage.error(message || '系统错误');
+        return Promise.reject(resData);
+    },
+    (error: AxiosError) => {
+        let message = '';
+        if (error.response) {
+            const status = error.response.status;
+            const backendMessage = (error.response.data as any)?.message;
+            switch (status) {
+                case 400: message = backendMessage || '请求语法错误(400)'; break;
+                case 401:
+                    handleUnauthorized(backendMessage);
+                    return Promise.reject(error);
+                case 403: message = '由于权限原因，服务器拒绝访问(403)'; break;
+                case 404: message = '接口地址未找到(404)'; break;
+                case 408: message = '请求超时(408)'; break;
+                case 500: message = '服务器内部发生错误(500)'; break;
+                case 502: message = '网关错误/服务器正在重启(502)'; break;
+                case 503: message = '服务不可用/服务器超载(503)'; break;
+                case 504: message = '网关超时/外部服务调用断开(504)'; break;
+                default: message = backendMessage || `系统连接出错(${status})!`;
+            }
+        }
+        else if (error.request) {
+            if (error.message.includes('timeout')) {
+                message = '客户端请求超时，请检查您的网络带宽';
+            } else {
+                message = '无法连接到服务器，请检查网络连接或确认服务是否开启';
+            }
+        }
+        else {
+            message = `由于未知异常导致请求发送失败: ${error.message}`;
+        }
+        ElMessage.error(message);
         return Promise.reject(error);
     }
 );

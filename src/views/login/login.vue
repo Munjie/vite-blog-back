@@ -146,11 +146,11 @@ let loginStatus = ref<'loading' | 'waiting' | 'scanned' | 'refreshing' | 'failed
 const loginMode = ref<'qr' | 'pwd'>('qr')
 const isSubmitting = ref(false)
 const rememberMe = ref(true)
-// 账号登录表单
-const loginForm = reactive({
+
+const loginForm = ref({
     username: '',
     password: ''
-})
+});
 
 const toggleLoginMode = () => {
     loginMode.value = loginMode.value === 'qr' ? 'pwd' : 'qr'
@@ -161,12 +161,12 @@ const toggleLoginMode = () => {
 
 // 密码登录逻辑
 const handlePwdLogin = async () => {
-    if (!loginForm.username || !loginForm.password) {
+    if (!loginForm.value.username || !loginForm.value.password) {
         return ElMessage.warning('请填写完整的登录信息')
     }
     isSubmitting.value = true
     try {
-        const res = (await login(loginForm)).data;
+        const res = (await login(loginForm.value)).data;
         await performLogin(res.token, res.userId, res.userName, res.avatar, res.expire)
     } finally {
         isSubmitting.value = false

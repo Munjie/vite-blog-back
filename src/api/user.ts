@@ -14,7 +14,7 @@ export const updateName = (data?: object) => {
 
 export const login = (data?: object) => {
     return http.post(
-        '/api/user/login',
+        '/api/auth/login',
         data
     );
 };
