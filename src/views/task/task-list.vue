@@ -42,6 +42,8 @@ const router = useRouter()
 import {useRoute} from 'vue-router';
 import {ElMessage, ElMessageBox} from "element-plus";
 import axios from "axios";
+import http from '../../api/http.ts';
+import {useUserStore} from "../../stores";
 
 const route = useRoute();
 // 2. 定义点击事件处理函数
@@ -80,27 +82,26 @@ const tableColumns = ref([
 
 const exportFun = async (row: { id: string | number, title: string }) => {
   try {
-    // 1. 提交异步任务
-    const res = await axios.post('/api/export/export-report', { taskId: row.id ,title:row.title});
-
+      const res = await http.post('/api/export/export-report', {
+          taskId: row.id,
+          title: row.title
+      })
     if (res.status === 429) {
       ElMessage.warning('该报告正在生成中，请不要重复点击');
       return;
     }
-    const jobId = res.data.data;
+    const jobId = res.data;
 
     console.log("000000000"+jobId);
     // 2. 初始化进度条
     progressVisible.value = true;
     exportPercentage.value = 0;
     progressStatusText.value = '正在排队分析各班级成绩...';
-
     // 3. 轮询进度接口
     const timer = setInterval(async () => {
       const { data } = await progress(jobId);
       if (data.status === 'processing') {
         exportPercentage.value = data.percent;
-        // progressStatusText.value = `正在生成班级分析表 (${data.percent}%)`;
         progressStatusText.value = data.currentStage || '正在处理数据...';
       }
       else if (data.status === 'completed') {
@@ -158,40 +159,53 @@ const deleteFun = async (row: { id: string | number }) => {
         console.log('用户取消操作')
     }
 }
-const allDownload = async (title: string ,filePath: string) => {
 
-  let info = {
-    title: title,
-    filePath: filePath,
-  }
-  const response = await axios.post('/api/export/download-excel', info, {
-    headers: {'Content-Type': 'application/json; application/octet-stream'},
-    responseType: "blob"
-  })
-  const disposition = response.headers['content-disposition'] ?? response.headers['Content-Disposition'];
-  let fileName = '下载文件';
 
-  if (disposition) {
-    // 匹配 filename*="UTF-8''xxx" 或 filename="xxx" 或 filename=xxx
-    const match = disposition.match(/filename[*]?=(?:UTF-8'')?([^;]+)/i);
-    if (match?.[1]) {
-      fileName = decodeURIComponent(match[1].replace(/"/g, ''));
+const allDownload = async (title: string, filePath: string) => {
+    const userStore = useUserStore();
+    const token = userStore.getExpireToken();
+    let info = {
+        title: title,
+        filePath: filePath,
+    };
+    try {
+        const response = await axios.post('/api/export/download-excel', info, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            responseType: "blob"
+        });
+        if (response.data.type === 'application/json') {
+            const text = await response.data.text();
+            const errorObj = JSON.parse(text);
+            ElMessage.error(errorObj.message || '下载失败，服务器内部错误');
+            return;
+        }
+        const disposition = response.headers['content-disposition'] ?? response.headers['Content-Disposition'];
+        let fileName = `${title || '下载文件'}.xlsx`;
+
+        if (disposition) {
+            const match = disposition.match(/filename[*]?=(?:UTF-8'')?([^;]+)/i);
+            if (match?.[1]) {
+                fileName = decodeURIComponent(match[1].replace(/"/g, ''));
+            }
+        }
+        console.log('解析出的文件名:', fileName);
+        const blob = new Blob([response.data]);
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        URL.revokeObjectURL(url);
+        link.remove();
+        ElMessage.success('下载完成');
+    } catch (error: any) {
+        console.error('下载过程中发生网络或系统异常:', error);
+        ElMessage.error('网络连接失败或服务器无响应');
     }
-  }
-  console.log(fileName)
-  const blob = new Blob([response.data]);
-  // 创建下载链接
-  const url = URL.createObjectURL(blob);
-  // 创建虚拟a标签进行下载
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = fileName;
-  link.click();
-  // 释放URL对象
-  URL.revokeObjectURL(url);
-  link.remove();
-  ElMessage.success('下载完成')
-
 };
 
 

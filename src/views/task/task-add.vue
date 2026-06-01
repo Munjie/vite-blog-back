@@ -115,6 +115,7 @@ import { ElMessage, type UploadUserFile, type UploadInstance, type UploadProps }
 import axios from 'axios' // 假设你使用 axios
 
 import router from "../../router";
+import {useUserStore} from "../../stores";
 // Upload 实例 ref (用于操作清空等)
 const uploadRef = ref<UploadInstance>()
 // 文件列表
@@ -143,9 +144,9 @@ const handleExceed: UploadProps['onExceed'] = (files) => {
     ElMessage.warning(`最多只能选择50个文件，你当前选择了 ${files.length} 个文件。`)
 }
 
-// --- 4. 提交逻辑 (FormData) ---
+
+
 const submitAll = async () => {
-    // 1. 校验
     if (!form.startYear) {
         ElMessage.error('请选择学年')
         return
@@ -154,45 +155,45 @@ const submitAll = async () => {
         ElMessage.warning('请至少上传一个 Excel 文件')
         return
     }
-
     loading.value = true
-
     try {
-        // 2. 构建 FormData 对象 (用于同时传输文件和文本)
+        const userStore = useUserStore()
+        const token = userStore.getExpireToken()
+
         const formData = new FormData()
         let infoForm = {
             taskName: form.taskName,
             title: fullTitle.value
         }
-        formData.append('info', new Blob([JSON.stringify(infoForm)], {type: "application/json"}));
-
-
+        formData.append('info', new Blob([JSON.stringify(infoForm)], { type: "application/json" }));
         fileList.value.forEach((file) => {
             if (file.raw) {
                 formData.append('files', file.raw)
             }
         })
-        // const res = await uploadTask(formData);
-        // 3. 发送请求 (模拟 axios)
+
+
         const res = await axios.post('/api/score-manage/create-score-task', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data' // 必须指定
-          }
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                'Authorization': `Bearer ${token}`
+            }
         })
-        if (res.data.code === 200) {
-            ElMessage.success(res.data.data)
+        if (res.data && res.data.code === 200) {
+            ElMessage.success(res.data.data || '创建成功')
             try {
                 resetForm();
             } catch (e) {
                 console.error("重置表单失败", e);
             }
             await router.replace('/task-list');
-        }else {
-            ElMessage.error(res.data.message)
+        } else {
+            ElMessage.error(res.data?.message || '创建失败')
         }
-    } catch (error) {
-        console.error(error)
-        ElMessage.error('上传失败，请重试')
+    } catch (error: any) {
+        console.error('请求层面出错:', error)
+        const errorMsg = error.response?.data?.message || '上传失败，请重试';
+        ElMessage.error(errorMsg)
     } finally {
         loading.value = false
     }
@@ -203,8 +204,8 @@ const resetForm = () => {
     form.startYear = new Date().getFullYear().toString()
     form.semester = '第一学期'
     form.examType = '期末'
-    fileList.value = [] // 清空文件数组
-    uploadRef.value?.clearFiles() // 清空 UI 显示的文件
+    fileList.value = []
+    uploadRef.value?.clearFiles()
 }
 </script>
 
