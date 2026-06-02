@@ -86,7 +86,7 @@ const exportFun = async (row: { id: string | number, title: string }) => {
           taskId: row.id,
           title: row.title
       })
-    if (res.status === 429) {
+    if (res.code === 429) {
       ElMessage.warning('该报告正在生成中，请不要重复点击');
       return;
     }
