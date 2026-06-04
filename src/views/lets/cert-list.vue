@@ -72,12 +72,108 @@
                 </template>
             </el-table-column>
         </el-table>
+
+        <el-drawer
+                v-model="drawerVisible"
+                title="证书详细信息"
+                size="640px"
+                custom-class="jcloud-drawer"
+                destroy-on-close
+        >
+            <div v-loading="drawerLoading" class="drawer-content">
+                <div v-if="detailData">
+                    <div class="detail-section">
+                        <h3 class="section-title"><el-icon><InfoFilled /></el-icon> 基本信息</h3>
+                        <el-descriptions :column="1" border class="dark-descriptions">
+                            <el-descriptions-item label="域名">{{ detailData.domain }}</el-descriptions-item>
+                            <el-descriptions-item label="状态">
+                                <el-tag :type="detailData.status === 'VALID' ? 'success' : 'danger'" effect="dark">
+                                    {{ detailData.status === 'VALID' ? '有效' : '无效' }}
+                                </el-tag>
+                            </el-descriptions-item>
+                            <el-descriptions-item label="证书类型">{{ detailData.certType || 'DV' }}</el-descriptions-item>
+                            <el-descriptions-item label="证书分类">{{ detailData.certCategory || '服务器证书' }}</el-descriptions-item>
+                            <el-descriptions-item label="创建时间">{{ detailData.createTime }}</el-descriptions-item>
+                        </el-descriptions>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3 class="section-title"><el-icon><User /></el-icon> 证书主体信息</h3>
+                        <el-descriptions :column="1" border class="dark-descriptions">
+                            <el-descriptions-item label="通用名称(CN)">{{ detailData.domain }}</el-descriptions-item>
+                        </el-descriptions>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3 class="section-title"><el-icon><Management /></el-icon> 签发者信息</h3>
+                        <el-descriptions :column="1" border class="dark-descriptions">
+                            <el-descriptions-item label="通用名称(CN)">{{ detailData.issuerCn || 'R12' }}</el-descriptions-item>
+                            <el-descriptions-item label="国家(C)">{{ detailData.issuerCountry || 'US' }}</el-descriptions-item>
+                            <el-descriptions-item label="省份(ST)">{{ detailData.issuerProvince || '-' }}</el-descriptions-item>
+                            <el-descriptions-item label="城市(L)">{{ detailData.issuerCity || '-' }}</el-descriptions-item>
+                            <el-descriptions-item label="组织(O)">{{ detailData.issuerOrg || "Let's Encrypt" }}</el-descriptions-item>
+                            <el-descriptions-item label="部门(OU)">{{ detailData.issuerOu || '-' }}</el-descriptions-item>
+                        </el-descriptions>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3 class="section-title"><el-icon><Cpu /></el-icon> 证书技术信息</h3>
+                        <el-descriptions :column="1" border class="dark-descriptions">
+                            <el-descriptions-item label="序列号"><span class="mono-text">{{ detailData.serialNumber }}</span></el-descriptions-item>
+                            <el-descriptions-item label="密钥类型">{{ detailData.keyType || 'RSA' }}</el-descriptions-item>
+                            <el-descriptions-item label="密钥强度">{{ detailData.keyStrength || '2048 bits' }}</el-descriptions-item>
+                            <el-descriptions-item label="签名算法">{{ detailData.signAlgorithm || 'SHA256withRSA' }}</el-descriptions-item>
+                            <el-descriptions-item label="密钥用法">{{ detailData.keyUsage }}</el-descriptions-item>
+                            <el-descriptions-item label="CA URL"><a :href="detailData.caUrl" target="_blank" class="link-text">{{ detailData.caUrl || '-' }}</a></el-descriptions-item>
+                            <el-descriptions-item label="CRL URL"><a :href="detailData.crlUrl" target="_blank" class="link-text">{{ detailData.crlUrl || '-' }}</a></el-descriptions-item>
+                            <el-descriptions-item label="OCSP URL">{{ detailData.ocspUrl || '-' }}</el-descriptions-item>
+                        </el-descriptions>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3 class="section-title"><el-icon><Calendar /></el-icon> 有效期信息</h3>
+                        <el-descriptions :column="1" border class="dark-descriptions">
+                            <el-descriptions-item label="颁发时间">{{ detailData.startDate }}</el-descriptions-item>
+                            <el-descriptions-item label="过期时间">{{ detailData.expiryDate }}</el-descriptions-item>
+                            <el-descriptions-item label="有效期">
+            <span :class="{'text-warning': getRemainingDays(detailData.expiryDate) < 30}">
+              {{ getRemainingDays(detailData.expiryDate) }} 天
+            </span>
+                            </el-descriptions-item>
+                        </el-descriptions>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3 class="section-title"><el-icon><Key /></el-icon> 指纹信息</h3>
+                        <el-descriptions :column="1" border class="dark-descriptions">
+                            <el-descriptions-item label="SHA1指纹">
+                                <span class="mono-text break-all">{{ detailData.sha1Fingerprint }}</span>
+                            </el-descriptions-item>
+                            <el-descriptions-item label="SHA256指纹">
+                                <span class="mono-text break-all">{{ detailData.sha256Fingerprint }}</span>
+                            </el-descriptions-item>
+                        </el-descriptions>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3 class="section-title"><el-icon><Connection /></el-icon> 扩展信息</h3>
+                        <el-descriptions :column="1" border class="dark-descriptions">
+                            <el-descriptions-item label="密钥用法">{{ detailData.keyUsage }}</el-descriptions-item>
+                            <el-descriptions-item label="主题备用名称">{{ detailData.sans || detailData.domain }}</el-descriptions-item>
+                            <el-descriptions-item label="公钥">
+                                <pre class="key-block"><code>{{ detailData.publicKey }}</code></pre>
+                            </el-descriptions-item>
+                        </el-descriptions>
+                    </div>
+                </div>
+            </div>
+        </el-drawer>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
-import { ElMessage, ElMessageBox } from 'element-plus';
+import {  computed, onMounted } from 'vue';
+import { ElMessage } from 'element-plus';
 import { Plus, Search } from '@element-plus/icons-vue';
 import {deleteDomain, listCert} from "../../api/lets.ts";
 import {useRouter} from "vue-router";
@@ -177,12 +273,12 @@ const goToApply = () => {
     ElMessage.info('跳转至申请页面');
 };
 
-const handleDetail = (row: Certificate) => {
+/*const handleDetail = (row: Certificate) => {
     ElMessageBox.alert(`域名: ${row.domain}<br>签发者: ${row.issuer}<br>证书 ID: ${row.id}`, '证书详情', {
         confirmButtonText: '确定',
         dangerouslyUseHTMLString: true,
     });
-};
+};*/
 const exportFun = async (row: Certificate) => {
     const userStore = useUserStore();
     const token = userStore.getExpireToken();
@@ -222,6 +318,48 @@ const exportFun = async (row: Certificate) => {
 onMounted(() => {
     fetchCertList();
 });
+
+import { ref } from 'vue';
+import {
+    InfoFilled, User, Management, Cpu, Calendar, Key, Connection
+} from '@element-plus/icons-vue';
+// 导入获取详情的 API，假设名字叫 getCertDetailById
+import { getLetsById } from "../../api/lets.ts";
+
+// --- 详情抽屉控制状态 ---
+const drawerVisible = ref(false);
+const drawerLoading = ref(false);
+const detailData = ref<any>(null);
+
+// --- 替换原有的 handleDetail 方法 ---
+const handleDetail = async (row: any) => {
+    drawerVisible.value = true;
+    drawerLoading.value = true;
+    try {
+        // 调用后端接口获取包含指纹、公钥等完整拓展信息的明细
+        const res = await getLetsById(row.id);
+        if (res.code === 200) {
+            detailData.value = res.data;
+        } else {
+            ElMessage.error(res.message || '获取证书详情失败');
+            drawerVisible.value = false;
+        }
+    } catch (err) {
+        console.error(err);
+        drawerVisible.value = false;
+    } finally {
+        drawerLoading.value = false;
+    }
+};
+
+// 计算有效期天数工具
+const getRemainingDays = (expiryDateStr: string) => {
+    if (!expiryDateStr || expiryDateStr === '--') return 0;
+    const expiry = new Date(expiryDateStr).getTime();
+    const now = new Date().getTime();
+    const diff = expiry - now;
+    return diff > 0 ? Math.ceil(diff / (1000 * 60 * 60 * 24)) : 0;
+};
 </script>
 
 <style scoped>
@@ -282,4 +420,103 @@ onMounted(() => {
 
 :deep(.el-button--primary.is-link) { color: #58a6ff; }
 :deep(.el-button--danger.is-link) { color: #f85149; }
+
+/* 抽屉整体适配暗黑 */
+:deep(.jcloud-drawer) {
+    background-color: #161b22 !important;
+    color: #c9d1d9 !important;
+    border-left: 1px solid #30363d;
+}
+
+:deep(.el-drawer__header) {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #30363d;
+    color: #58a6ff !important;
+    font-weight: bold;
+}
+
+.drawer-content {
+    padding: 0 10px;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.detail-section {
+    margin-bottom: 30px;
+}
+
+.section-title {
+    font-size: 15px;
+    color: #58a6ff;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-left: 3px solid #58a6ff;
+    padding-left: 8px;
+}
+
+/* 彻底重塑 Descriptions 组件为界云暗黑系 */
+.dark-descriptions :deep(.el-descriptions__table) {
+    background-color: #0d1117 !important;
+    border: 1px solid #30363d !important;
+}
+
+.dark-descriptions :deep(.el-descriptions__label) {
+    background-color: #21262d !important;
+    color: #8b949e !important;
+    width: 140px;
+    font-weight: 500;
+    border-right: 1px solid #30363d !important;
+    border-bottom: 1px solid #30363d !important;
+}
+
+.dark-descriptions :deep(.el-descriptions__content) {
+    color: #c9d1d9 !important;
+    background-color: #0d1117 !important;
+    border-bottom: 1px solid #30363d !important;
+}
+
+/* 字体代码化与公钥块 */
+.mono-text {
+    font-family: 'JetBrains Mono', Consolas, monospace;
+    color: #7ee787;
+    font-size: 13px;
+}
+
+.break-all {
+    word-break: break-all;
+}
+
+.link-text {
+    color: #58a6ff;
+    text-decoration: none;
+}
+.link-text:hover {
+    text-transform: underline;
+}
+
+.key-block {
+    background-color: #1c2128;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 12px;
+    max-height: 180px;
+    overflow-y: auto;
+    margin: 0;
+}
+
+.key-block code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #ff7b72;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.text-warning {
+    color: #e3b341;
+    font-weight: bold;
+}
 </style>
