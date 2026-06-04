@@ -82,6 +82,7 @@ import { Plus, Search } from '@element-plus/icons-vue';
 import {deleteDomain, listCert} from "../../api/lets.ts";
 import {useRouter} from "vue-router";
 import axios from "axios";
+import {useUserStore} from "../../stores";
 const router = useRouter()
 // --- 类型定义 ---
 interface Certificate {
@@ -183,11 +184,16 @@ const handleDetail = (row: Certificate) => {
     });
 };
 const exportFun = async (row: Certificate) => {
+    const userStore = useUserStore();
+    const token = userStore.getExpireToken();
   let info = {
     id: row.id,
   }
   const response = await axios.post('/api/lets/download', info, {
-    headers: {'Content-Type': 'application/json; application/octet-stream'},
+    headers: {
+        'Content-Type': 'application/json; application/octet-stream',
+        'Authorization': `Bearer ${token}`
+    },
     responseType: "blob"
   })
   const disposition = response.headers['content-disposition'] ?? response.headers['Content-Disposition'];
