@@ -41,5 +41,23 @@ export function deleteDomain(id: number) {
     return http.delete<void>('/api/lets/delete', { id: id });
 }
 
+export const toggleAutoRenew = async (id: any, autoRenew: number) => {
+    return await http.put(`/api/lets/${id}/toggle-renew?autoRenew=${autoRenew}`);
+};
 
 
+export const previewTemplate  = async () => {
+    try {
+        return http.get('/api/lets/shell/preview_template')  ;
+    } catch (error) {
+        console.error(error);
+    }
+};
+
+
+export const saveDeploy = (data?: object) => {
+    return http.post(
+        '/api/lets/save-deploy',
+        data
+    );
+};

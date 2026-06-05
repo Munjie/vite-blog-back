@@ -152,6 +152,14 @@ export const routes = [
                 },
                 component: () => import('@/views/lets/lets-add.vue'),
             },
+            {
+                path: '/lets-deploy',
+                name: 'lets-deploy',
+                meta: {
+                    title: '自动部署'
+                },
+                component: () => import('@/views/lets/lets-deploy.vue'),
+            },
         ],
     },
     {
