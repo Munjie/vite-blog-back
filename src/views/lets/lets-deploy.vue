@@ -113,7 +113,7 @@ onMounted(() => {
         return;
     }
     deployForm.id = Number(certId);
-    fetchCurrentScriptTemplate();
+    // fetchCurrentScriptTemplate();
 });
 
 
