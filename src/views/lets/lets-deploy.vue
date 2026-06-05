@@ -88,7 +88,7 @@
 import {ref, reactive, onMounted} from 'vue';
 import {useRoute, useRouter} from 'vue-router';
 import {ElMessage} from 'element-plus';
-import {previewTemplate, saveDeploy} from "../../api/lets.ts";
+import { saveDeploy} from "../../api/lets.ts";
 
 const router = useRouter();
 const route = useRoute();
@@ -134,14 +134,14 @@ const handleServerTypeChange = (val: any) => {
 };
 
 
-const fetchCurrentScriptTemplate = async () => {
+/*const fetchCurrentScriptTemplate = async () => {
     try {
         const res = await previewTemplate();
         scriptPreviewText.value = typeof res?.data === 'string' ? res.data : JSON.stringify(res?.data);
     } catch (e) {
         scriptPreviewText.value = "# 暂无网络连接 #";
     }
-};
+};*/
 
 
 const generateDeployCommand = async () => {
