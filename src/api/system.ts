@@ -5,7 +5,7 @@ import type {Menu, Role, UserForm} from '../types/system';
 
 export const getMenuTree  = async () => {
     try {
-        return request.get<Menu[]>('/api/back/list-all-menu');
+        return request.get<Menu[]>('/api/system/list-all-menu');
     } catch (error) {
         console.error('获取数据失败:', error);
         return [];
