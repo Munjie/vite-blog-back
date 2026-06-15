@@ -160,6 +160,14 @@ export const routes = [
                 },
                 component: () => import('@/views/lets/lets-deploy.vue'),
             },
+            {
+                path: '/template-manage',
+                name: 'template-manage',
+                meta: {
+                    title: '模板管理'
+                },
+                component: () => import('@/views/notification/TemplateManager.vue'),
+            },
         ],
     },
     {
