@@ -79,6 +79,7 @@ import {ElDialog, ElIcon} from 'element-plus'
 import {Plus} from '@element-plus/icons-vue'
 import axios from 'axios'
 import {useRoute} from 'vue-router'
+import {useUserStore} from "../../stores";
 
 const route = useRoute()
 // 文章数据
@@ -127,12 +128,17 @@ const previewUrl = ref('')
 // 新增：图片上传处理函数
 const onUploadImg = async (files: File[], callback: (urls: string[]) => void) => {
     // 并行上传，提高速度
+    const userStore = useUserStore();
+    const token = userStore.getExpireToken();
     const uploadPromises = files.map(async (file) => {
         try {
             const formData = new FormData()
             formData.append('file', file)
-            const res = await axios.post('/api/back/upload-cover', formData, {
-                headers: {'Content-Type': 'multipart/form-data'}
+            const res = await axios.post('/api/article/upload-cover', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'Authorization': `Bearer ${token}`
+                }
             })
             if (!res.data.data) {
                 throw new Error('上传成功但未返回有效 URL')
@@ -185,11 +191,16 @@ const handleExceed = () => {
 
 // 自定义上传
 const customUpload = async (options: any) => {
+    const userStore = useUserStore();
+    const token = userStore.getExpireToken();
     const formData = new FormData()
     formData.append('file', options.file)
     try {
-        const res = await axios.post('/api/back/upload-cover', formData, {
-            headers: {'Content-Type': 'multipart/form-data'}
+        const res = await axios.post('/api/article/upload-cover', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                'Authorization': `Bearer ${token}`
+            }
         })
         return res.data.data
     } catch (err) {

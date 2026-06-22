@@ -3,26 +3,26 @@ import http from "./http.ts";
 
 export const addArticle = (data?: object) => {
     return http.post(
-        '/api/back/add-article',
+        '/api/article/add-article',
         data
     );
 };
 
 
 export const getArticle  = async (id: any) => {
-    return await http.get(`/api/back/get-article/${id}`);
+    return await http.get(`/api/article/get-article/${id}`);
 };
 
 export const getArticleList = (data?: object) => {
     return http.post(
-        '/api/back/page-all-article',
+        '/api/article/page-all-article',
         data
     );
 };
 
 
 export function deleteArticle(id: number) {
-    return http.delete<void>('/api/back/delete-article', { id: id });
+    return http.delete<void>('/api/article/delete-article', { id: id });
 }
 
 
@@ -30,7 +30,7 @@ export function deleteArticle(id: number) {
 
 export const updateArticleStatus = (data?: object) => {
     return http.post(
-        '/api/back/update-article-status',
+        '/api/article/update-article-status',
         data
     );
 };
@@ -38,7 +38,7 @@ export const updateArticleStatus = (data?: object) => {
 
 
 export function deleteCoverImage(coverUrl: string) {
-    return http.delete<void>('/api/back/delete-cover-image', { coverUrl: coverUrl });
+    return http.delete<void>('/api/article/delete-cover-image', { coverUrl: coverUrl });
 }
 
 
