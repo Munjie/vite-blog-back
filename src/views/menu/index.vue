@@ -18,6 +18,7 @@
                 <el-table-column prop="icon" label="图标" min-width="100" align="center" show-overflow-tooltip>
                     <template #default="scope">
                         <el-icon v-if="scope.row.icon"><component :is="scope.row.icon" /></el-icon>
+                        <span v-else class="text-gray-400">-</span>
                     </template>
                 </el-table-column>
                 <el-table-column prop="index" label="路由路径" min-width="100" align="center" show-overflow-tooltip />
@@ -33,10 +34,16 @@
             </el-table>
         </el-card>
 
-        <el-dialog v-model="dialogVisible" :title="dialogTitle" width="600px" destroy-on-close>
+        <!-- 关键改进：增加 v-if，确保每次打开弹窗组件状态都是最新重置的 -->
+        <el-dialog
+            v-if="dialogVisible"
+            v-model="dialogVisible"
+            :title="dialogTitle"
+            width="600px"
+            destroy-on-close
+        >
             <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
                 <el-form-item label="上级菜单">
-                    <!-- 关键点 1：加冒号绑定 :props，并且使用了 filterSelectable 禁用非合法选择 -->
                     <el-tree-select
                         v-model="form.pid"
                         :data="menuOptions"
@@ -54,7 +61,19 @@
                     <el-input v-model="form.index" placeholder="例如：/system/user" />
                 </el-form-item>
                 <el-form-item label="图标" prop="icon">
-                    <IconSelect v-model="form.icon" />
+                    <div class="flex items-center gap-2 w-full">
+                        <IconSelect v-model="form.icon" class="flex-1" />
+                        <!-- 核心解决手段：增加显式的“无图标/清空”按钮 -->
+                        <el-button
+                            v-if="form.icon"
+                            type="danger"
+                            link
+                            icon="Delete"
+                            @click="form.icon = ''"
+                        >
+                            清空图标
+                        </el-button>
+                    </div>
                 </el-form-item>
                 <el-form-item label="排序" prop="sort">
                     <el-input-number v-model="form.sort" :min="0" />
@@ -88,7 +107,7 @@ const treeProps = {
     label: 'title',
     value: 'id',
     children: 'children',
-    disabled: 'disabled' // 用于判断节点是否禁用
+    disabled: 'disabled'
 };
 
 const form = reactive<Menu>({
@@ -113,7 +132,6 @@ const filterTreeDisabled = (nodes: any[], currentId: number): any[] => {
             disabled: isSelf
         };
         if (node.children && node.children.length > 0) {
-            // 如果父节点被禁用了，所有子节点也需要被禁用
             newNode.children = filterTreeDisabledWithParentState(node.children, currentId, isSelf);
         }
         return newNode;
@@ -150,12 +168,10 @@ const fetchData = async () => {
 const updateMenuOptions = (currentEditId: number = 0) => {
     let treeData = JSON.parse(JSON.stringify(menuList.value));
 
-    // 如果是编辑模式，过滤掉自身及其子节点
     if (currentEditId > 0) {
         treeData = filterTreeDisabled(treeData, currentEditId);
     }
 
-    // 关键点 2：根节点设置为 id: 0，title: '无'
     menuOptions.value = [
         {
             id: 0,
@@ -173,7 +189,7 @@ const resetForm = () => {
 const handleOpenDialog = (pid: number) => {
     resetForm();
     form.pid = pid;
-    updateMenuOptions(0); // 新增时不需要禁用节点
+    updateMenuOptions(0);
     dialogTitle.value = '新增菜单';
     dialogVisible.value = true;
 };
@@ -181,8 +197,12 @@ const handleOpenDialog = (pid: number) => {
 // 打开编辑弹窗
 const handleEdit = (row: Menu) => {
     resetForm();
-    Object.assign(form, row);
-    updateMenuOptions(row.id); // 编辑时过滤当前节点与其子节点
+    // 确保传递给表单的 icon 字段至少是空字符串，避免 null/undefined 导致的响应问题
+    Object.assign(form, {
+        ...row,
+        icon: row.icon || ''
+    });
+    updateMenuOptions(row.id);
     dialogTitle.value = '编辑菜单';
     dialogVisible.value = true;
 };
@@ -194,11 +214,17 @@ const submitForm = async () => {
         if (valid) {
             btnLoading.value = true;
             try {
-                if (form.id) {
-                    await updateMenu(form);
+                // 确保清空图标时提交给后端的始终是空字符串 ''，而不是 undefined
+                const submitData = {
+                    ...form,
+                    icon: form.icon || ''
+                };
+
+                if (submitData.id) {
+                    await updateMenu(submitData);
                     ElMessage.success('修改成功');
                 } else {
-                    await addMenu(form);
+                    await addMenu(submitData);
                     ElMessage.success('新增成功');
                 }
                 dialogVisible.value = false;

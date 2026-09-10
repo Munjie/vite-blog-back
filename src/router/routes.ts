@@ -168,6 +168,14 @@ export const routes = [
                 },
                 component: () => import('@/views/notification/TemplateManager.vue'),
             },
+            {
+                path: '/dig-twin',
+                name: 'dig-twin',
+                meta: {
+                    title: '3D数字'
+                },
+                component: () => import('@/views/digital-twin/DigitalTwin.vue'),
+            },
         ],
     },
     {

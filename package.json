@@ -11,6 +11,7 @@
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.2",
     "@stomp/stompjs": "^7.2.1",
+    "@tweenjs/tween.js": "^25.0.0",
     "@vueuse/core": "^14.1.0",
     "axios": "^1.13.2",
     "countup.js": "^2.8.0",
@@ -27,6 +28,7 @@
     "pinia": "^3.0.4",
     "pinia-plugin-persistedstate": "^4.7.1",
     "sockjs-client": "^1.6.1",
+    "three": "^0.185.1",
     "vue": "^3.5.24",
     "vue-echarts": "^8.0.1",
     "vue-router": "^4.6.3",
@@ -40,6 +42,7 @@
     "@types/markdown-it": "^14.1.2",
     "@types/node": "^24.10.1",
     "@types/sockjs-client": "^1.5.4",
+    "@types/three": "^0.185.4",
     "@vitejs/plugin-vue": "^6.0.1",
     "@vue/tsconfig": "^0.8.1",
     "@wangeditor/editor": "^5.1.23",
